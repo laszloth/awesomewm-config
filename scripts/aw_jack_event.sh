@@ -2,7 +2,7 @@
 
 EVENT=acpi_jack
 
-AW_PID=$(pgrep awesome)
+AW_PID=$(pgrep awesome | head -1)
 if [ $? -eq 0 ]; then
     AW_UID=$(cat /proc/$AW_PID/status | grep "Uid:" | awk '{print $2}')
     AW_USER=$(getent passwd $AW_UID | cut -d':' -f1)
