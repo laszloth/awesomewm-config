@@ -105,6 +105,8 @@ eventHandler = function(e)
     --debug_print("DBUS EVENT: "..e)
     if e == "acpi_jack" then
         myvolwidget:set_markup(hf.getVolumeLevel())
+    elseif e == "acpi_ac" then
+        mybatwidget:set_markup(hf.getBatteryLevel())
     else
         debug_print("Wrong event string:"..e)
     end
