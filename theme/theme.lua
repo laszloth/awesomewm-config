@@ -1,7 +1,7 @@
--------------------------------
+----------------------------------------
 --  Based on "Zenburn" awesome theme  --
---    By Adrian C. (anrxc)   --
--------------------------------
+--    By Adrian C. (anrxc)            --
+----------------------------------------
 
 -- Alternative icon sets and widget icons:
 --  * http://awesome.naquadah.org/wiki/Nice_Icons

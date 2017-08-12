@@ -23,6 +23,8 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 -- Others
 local vicious = require("vicious")
+-- own helpers
+local hf = require("helpers")
 
 -- Load Debian menu entries
 require("debian.menu")
@@ -77,35 +79,7 @@ modkey = "Mod4"
 
 -- Widget variables
 local def_screen = 1
-local net_devices = { 'eno1', 'wlp3s0' }
 local numCores = awful.util.pread("awk '/cpu cores/ {print $4}' /proc/cpuinfo | uniq")
-
-local warn_color              = '#FECA00' --orange
-local crit_color              = '#FF0000' --red
-
-local prompt_bg               = '#000000'
-local prompt_fg               = '#00FF00'
-
-local net_download_color      = '#CC9933'
-local net_upload_color        = '#7F9F7F'
-local klimit                  = 1024
-
-local cpu_temp_low_color      = "#7FAE5A" -- colors.green TODO
-local cpu_temp_medium_color   = warn_color
-local cpu_temp_high_color     = crit_color
-local cpu_temp_high           = 85
-local cpu_temp_mid            = 55
-
-local volume_high             = 65
-local volume_mid              = 40
-local volume_high_color       = crit_color
-local volume_mid_color        = warn_color
-local volume_mute_color       = "#5C5C5C"
-local volume_limit            = 80
-
-local battery_low             = 15
-local battery_low_color       = crit_color
-local battery_charge_color    = "#7FAE5A"
 
 -- helper functions
 debug_print = function (msg)
@@ -127,145 +101,10 @@ updateScreenCount = function(s)
     debug_print("updateScreenCount: def_screen="..def_screen)
 end
 
-isJackPlugged = function()
-    local jackcmd = "cat /proc/asound/card1/codec#0 | grep 'Pin-ctls:'" ..
-                "| head -3 | tail -1 | grep -c OUT"
-    local h = assert(io.popen(jackcmd))
-    local ret = h:read("*n")
-    h:close()
-    return 1 - ret
-end
-
-isMuted = function()
-    local mutedcmd = "pactl list sinks | grep \"^\\s\\+Mute: yes\" | awk '{print $2}'"
-    local ret = 0
-    local h = assert(io.popen(mutedcmd))
-    if h:read("*l") == "yes" then
-        ret = 1
-    end
-    h:close()
-    return ret
-end
-
-getVolumeLevel = function(raw)
-    local volcmd = "pactl list sinks | grep \"^\\s\\+Volume\" | awk '{print $5}'"
-    local h = assert(io.popen(volcmd))
-    local vol = h:read("*n")
-    h:close()
-
-    -- on version update, have to change popen to easy async or with_line_callback
-    --awful.spawn.easy_async(volcmd, function(stdout, stderr, reason, exit_code)
-    --    naughty.notify { text = stdout }
-    --end)
-
-    if raw == 1 then
-        return vol
-    end
-
-    local pref = 'SPKR:'
-    if isJackPlugged() == 1 then
-        pref = 'JACK:'
-    end
-
-    if isMuted() == 1 then
-        pref = 'MUTED:'
-        return '<span foreground="'..volume_mute_color..'">'..pref..vol..'</span>'
-    elseif vol >= volume_high then
-        return '<span foreground="'..volume_high_color..'">'..pref..vol..'</span>'
-    elseif vol >= volume_mid then
-        return '<span foreground="'..volume_mid_color..'">'..pref..vol..'</span>'
-    else
-        return pref..vol
-    end
-end
-
-getBatteryLevel = function ()
-    local h = assert(io.popen("cat /sys/class/power_supply/BAT0/capacity"))
-    local cap = h:read("*n")
-    h:close()
-
-    -- check if battery is present
-    if cap == nil then
-        return "no battery"
-    end
-
-    -- workaround for capacity containing 100+ value
-    if cap > 100 then cap = 100 end
-    h = assert(io.popen("cat /sys/class/power_supply/AC/online"))
-    local ac = h:read("*n")
-    h:close()
-    if ac == 0 then
-        if cap <= battery_low then
-            return '<span foreground="'..battery_low_color..'">B:'..cap..'</span>'
-        else
-            return "B:"..cap
-        end
-    else
-        return '<span foreground="'..battery_charge_color..'">B:'..cap..'</span>'
-    end
-end
-
-getNetworkStats = function(widget,args)
-    local text=""
-    for i = 1, #net_devices do
-      local ndev = net_devices[i]
-      if args["{"..ndev.." carrier}"] == 1 then
-          local upv = args['{'..ndev..' up_kb}']
-          local dnv = args['{'..ndev..' down_kb}']
-          local upunit = "K"
-          local dnunit = "K"
-
-          if tonumber(upv) >= klimit then
-            upunit = "M"
-            upv = args['{'..ndev..' up_mb}']
-          end
-
-          if tonumber(dnv) >= klimit then
-            dnunit = "M"
-            dnv = args['{'..ndev..' down_mb}']
-          end
-
-          local upspeed = upv..' '..upunit
-          local dnspeed = dnv..' '..dnunit
-          text=text..'|'..ndev..':<span color="'..net_download_color..'"> down: '..dnspeed..'</span> <span color="'..net_upload_color..'">up: '..upspeed..'</span>'
-      end
-    end
-
-    if string.len(text)>0 then
-        return string.sub(text,2,-1)
-    end
-
-    return 'No network'
-end
-
-getCoreTemp = function (args, n)
-        local t = args[1]
-        local ctemp = tonumber(t)
-        local s = 'Core ' ..(n-2).. ': '
-
-        if ctemp <= cpu_temp_mid then
-          s = s..'<span color="'..cpu_temp_low_color..'">'
-        elseif ctemp <= cpu_temp_high  then
-          s = s..'<span color="'..cpu_temp_medium_color..'">'
-        else
-          s = s..'<span color="'..cpu_temp_high_color..'">'
-        end
-
-        return s..t..'°C</span>'
-end
-
-getBacklightLevel = function()
-    local blcmd = "xbacklight -get"
-    local h = assert(io.popen(blcmd))
-    local bl = h:read("*n")
-    h:close()
-    return math.floor(bl)
-end
-
 eventHandler = function(e)
     --debug_print("DBUS EVENT: "..e)
     if e == "acpi_jack" then
-        myvolwidget:set_markup(getVolumeLevel())
+        myvolwidget:set_markup(hf.getVolumeLevel())
     else
         debug_print("Wrong event string:"..e)
     end
@@ -356,7 +195,7 @@ mytextclock = awful.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
 
 -- Create backlight widget
 myblwidget = wibox.widget.textbox()
-myblwidget:set_markup(getBacklightLevel())
+myblwidget:set_markup(hf.getBacklightLevel())
 --myblwidget.visible = false
 
 -- TODO start timer to hide textbox
@@ -365,23 +204,23 @@ myblwidget:set_markup(getBacklightLevel())
 
 -- Create volume widget
 myvoltimer = timer({ timeout = 120 })
-myvoltimer:connect_signal("timeout", function() myvolwidget:set_markup(getVolumeLevel()) end)
+myvoltimer:connect_signal("timeout", function() myvolwidget:set_markup(hf.getVolumeLevel()) end)
 
 myvolwidget = wibox.widget.textbox()
-myvolwidget:set_markup(getVolumeLevel())
+myvolwidget:set_markup(hf.getVolumeLevel())
 myvoltimer:start()
 
 -- Create battery widget
 mybattimer = timer({ timeout = 90 })
-mybattimer:connect_signal("timeout", function() mybatwidget:set_markup(getBatteryLevel()) end)
+mybattimer:connect_signal("timeout", function() mybatwidget:set_markup(hf.getBatteryLevel()) end)
 
 mybatwidget = wibox.widget.textbox()
-mybatwidget:set_markup(getBatteryLevel())
+mybatwidget:set_markup(hf.getBatteryLevel())
 mybattimer:start()
 
 -- Create net widget
 mynetwidget = wibox.widget.textbox()
-vicious.register(mynetwidget, vicious.widgets.net, getNetworkStats, 1)
+vicious.register(mynetwidget, vicious.widgets.net, hf.getNetworkStats, 1)
 
 -- Create CPU widgets
 cpudata = {}
@@ -396,7 +235,7 @@ cpudata.temp = {}
 for i = 2,1+numCores do
     local c = wibox.widget.textbox()
     vicious.register(c, vicious.widgets.thermal,
-        function(widget, args) return getCoreTemp(args, i) end,
+        function(widget, args) return hf.getCoreTemp(args, i) end,
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
     table.insert(cpudata.temp, c)
@@ -494,8 +333,8 @@ for s = 1, screen.count() do
     --left_layout:add(mylauncher)
     left_layout:add(mytaglist[s])
     local dec_prompt = wibox.widget.background(mypromptbox[s])
-    dec_prompt:set_fg(prompt_fg)
-    dec_prompt:set_bg(prompt_bg)
+    dec_prompt:set_fg(hf.prompt_fg)
+    dec_prompt:set_bg(hf.prompt_bg)
     left_layout:add(dec_prompt)
 
     -- Widgets that are aligned to the right
@@ -597,16 +436,16 @@ globalkeys = awful.util.table.join(
         awful.util.spawn( locker_cmd ) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
         awful.util.spawn( "pactl set-sink-volume 0 -2%" )
-        myvolwidget:set_markup(getVolumeLevel()) end),
+        myvolwidget:set_markup(hf.getVolumeLevel()) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        if getVolumeLevel(1) >= volume_limit then
+        if hf.getVolumeLevel(1) >= hf.volume_limit then
             return
         end
         awful.util.spawn( "pactl set-sink-volume 0 +2%" )
-        myvolwidget:set_markup(getVolumeLevel()) end),
+        myvolwidget:set_markup(hf.getVolumeLevel()) end),
     awful.key({ }, "XF86AudioMute", function()
         awful.util.spawn( "pactl set-sink-mute 0 toggle" )
-        myvolwidget:set_markup(getVolumeLevel()) end),
+        myvolwidget:set_markup(hf.getVolumeLevel()) end),
     awful.key({ }, "XF86AudioNext", function()
         awful.util.spawn( "dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next" ) end),
     awful.key({ }, "XF86AudioPrev", function()
@@ -619,11 +458,11 @@ globalkeys = awful.util.table.join(
         awful.util.spawn_with_shell( "~/.config/awesome/scripts/dell_touch.sh" ) end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         awful.util.spawn( "xbacklight -dec 10" )
-        myblwidget:set_markup(getBacklightLevel())
+        myblwidget:set_markup(hf.getBacklightLevel())
         end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         awful.util.spawn( "xbacklight -inc 10" )
-        myblwidget:set_markup(getBacklightLevel())
+        myblwidget:set_markup(hf.getBacklightLevel())
         end),
 
     awful.key({ modkey }, "x",
