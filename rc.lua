@@ -52,19 +52,6 @@ do
 end
 -- }}}
 
-
-debug_print = function (msg)
-    naughty.notify({ preset = naughty.config.presets.critical,
-        title = "DEBUG MESSAGE",
-        text = msg })
-end
-
-notify_print = function (msg)
-    naughty.notify({ preset = naughty.config.presets.normal,
-        title = "notification",
-        text = msg })
-end
-
 -- {{{ Autorun script start
 awful.util.spawn_with_shell("~/.config/awesome/scripts/autorun.sh")
 -- }}}
@@ -89,7 +76,9 @@ locker_cmd  = "light-locker-command -l"
 modkey = "Mod4"
 
 -- Widget variables
+local def_screen = 1
 local net_devices = { 'eno1', 'wlp3s0' }
+local numCores = awful.util.pread("awk '/cpu cores/ {print $4}' /proc/cpuinfo | uniq")
 
 local warn_color              = '#FECA00' --orange
 local crit_color              = '#FF0000' --red
@@ -118,13 +107,24 @@ local battery_low             = 15
 local battery_low_color       = crit_color
 local battery_charge_color    = "#7FAE5A"
 
--- Widget functions
-local def_screen = 1
-scrn_cnt_update = function(s)
+-- helper functions
+debug_print = function (msg)
+    naughty.notify({ preset = naughty.config.presets.critical,
+        title = "DEBUG MESSAGE",
+        text = msg })
+end
+
+notify_print = function (msg)
+    naughty.notify({ preset = naughty.config.presets.normal,
+        title = "notification",
+        text = msg })
+end
+
+updateScreenCount = function(s)
     if screen.count() > 1 then
         def_screen = 2
     end
-    debug_print("scrn_cnt_update: def_screen="..def_screen)
+    debug_print("updateScreenCount: def_screen="..def_screen)
 end
 
 isJackPlugged = function()
@@ -179,6 +179,89 @@ getVolumeLevel = function(raw)
     end
 end
 
+getBatteryLevel = function ()
+    local h = assert(io.popen("cat /sys/class/power_supply/BAT0/capacity"))
+    local cap = h:read("*n")
+    h:close()
+
+    -- check if battery is present
+    if cap == nil then
+        return "no battery"
+    end
+
+    -- workaround for capacity containing 100+ value
+    if cap > 100 then cap = 100 end
+    h = assert(io.popen("cat /sys/class/power_supply/AC/online"))
+    local ac = h:read("*n")
+    h:close()
+    if ac == 0 then
+        if cap <= battery_low then
+            return '<span foreground="'..battery_low_color..'">B:'..cap..'</span>'
+        else
+            return "B:"..cap
+        end
+    else
+        return '<span foreground="'..battery_charge_color..'">B:'..cap..'</span>'
+    end
+end
+
+getNetworkStats = function(widget,args)
+    local text=""
+    for i = 1, #net_devices do
+      local ndev = net_devices[i]
+      if args["{"..ndev.." carrier}"] == 1 then
+          local upv = args['{'..ndev..' up_kb}']
+          local dnv = args['{'..ndev..' down_kb}']
+          local upunit = "K"
+          local dnunit = "K"
+
+          if tonumber(upv) >= klimit then
+            upunit = "M"
+            upv = args['{'..ndev..' up_mb}']
+          end
+
+          if tonumber(dnv) >= klimit then
+            dnunit = "M"
+            dnv = args['{'..ndev..' down_mb}']
+          end
+
+          local upspeed = upv..' '..upunit
+          local dnspeed = dnv..' '..dnunit
+          text=text..'|'..ndev..':<span color="'..net_download_color..'"> down: '..dnspeed..'</span> <span color="'..net_upload_color..'">up: '..upspeed..'</span>'
+      end
+    end
+
+    if string.len(text)>0 then
+        return string.sub(text,2,-1)
+    end
+
+    return 'No network'
+end
+
+getCoreTemp = function (args, n)
+        local t = args[1]
+        local ctemp = tonumber(t)
+        local s = 'Core ' ..(n-2).. ': '
+
+        if ctemp <= cpu_temp_mid then
+          s = s..'<span color="'..cpu_temp_low_color..'">'
+        elseif ctemp <= cpu_temp_high  then
+          s = s..'<span color="'..cpu_temp_medium_color..'">'
+        else
+          s = s..'<span color="'..cpu_temp_high_color..'">'
+        end
+
+        return s..t..'°C</span>'
+end
+
+getBacklightLevel = function()
+    local blcmd = "xbacklight -get"
+    local h = assert(io.popen(blcmd))
+    local bl = h:read("*n")
+    h:close()
+    return math.floor(bl)
+end
+
 eventHandler = function(e)
     --debug_print("DBUS EVENT: "..e)
     if e == "acpi_jack" then
@@ -188,13 +271,11 @@ eventHandler = function(e)
     end
 end
 
---debug_print(isJackPlugged())
---debug_print(getVolumeLevel(1))
-
 -- Default screen settings for Firefox and others
-scrn_cnt_update()
-screen[1]:connect_signal("added", scrn_cnt_update)
-screen[1]:connect_signal("removed", scrn_cnt_update)
+updateScreenCount()
+-- TODO signals don't seem to work
+--screen[1]:connect_signal("added", updateScreenCount)
+--screen[1]:connect_signal("removed", updateScreenCount)
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 local layouts =
@@ -274,14 +355,6 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 mytextclock = awful.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
 
 -- Create backlight widget
-getBacklightLevel = function()
-    local blcmd = "xbacklight -get"
-    local h = assert(io.popen(blcmd))
-    local bl = h:read("*n")
-    h:close()
-    return math.floor(bl)
-end
-
 myblwidget = wibox.widget.textbox()
 myblwidget:set_markup(getBacklightLevel())
 --myblwidget.visible = false
@@ -299,32 +372,6 @@ myvolwidget:set_markup(getVolumeLevel())
 myvoltimer:start()
 
 -- Create battery widget
-getBatteryLevel = function ()
-    local h = assert(io.popen("cat /sys/class/power_supply/BAT0/capacity"))
-    local cap = h:read("*n")
-    h:close()
-
-    -- check if battery is present
-    if cap == nil then
-        return "no battery"
-    end
-
-    -- workaround for capacity containing 100+ value
-    if cap > 100 then cap = 100 end
-    h = assert(io.popen("cat /sys/class/power_supply/AC/online"))
-    local ac = h:read("*n")
-    h:close()
-    if ac == 0 then
-        if cap <= battery_low then
-            return '<span foreground="'..battery_low_color..'">B:'..cap..'</span>'
-        else
-            return "B:"..cap
-        end
-    else
-        return '<span foreground="'..battery_charge_color..'">B:'..cap..'</span>'
-    end
-end
-
 mybattimer = timer({ timeout = 90 })
 mybattimer:connect_signal("timeout", function() mybatwidget:set_markup(getBatteryLevel()) end)
 
@@ -334,61 +381,23 @@ mybattimer:start()
 
 -- Create net widget
 mynetwidget = wibox.widget.textbox()
-vicious.register(mynetwidget, vicious.widgets.net,
-  function(widget,args)
-    local text=""
-    for i = 1, #net_devices do
-      local ndev = net_devices[i]
-      if args["{"..ndev.." carrier}"] == 1 then
-          local upv = args['{'..ndev..' up_kb}']
-          local dnv = args['{'..ndev..' down_kb}']
-          local upunit = "K"
-          local dnunit = "K"
-          if tonumber(upv) >= klimit then
-            upunit = "M"
-            upv = args['{'..ndev..' up_mb}']
-          end
-          if tonumber(dnv) >= klimit then
-            dnunit = "M"
-            dnv = args['{'..ndev..' down_mb}']
-          end
-
-          local upspeed = upv..' '..upunit
-          local dnspeed = dnv..' '..dnunit
-          text=text..'|'..ndev..':<span color="'..net_download_color..'"> down: '..dnspeed..'</span> <span color="'..net_upload_color..'">up: '..upspeed..'</span>'
-      end
-    end
-    if string.len(text)>0 then
-        return string.sub(text,2,-1)
-    end
-    return 'No network'
-  end, 1 )
+vicious.register(mynetwidget, vicious.widgets.net, getNetworkStats, 1)
 
 -- Create CPU widgets
 cpudata = {}
 
--- usage
+-- CPU: usage
 cpudata.usage = wibox.widget.textbox()
 vicious.register(cpudata.usage, vicious.widgets.cpu, function(widget, args)
-    return string.format("%02d", args[1]).."%"
-    end, 1)
--- thermal
+    return string.format("%02d", args[1]).."%" end, 1)
+
+-- CPU: thermal
 cpudata.temp = {}
-for i = 2,1+awful.util.pread("awk '/cpu cores/ {print $4}' /proc/cpuinfo | uniq") do
+for i = 2,1+numCores do
     local c = wibox.widget.textbox()
-    vicious.register(c, vicious.widgets.thermal, function(widget, args)
-        local t = args[1]
-        local ctemp = tonumber(t)
-        local s = 'Core ' ..(i-2).. ': '
-        if ctemp <= cpu_temp_mid then
-          s = s..'<span color="'..cpu_temp_low_color..'">'
-        elseif ctemp <= cpu_temp_high  then
-          s = s..'<span color="'..cpu_temp_medium_color..'">'
-        else
-          s = s..'<span color="'..cpu_temp_high_color..'">'
-        end
-        return s..t..'°C</span>'
-        end, 1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
+    vicious.register(c, vicious.widgets.thermal,
+        function(widget, args) return getCoreTemp(args, i) end,
+        1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
     table.insert(cpudata.temp, c)
 end
@@ -478,6 +487,7 @@ for s = 1, screen.count() do
     space2:set_text(spacetext2)
     space3:set_text(spacetext3)
     separator:set_text(separtext)
+    -- }}}
 
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
@@ -712,12 +722,6 @@ awful.rules.rules = {
                      raise = true,
                      keys = clientkeys,
                      buttons = clientbuttons } },
-    { rule = { class = "MPlayer" },
-      properties = { floating = true } },
-    { rule = { class = "pinentry" },
-      properties = { floating = true } },
-    { rule = { class = "gimp" },
-      properties = { floating = true } },
 
     -- Set Firefox to always map on www tag on def_screen
     { rule = { class = "Firefox" },
@@ -734,6 +738,15 @@ awful.rules.rules = {
     -- Set Spotify to always map to 'kreat' tag on def_screen
     { rule = { class = "Spotify" },
       properties = { tag = tags[def_screen][5] } },
+
+    -- defaults
+    { rule = { class = "MPlayer" },
+      properties = { floating = true } },
+    { rule = { class = "pinentry" },
+      properties = { floating = true } },
+    { rule = { class = "gimp" },
+      properties = { floating = true } },
+
 }
 -- }}}
 
@@ -809,6 +822,7 @@ client.connect_signal("manage", function (c, startup)
     end
 end)
 
+-- set unfocused to a little bit transparent
 client.connect_signal("focus", function(c)
                                  c.border_color = beautiful.border_focus
                                  c.opacity = 1
