@@ -55,7 +55,7 @@ end
 -- }}}
 
 -- {{{ Autorun script start
--- TODO return value will show not found commands, handle that
+-- TODO return value will show not found commands, handle that, using awesome-client wa.
 awful.util.spawn_with_shell("~/.config/awesome/scripts/autorun.sh &>/dev/null")
 -- }}}
 

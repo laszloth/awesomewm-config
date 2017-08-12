@@ -5,6 +5,7 @@ CMD_NOTF=0
 function run {
   if ! command -v $1 ;then
     CMD_NOTF=$((CMD_NOTF+1))
+    echo "debug_print(\"command not found: '$1'\")" | awesome-client
     return
   fi
 
