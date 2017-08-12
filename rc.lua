@@ -237,7 +237,7 @@ cpudata.temp = {}
 for i = 2,1+numCores do
     local c = wibox.widget.textbox()
     vicious.register(c, vicious.widgets.thermal,
-        function(widget, args) return hf.getCoreTemp(args, i) end,
+        function(widget, args) return hf.getCoreTempText(args[1], i) end,
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
     table.insert(cpudata.temp, c)

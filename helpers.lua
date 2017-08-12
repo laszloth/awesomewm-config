@@ -140,8 +140,7 @@ function helpers.getNetworkStats(widget,args)
     return 'No network'
 end
 
-function helpers.getCoreTemp(args, n)
-        local t = args[1]
+function helpers.getCoreTempText(t, n)
         local ctemp = tonumber(t)
         local s = 'Core ' ..(n-2).. ': '
 
