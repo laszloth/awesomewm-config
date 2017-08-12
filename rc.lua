@@ -55,7 +55,8 @@ end
 -- }}}
 
 -- {{{ Autorun script start
-awful.util.spawn_with_shell("~/.config/awesome/scripts/autorun.sh")
+-- TODO return value will show not found commands, handle that
+awful.util.spawn_with_shell("~/.config/awesome/scripts/autorun.sh &>/dev/null")
 -- }}}
 
 
