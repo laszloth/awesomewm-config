@@ -23,7 +23,7 @@ helpers.volume_mid              = 40
 helpers.volume_high_color       = helpers.crit_color
 helpers.volume_mid_color        = helpers.warn_color
 helpers.volume_mute_color       = "#5C5C5C"
-helpers.volume_limit            = 80
+helpers.volume_limit            = 100
 
 helpers.battery_low             = 15
 helpers.battery_low_color       = helpers.crit_color
@@ -79,6 +79,14 @@ function helpers.getVolumeLevel(raw)
     else
         return pref..vol
     end
+end
+
+function helpers.getCPUCoreCnt()
+    local corecmd = "awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo"
+    local h = assert(io.popen(corecmd))
+    local num = h:read("*n")
+    h:close()
+    return num
 end
 
 function helpers.getBatteryLevel()
