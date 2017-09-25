@@ -16,6 +16,7 @@ function run {
 
 # run 'em
 run xcompmgr
+run light-locker
 #run conky -q -c ~/.config/awesome/conky.cfg
 run parcellite
 
