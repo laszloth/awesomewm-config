@@ -385,7 +385,7 @@ awful.screen.connect_for_each_screen(function(s)
     table.insert(rightl, separator)
     table.insert(rightl, mybatwidget) table.insert(rightl, separator)
     table.insert(rightl, mytextclock) table.insert(rightl, space1)
-    table.insert(rightl, s.maylayoutbox)
+    table.insert(rightl, s.mylayoutbox)
 
     s.mywibox:setup {
         layout = wibox.layout.align.horizontal,
