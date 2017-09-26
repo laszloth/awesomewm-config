@@ -233,8 +233,6 @@ for i = 2,1+numCores do
     table.insert(cpud_temp, c)
 end
 
---cpudata.temp = *container*
-
 -- Create a wibox for each screen and add it
 local taglist_buttons = awful.util.table.join(
                     awful.button({ }, 1, function(t) t:view_only() end),
@@ -357,65 +355,45 @@ awful.screen.connect_for_each_screen(function(s)
     dprompt:set_bg(hf.prompt_bg)
 
     -- Add widgets to the wibox
-    -- TODO don't cut common parts, like layout
-    if firstScreen then
-    s.mywibox:setup {
-        layout = wibox.layout.align.horizontal,
-        { -- Left widgets
+    local leftl = { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
             --mylauncher,
             s.mytaglist,
             --s.mypromptbox,
             dprompt,
-        },
-
-        -- Middle widget
-        s.mytasklist,
-
-        { -- Right widgets
+    }
+    local middlel = s.mytasklist
+    local rightl = { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             --mykeyboardlayout,
             space1,
-            cpudata.usage, separator,
-            --cpudata.temp, separator,
-            mynetwidget, separator,
-            wibox.widget.systray(), separator,
-            myvolwidget, separator,
-            myblwidget, separator,
-            mybatwidget, separator,
-            mytextclock, space1,
-            s.mylayoutbox,
-        },
-    } else -- not first screen
+            cpudata.usage,
+    }
+
+    if firstScreen then
+        table.insert(rightl, separator)
+        for key,val in pairs(cpud_temp) do table.insert(rightl, val) table.insert(rightl, separator) end
+        table.insert(rightl, mynetwidget) table.insert(rightl, separator)
+        table.insert(rightl, wibox.widget.systray()) table.insert(rightl, separator)
+        table.insert(rightl, myvolwidget) table.insert(rightl, separator)
+        table.insert(rightl, myblwidget)
+    else
+        table.insert(rightl, separator)
+        table.insert(rightl, mynetwidget) table.insert(rightl, separator)
+        table.insert(rightl, myvolwidget)
+    end
+    table.insert(rightl, separator)
+    table.insert(rightl, mybatwidget) table.insert(rightl, separator)
+    table.insert(rightl, mytextclock) table.insert(rightl, space1)
+    table.insert(rightl, s.maylayoutbox)
+
     s.mywibox:setup {
         layout = wibox.layout.align.horizontal,
-        { -- Left widgets
-            layout = wibox.layout.fixed.horizontal,
-            --mylauncher,
-            s.mytaglist,
-            --s.mypromptbox,
-            dprompt,
-        },
-
-        -- Middle widget
-        s.mytasklist,
-
-        { -- Right widgets
-            layout = wibox.layout.fixed.horizontal,
-            --mykeyboardlayout,
-            space2,
-            cpudata.usage, separator,
-            --cpudata.temp, separator,
-            mynetwidget, separator,
-            --wibox.widget.systray(), separator,
-            myvolwidget, separator,
-            --myblwidget, separator,
-            mybatwidget, separator,
-            mytextclock, space1,
-            s.mylayoutbox,
-        },
+        leftl,
+        middlel,
+        rightl,
     }
-    end
+
 end)
 -- }}}
 
