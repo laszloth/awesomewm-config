@@ -24,7 +24,7 @@ local hotkeys_popup = require("awful.hotkeys_popup").widget
 -- Others
 local vicious = require("vicious")
 -- own helpers
-local hf = require("helpers")
+local helpers = require("helpers")
 
 -- Load Debian menu entries
 require("debian.menu")
@@ -55,7 +55,6 @@ end
 -- }}}
 
 -- {{{ Autorun script start
--- TODO return value will show not found commands, handle that, using awesome-client wa.
 awful.util.spawn_with_shell("~/.config/awesome/scripts/autorun.sh &>/dev/null")
 -- }}}
 
@@ -79,10 +78,17 @@ modkey = "Mod4"
 
 -- Widget variables
 local def_screen = 1
-local numCores = hf.getCPUCoreCnt()
+local numCores = helpers.getCPUCoreCnt()
 
 -- helper functions
 debug_print = function (msg)
+    naughty.notify({ preset = naughty.config.presets.critical,
+        timeout = 5,
+        title = "DEBUG MESSAGE",
+        text = tostring(msg) })
+end
+
+debug_print_perm = function (msg)
     naughty.notify({ preset = naughty.config.presets.critical,
         title = "DEBUG MESSAGE",
         text = tostring(msg) })
@@ -104,9 +110,9 @@ end
 eventHandler = function(e)
     --debug_print("DBUS EVENT: "..e)
     if e == "acpi_jack" then
-        myvolwidget:set_markup(hf.getVolumeLevel())
+        helpers.freshVolumeBox(myvolwidget)
     elseif e == "acpi_ac" then
-        mybatwidget:set_markup(hf.getBatteryLevel())
+        helpers.freshBatteryBox(mybatwidget)
     else
         debug_print("Wrong event string:"..e)
     end
@@ -114,9 +120,6 @@ end
 
 -- Default screen settings for Firefox and others
 updateScreenCount()
--- TODO signals don't seem to work
---screen[1]:connect_signal("added", updateScreenCount)
---screen[1]:connect_signal("removed", updateScreenCount)
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
@@ -182,37 +185,50 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- {{{ Wibar
 -- Create a textclock widget
---mytextclock = wibox.widget.textclock()
 mytextclock = awful.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
 
 -- Create backlight widget
 myblwidget = wibox.widget.textbox()
-myblwidget:set_markup(hf.getBacklightLevel())
---myblwidget.visible = false
+helpers.freshBacklightBox(myblwidget)
 
--- TODO start timer to hide textbox
---mybltimer = timer ({ timeout = 2 })
---mybltimer:connect_signal("timeout", function() myblwidget.visible = false end)
+-- timer to hide backlight textbox
+mybltimer = timer ({ timeout = 2.5 })
+mybltimer:connect_signal("timeout", function()
+    --debug_print_perm("mybltimer expired")
+    myblwidget.visible = false
+    mybltimer:stop() end)
+mybltimer:start()
 
 -- Create volume widget
 myvoltimer = timer({ timeout = 120 })
-myvoltimer:connect_signal("timeout", function() myvolwidget:set_markup(hf.getVolumeLevel()) end)
+myvoltimer:connect_signal("timeout", function()
+    --debug_print_perm("myvoltimer expired")
+    helpers.freshVolumeBox(myvolwidget)
+end)
 
 myvolwidget = wibox.widget.textbox()
-myvolwidget:set_markup(hf.getVolumeLevel())
+helpers.freshVolumeBox(myvolwidget)
+myvolwidget:connect_signal("button::release", function()
+    awful.util.spawn("pactl set-sink-mute 0 toggle")
+    helpers.freshVolumeBox(myvolwidget)
+end)
+
 myvoltimer:start()
 
 -- Create battery widget
 mybattimer = timer({ timeout = 90 })
-mybattimer:connect_signal("timeout", function() mybatwidget:set_markup(hf.getBatteryLevel()) end)
+mybattimer:connect_signal("timeout", function()
+    --debug_print_perm("mybattimer expired")
+    helpers.freshBatteryBox(mybatwidget)
+end)
 
 mybatwidget = wibox.widget.textbox()
-mybatwidget:set_markup(hf.getBatteryLevel())
+helpers.freshBatteryBox(mybatwidget)
 mybattimer:start()
 
 -- Create net widget
 mynetwidget = wibox.widget.textbox()
-vicious.register(mynetwidget, vicious.widgets.net, hf.getNetworkStats, 1)
+vicious.register(mynetwidget, vicious.widgets.net, helpers.getNetworkStats, 1)
 
 -- Create CPU widgets
 cpudata = {}
@@ -227,7 +243,7 @@ cpud_temp = {}
 for i = 2,1+numCores do
     local c = wibox.widget.textbox()
     vicious.register(c, vicious.widgets.thermal,
-        function(widget, args) return hf.getCoreTempText(args[1], i) end,
+        function(widget, args) return helpers.getCoreTempText(args[1], i) end,
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
     table.insert(cpud_temp, c)
@@ -301,12 +317,20 @@ awful.screen.connect_for_each_screen(function(s)
     if s.index == 1 then
         firstScreen = true
         firstTag = "evol"
+        s:connect_signal("removed", function()
+            debug_print("screen removed")
+            updateScreenCount()
+        end)
+        s:connect_signal("added", function()
+            debug_print("screen added")
+            updateScreenCount()
+        end)
     end
 
     -- Each screen has its own tag table.
     --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-    awful.tag({ "null", "main", "www", "term", "kreat", "riddler" }, s,
-            { awful.layout.layouts[1], -- TODO var. firstTag
+    awful.tag({ firstTag, "main", "www", "term", "kreat", "riddler" }, s,
+            { awful.layout.layouts[1], -- var. firstTag
               awful.layout.layouts[1], -- main
               awful.layout.layouts[3], -- www
               awful.layout.layouts[2], -- term
@@ -339,20 +363,15 @@ awful.screen.connect_for_each_screen(function(s)
     local space3 = wibox.widget.textbox()
     local separator = wibox.widget.textbox()
 
-    local spacetext = ' '
-    local spacetext2 = '  '
-    local spacetext3 = '   '
-    local separtext = ' | '
-
-    space1:set_text(spacetext)
-    space2:set_text(spacetext2)
-    space3:set_text(spacetext3)
-    separator:set_text(separtext)
+    space1:set_text(helpers.spacetxt)
+    space2:set_text(helpers.spacetxt2)
+    space3:set_text(helpers.spacetxt3)
+    separator:set_text(helpers.separtxt)
     -- }}}
 
     local dprompt = wibox.widget.background(s.mypromptbox)
-    dprompt:set_fg(hf.prompt_fg)
-    dprompt:set_bg(hf.prompt_bg)
+    dprompt:set_fg(helpers.prompt_fg)
+    dprompt:set_bg(helpers.prompt_bg)
 
     -- Add widgets to the wibox
     local leftl = { -- Left widgets
@@ -375,7 +394,8 @@ awful.screen.connect_for_each_screen(function(s)
         for key,val in pairs(cpud_temp) do table.insert(rightl, val) table.insert(rightl, separator) end
         table.insert(rightl, mynetwidget) table.insert(rightl, separator)
         table.insert(rightl, wibox.widget.systray()) table.insert(rightl, separator)
-        table.insert(rightl, myvolwidget) table.insert(rightl, separator)
+        table.insert(rightl, myvolwidget)
+        -- separator included
         table.insert(rightl, myblwidget)
     else
         table.insert(rightl, separator)
@@ -504,36 +524,35 @@ globalkeys = awful.util.table.join(
 
     -- Assign special keys
     awful.key({ "Control", "Mod1" }, "Delete", function()
-        awful.util.spawn( locker_cmd ) end),
+        awful.util.spawn(locker_cmd) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        awful.util.spawn( "pactl set-sink-volume 0 -2%" )
-        myvolwidget:set_markup(hf.getVolumeLevel()) end),
+        awful.util.spawn("pactl set-sink-volume 0 -2%")
+        helpers.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        if hf.getVolumeLevel(1) >= hf.volume_limit then
-            return
-        end
-        awful.util.spawn( "pactl set-sink-volume 0 +2%" )
-        myvolwidget:set_markup(hf.getVolumeLevel()) end),
+        awful.util.spawn("pactl set-sink-volume 0 +2%")
+        helpers.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioMute", function()
-        awful.util.spawn( "pactl set-sink-mute 0 toggle" )
-        myvolwidget:set_markup(hf.getVolumeLevel()) end),
+        awful.util.spawn("pactl set-sink-mute 0 toggle")
+        helpers.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioNext", function()
-        awful.util.spawn( "dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next" ) end),
+        awful.util.spawn("dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next") end),
     awful.key({ }, "XF86AudioPrev", function()
-        awful.util.spawn( "dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous" ) end),
+        awful.util.spawn("dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous") end),
     awful.key({ }, "XF86AudioPlay", function()
         awful.util.spawn_with_shell( "~/.config/awesome/scripts/XF86Play.sh" ) end),
     awful.key({ }, "XF86Calculator", function()
-        awful.util.spawn( "gnome-calculator" ) end),
+        awful.util.spawn("gnome-calculator") end),
     awful.key({ }, "XF86TouchpadToggle", function()
         awful.util.spawn_with_shell( "~/.config/awesome/scripts/dell_touch.sh" ) end),
     awful.key({ }, "XF86MonBrightnessDown", function()
-        awful.util.spawn( "xbacklight -dec 10" )
-        myblwidget:set_markup(hf.getBacklightLevel())
+        awful.util.spawn("xbacklight -dec 10")
+        helpers.freshBacklightBox(myblwidget)
+        mybltimer:again()
         end),
     awful.key({ }, "XF86MonBrightnessUp", function()
-        awful.util.spawn( "xbacklight -inc 10" )
-        myblwidget:set_markup(hf.getBacklightLevel())
+        awful.util.spawn("xbacklight -inc 10")
+        helpers.freshBacklightBox(myblwidget)
+        mybltimer:again()
         end),
 
     -- Menubar
@@ -689,11 +708,11 @@ awful.rules.rules = {
 
     -- Set Evolution to always map to first tag on first screen
     { rule = { class = "Evolution" },
-      properties = { screen = 1, tag = "null" } },
+      properties = { screen = 1, tag = "evol" } },
 
     -- Set Pidgin to always map to 'evol' tag and be floating on first screen
     { rule = { class = "Pidgin" },
-      properties = { screen = 1, tag = "null",
+      properties = { screen = 1, tag = "evol",
                      floating = true } },
     -- Set Spotify to always map to 'kreat' tag on def_screen
     { rule = { class = "Spotify" },

@@ -1,6 +1,7 @@
+local awful = require("awful")
 local helpers = {}
 
-helpers.net_devices = { 'eno1', 'wlp3s0' }
+helpers.net_devices = { "eno1", "wlp3s0" }
 
 helpers.warn_color              = '#FECA00'
 helpers.crit_color              = '#FF0000'
@@ -12,7 +13,7 @@ helpers.net_download_color      = '#CC9933'
 helpers.net_upload_color        = '#7F9F7F'
 helpers.klimit                  = 1024
 
-helpers.cpu_temp_low_color      = "#7FAE5A"
+helpers.cpu_temp_low_color      = '#7FAE5A'
 helpers.cpu_temp_medium_color   = helpers.warn_color
 helpers.cpu_temp_high_color     = helpers.crit_color
 helpers.cpu_temp_high           = 85
@@ -22,97 +23,100 @@ helpers.volume_high             = 65
 helpers.volume_mid              = 40
 helpers.volume_high_color       = helpers.crit_color
 helpers.volume_mid_color        = helpers.warn_color
-helpers.volume_mute_color       = "#5C5C5C"
-helpers.volume_limit            = 100
+helpers.volume_mute_color       = '#5C5C5C'
 
 helpers.battery_low             = 15
 helpers.battery_low_color       = helpers.crit_color
-helpers.battery_charge_color    = "#7FAE5A"
+helpers.battery_charge_color    = '#7FAE5A'
+
+helpers.spacetxt = ' '
+helpers.spacetxt2 = '  '
+helpers.spacetxt3 = '   '
+helpers.separtxt = ' | '
 
 function helpers.isJackPlugged()
     local jackcmd = "cat /proc/asound/card1/codec#0 | grep 'Pin-ctls:'" ..
                 "| head -3 | tail -1 | grep -c OUT"
+    -- will be called in async callback
     local h = assert(io.popen(jackcmd))
     local ret = h:read("*n")
     h:close()
-    return 1 - ret
+    return ret == 0
 end
 
 function helpers.isMuted()
     local mutedcmd = "pactl list sinks | grep \"^\\s\\+Mute: yes\" | awk '{print $2}'"
     local ret = 0
+    -- will be called in async callback
     local h = assert(io.popen(mutedcmd))
     if h:read("*l") == "yes" then
         ret = 1
     end
     h:close()
-    return ret
+    return ret == 1
 end
 
-function helpers.getVolumeLevel(raw)
-    local volcmd = "pactl list sinks | grep \"^\\s\\+Volume\" | awk '{print $5}'"
-    local h = assert(io.popen(volcmd))
-    local vol = h:read("*n")
-    h:close()
+function helpers.freshVolumeBox(box)
+    local volcmd = {"bash", "-c", "pactl list sinks | grep \"^\\s\\+Volume\" | awk '{print $5}' | tr -d '%'"}
+    awful.spawn.easy_async(volcmd, function(stdout, stderr, reason, exit_code)
+        local vol = tonumber(stdout)
+        local pref = 'SPKR:'
 
-    -- on version update, have to change popen to easy async or with_line_callback
-    --awful.spawn.easy_async(volcmd, function(stdout, stderr, reason, exit_code)
-    --    naughty.notify { text = stdout }
-    --end)
-
-    if raw == 1 then
-        return vol
-    end
-
-    local pref = 'SPKR:'
-    if helpers.isJackPlugged() == 1 then
-        pref = 'JACK:'
-    end
-
-    if helpers.isMuted() == 1 then
-        pref = 'MUTED:'
-        return '<span foreground="'..helpers.volume_mute_color..'">'..pref..vol..'</span>'
-    elseif vol >= helpers.volume_high then
-        return '<span foreground="'..helpers.volume_high_color..'">'..pref..vol..'</span>'
-    elseif vol >= helpers.volume_mid then
-        return '<span foreground="'..helpers.volume_mid_color..'">'..pref..vol..'</span>'
-    else
-        return pref..vol
-    end
-end
-
-function helpers.getCPUCoreCnt()
-    local corecmd = "awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo"
-    local h = assert(io.popen(corecmd))
-    local num = h:read("*n")
-    h:close()
-    return num
-end
-
-function helpers.getBatteryLevel()
-    local h = assert(io.popen("cat /sys/class/power_supply/BAT0/capacity"))
-    local cap = h:read("*n")
-    h:close()
-
-    -- check if battery is present
-    if cap == nil then
-        return "no battery"
-    end
-
-    -- workaround for capacity containing 100+ value
-    if cap > 100 then cap = 100 end
-    h = assert(io.popen("cat /sys/class/power_supply/AC/online"))
-    local ac = h:read("*n")
-    h:close()
-    if ac == 0 then
-        if cap <= helpers.battery_low then
-            return '<span foreground="'..helpers.battery_low_color..'">B:'..cap..'</span>'
-        else
-            return "B:"..cap
+        if helpers.isJackPlugged() then
+            pref = 'JACK:'
         end
-    else
-        return '<span foreground="'..helpers.battery_charge_color..'">B:'..cap..'</span>'
-    end
+
+        if helpers.isMuted() then
+            pref = 'MUTED:'
+            box.markup = '<span foreground="'..helpers.volume_mute_color..'">'..pref..vol..'</span>'
+        elseif vol >= helpers.volume_high then
+            box.markup = '<span foreground="'..helpers.volume_high_color..'">'..pref..vol..'</span>'
+        elseif vol >= helpers.volume_mid then
+            box.markup = '<span foreground="'..helpers.volume_mid_color..'">'..pref..vol..'</span>'
+        else
+            box.markup = pref..vol
+        end
+    end)
+end
+
+function helpers.freshBacklightBox(box)
+    local blcmd = {"bash", "-c", "xbacklight -get"}
+    local pref = 'backlight: '
+    awful.spawn.easy_async(blcmd, function(stdout, stderr, reason, exit_code)
+        box.visible = true
+        box.markup = helpers.separtxt..pref..
+            '<span foreground="'..helpers.warn_color..'">'..math.floor(tonumber(stdout))..'</span>'
+    end)
+end
+
+function helpers.freshBatteryBox(box)
+    local batcmd = {"bash", "-c", "cat /sys/class/power_supply/BAT0/capacity"}
+
+    awful.spawn.easy_async(batcmd, function(stdout, stderr, reason, exit_code)
+        local cap = tonumber(stdout)
+        local accmd = "cat /sys/class/power_supply/AC/online"
+
+        -- check if battery is present
+        if cap == nil then
+            box.markup = "no battery"
+        end
+
+        -- workaround for capacity containing 100+ value
+        if cap > 100 then cap = 100 end
+
+        local h = assert(io.popen(accmd))
+        local ac = h:read("*n")
+        h:close()
+        if ac == 0 then
+            if cap <= helpers.battery_low then
+                box.markup = '<span foreground="'..helpers.battery_low_color..'">B:'..cap..'</span>'
+            else
+                box.markup = "B:"..cap
+            end
+        else
+            box.markup = '<span foreground="'..helpers.battery_charge_color..'">B:'..cap..'</span>'
+        end
+    end)
 end
 
 function helpers.getNetworkStats(widget,args)
@@ -163,12 +167,13 @@ function helpers.getCoreTempText(t, n)
         return s..t..'°C</span>'
 end
 
-function helpers.getBacklightLevel()
-    local blcmd = "xbacklight -get"
-    local h = assert(io.popen(blcmd))
-    local bl = h:read("*n")
+-- called once at startup, popen is fine for now
+function helpers.getCPUCoreCnt()
+    local corecmd = "awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo"
+    local h = assert(io.popen(corecmd))
+    local num = h:read("*n")
     h:close()
-    return math.floor(bl)
+    return num
 end
 
 return helpers
