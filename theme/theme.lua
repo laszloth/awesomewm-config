@@ -7,37 +7,12 @@
 --  * http://awesome.naquadah.org/wiki/Nice_Icons
 
 -- {{{ Main
-theme = {}
+local theme = {}
 theme.wallpaper = "~/.config/awesome/theme/minimal-background.jpg"
 -- }}}
 
 -- {{{ Styles
 theme.font      = "sans 8"
-
---[[
-+colors.light    = "#DCDCCC"
-+colors.lightc   = "#F0DFAF"
-+colors.dark     = "#212121"
-+colors.darkc    = "#1E2320"
-+colors.medium   = "#3F3F3F"
-+colors.mediumc  = "#3F3F3F"
-+colors.mediumf  = "#6F6F6F"
-+colors.notif    = "#CC9393"
-+
-+colors.yellow   = "#FECA00"
-+colors.red      = "#D4434A"
-+colors.blue     = "#003366"
-+colors.lblue    = "#A8ADF5"
-+colors.green    = "#7FAE5A"
-+colors.light    = "#E8F0F7"
-+colors.dark     = "#4D323E"
-+colors.heavy    = "#55001D"
-+
-+colors.bdark    = "#000000"
-+colors.blight   = "#FFFFFF"
-+colors.bred     = "#FF0000"
-+colors.bblue    = "#0000FF"
---]]
 
 -- {{{ Base colors
 theme.fg_normal  = "#DCDCCC"
@@ -128,6 +103,10 @@ theme.layout_max        = "~/.config/awesome/theme/layouts/max.png"
 theme.layout_fullscreen = "~/.config/awesome/theme/layouts/fullscreen.png"
 theme.layout_magnifier  = "~/.config/awesome/theme/layouts/magnifier.png"
 theme.layout_floating   = "~/.config/awesome/theme/layouts/floating.png"
+theme.layout_cornernw   = "~/.config/awesome/theme/layouts/cornernw.png"
+theme.layout_cornerne   = "~/.config/awesome/theme/layouts/cornerne.png"
+theme.layout_cornersw   = "~/.config/awesome/theme/layouts/cornersw.png"
+theme.layout_cornerse   = "~/.config/awesome/theme/layouts/cornerse.png"
 -- }}}
 
 -- {{{ Titlebar
