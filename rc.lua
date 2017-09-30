@@ -55,7 +55,7 @@ end
 -- }}}
 
 -- {{{ Autorun script start
-awful.util.spawn_with_shell("~/.config/awesome/scripts/autorun.sh &>/dev/null")
+awful.spawn.with_shell("~/.config/awesome/scripts/autorun.sh &>/dev/null")
 -- }}}
 
 -- {{{ Variable definitions
@@ -185,14 +185,14 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = awful.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
+mytextclock = wibox.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
 
 -- Create backlight widget
 myblwidget = wibox.widget.textbox()
 helpers.freshBacklightBox(myblwidget)
 
 -- timer to hide backlight textbox
-mybltimer = timer ({ timeout = 2.5 })
+mybltimer = gears.timer { timeout = 2.5, }
 mybltimer:connect_signal("timeout", function()
     --debug_print_perm("mybltimer expired")
     myblwidget.visible = false
@@ -200,7 +200,7 @@ mybltimer:connect_signal("timeout", function()
 mybltimer:start()
 
 -- Create volume widget
-myvoltimer = timer({ timeout = 120 })
+myvoltimer = gears.timer { timeout = 120, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
     helpers.freshVolumeBox(myvolwidget)
@@ -216,7 +216,7 @@ end)
 myvoltimer:start()
 
 -- Create battery widget
-mybattimer = timer({ timeout = 90 })
+mybattimer = gears.timer { timeout = 90, }
 mybattimer:connect_signal("timeout", function()
     --debug_print_perm("mybattimer expired")
     helpers.freshBatteryBox(mybatwidget)
@@ -369,7 +369,7 @@ awful.screen.connect_for_each_screen(function(s)
     separator:set_text(helpers.separtxt)
     -- }}}
 
-    local dprompt = wibox.widget.background(s.mypromptbox)
+    local dprompt = wibox.container.background(s.mypromptbox)
     dprompt:set_fg(helpers.prompt_fg)
     dprompt:set_bg(helpers.prompt_bg)
 
@@ -539,11 +539,11 @@ globalkeys = awful.util.table.join(
     awful.key({ }, "XF86AudioPrev", function()
         awful.util.spawn("dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous") end),
     awful.key({ }, "XF86AudioPlay", function()
-        awful.util.spawn_with_shell( "~/.config/awesome/scripts/XF86Play.sh" ) end),
+        awful.spawn.with_shell("~/.config/awesome/scripts/XF86Play.sh") end),
     awful.key({ }, "XF86Calculator", function()
         awful.util.spawn("gnome-calculator") end),
     awful.key({ }, "XF86TouchpadToggle", function()
-        awful.util.spawn_with_shell( "~/.config/awesome/scripts/dell_touch.sh" ) end),
+        awful.spawn.with_shell("~/.config/awesome/scripts/dell_touch.sh") end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         awful.util.spawn("xbacklight -dec 10")
         helpers.freshBacklightBox(myblwidget)
