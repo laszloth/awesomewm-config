@@ -109,17 +109,6 @@ local function updateScreenCount(s)
     debug_print("def_screen="..def_screen)
 end
 
-function eventHandler(e)
-    --debug_print("DBUS EVENT: "..e)
-    if e == "acpi_jack" then
-        helpers.freshVolumeBox(myvolwidget)
-    elseif e == "acpi_ac" then
-        helpers.freshBatteryBox(mybatwidget)
-    else
-        debug_print("Wrong event string:"..e)
-    end
-end
-
 local function client_menu_toggle_fn()
     local instance = nil
 
@@ -262,6 +251,17 @@ for i = 2,1+numCores do
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
     table.insert(cpud_temp, c)
+end
+
+function eventHandler(e)
+    --debug_print("DBUS EVENT: "..e)
+    if e == "acpi_jack" then
+        helpers.freshVolumeBox(myvolwidget)
+    elseif e == "acpi_ac" then
+        helpers.freshBatteryBox(mybatwidget)
+    else
+        debug_print("Wrong event string:"..e)
+    end
 end
 
 -- Create a wibox for each screen and add it
