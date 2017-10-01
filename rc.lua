@@ -23,6 +23,8 @@ local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 -- Others
 local vicious = require("vicious")
+-- C API
+local capi = { awesome = awesome }
 -- own helpers
 local helpers = require("helpers")
 
@@ -186,6 +188,20 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 -- {{{ Wibar
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
+
+-- Create systray and its separator
+mystseparator = wibox.widget.textbox()
+mystseparator.text = helpers.separtxt
+mysystray = wibox.widget.systray()
+mysystray:connect_signal("widget::redraw_needed", function()
+    local entries = capi.awesome.systray()
+    --debug_print("systray entries="..entries)
+    if entries == 0 then
+        mystseparator.visible = false
+    else
+        mystseparator.visible = true
+    end
+end)
 
 -- Create backlight widget
 myblwidget = wibox.widget.textbox()
@@ -359,14 +375,14 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- {{{ spaces and separator
     local space1 = wibox.widget.textbox()
-    local space2 = wibox.widget.textbox()
-    local space3 = wibox.widget.textbox()
+    space1.text = helpers.spacetxt
+    --local space2 = wibox.widget.textbox()
+    --space2.text = helpers.spacetxt2
+    --local space3 = wibox.widget.textbox()
+    --space3.text = helpers.spacetxt3
     local separator = wibox.widget.textbox()
+    separator.text = helpers.separtxt
 
-    space1:set_text(helpers.spacetxt)
-    space2:set_text(helpers.spacetxt2)
-    space3:set_text(helpers.spacetxt3)
-    separator:set_text(helpers.separtxt)
     -- }}}
 
     local dprompt = wibox.container.background(s.mypromptbox)
@@ -393,7 +409,7 @@ awful.screen.connect_for_each_screen(function(s)
         table.insert(rightl, separator)
         for key,val in pairs(cpud_temp) do table.insert(rightl, val) table.insert(rightl, separator) end
         table.insert(rightl, mynetwidget) table.insert(rightl, separator)
-        table.insert(rightl, wibox.widget.systray()) table.insert(rightl, separator)
+        table.insert(rightl, mysystray) table.insert(rightl, mystseparator)
         table.insert(rightl, myvolwidget)
         -- separator included
         table.insert(rightl, myblwidget)
