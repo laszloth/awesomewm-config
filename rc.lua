@@ -82,34 +82,34 @@ modkey = "Mod4"
 local def_screen = 1
 local numCores = helpers.getCPUCoreCnt()
 
--- helper functions
-debug_print = function (msg)
+-- {{{ Helper functions
+function debug_print(msg)
     naughty.notify({ preset = naughty.config.presets.critical,
         timeout = 5,
         title = "DEBUG MESSAGE",
         text = tostring(msg) })
 end
 
-local debug_print_perm = function (msg)
+local function debug_print_perm(msg)
     naughty.notify({ preset = naughty.config.presets.critical,
         title = "DEBUG MESSAGE",
         text = tostring(msg) })
 end
 
-local notify_print = function (msg)
+local function notify_print(msg)
     naughty.notify({ preset = naughty.config.presets.normal,
         title = "notification",
         text = tostring(msg) })
 end
 
-local updateScreenCount = function(s)
+local function updateScreenCount(s)
     if screen.count() > 1 then
         def_screen = 2
     end
     debug_print("def_screen="..def_screen)
 end
 
-eventHandler = function(e)
+function eventHandler(e)
     --debug_print("DBUS EVENT: "..e)
     if e == "acpi_jack" then
         helpers.freshVolumeBox(myvolwidget)
@@ -119,6 +119,20 @@ eventHandler = function(e)
         debug_print("Wrong event string:"..e)
     end
 end
+
+local function client_menu_toggle_fn()
+    local instance = nil
+
+    return function ()
+        if instance and instance.wibox.visible then
+            instance:hide()
+            instance = nil
+        else
+            instance = awful.menu.clients({ theme = { width = 250 } })
+        end
+    end
+end
+-- }}}
 
 -- Default screen settings for Firefox and others
 updateScreenCount()
@@ -142,21 +156,6 @@ awful.layout.layouts = {
 --    awful.layout.suit.corner.sw,
 --    awful.layout.suit.corner.se,
 }
--- }}}
-
--- {{{ Helper functions
-local function client_menu_toggle_fn()
-    local instance = nil
-
-    return function ()
-        if instance and instance.wibox.visible then
-            instance:hide()
-            instance = nil
-        else
-            instance = awful.menu.clients({ theme = { width = 250 } })
-        end
-    end
-end
 -- }}}
 
 -- {{{ Menu
