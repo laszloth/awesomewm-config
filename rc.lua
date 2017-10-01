@@ -90,19 +90,19 @@ debug_print = function (msg)
         text = tostring(msg) })
 end
 
-debug_print_perm = function (msg)
+local debug_print_perm = function (msg)
     naughty.notify({ preset = naughty.config.presets.critical,
         title = "DEBUG MESSAGE",
         text = tostring(msg) })
 end
 
-notify_print = function (msg)
+local notify_print = function (msg)
     naughty.notify({ preset = naughty.config.presets.normal,
         title = "notification",
         text = tostring(msg) })
 end
 
-updateScreenCount = function(s)
+local updateScreenCount = function(s)
     if screen.count() > 1 then
         def_screen = 2
     end
@@ -183,16 +183,16 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- }}}
 
 -- Keyboard map indicator and switcher
-mykeyboardlayout = awful.widget.keyboardlayout()
+local mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
+local mytextclock = wibox.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
 
 -- Create systray and its separator
-mystseparator = wibox.widget.textbox()
+local mystseparator = wibox.widget.textbox()
 mystseparator.text = helpers.separtxt
-mysystray = wibox.widget.systray()
+local mysystray = wibox.widget.systray()
 mysystray:connect_signal("widget::redraw_needed", function()
     local entries = capi.awesome.systray()
     --debug_print("systray entries="..entries)
@@ -204,11 +204,11 @@ mysystray:connect_signal("widget::redraw_needed", function()
 end)
 
 -- Create backlight widget
-myblwidget = wibox.widget.textbox()
+local myblwidget = wibox.widget.textbox()
 helpers.freshBacklightBox(myblwidget)
 
 -- timer to hide backlight textbox
-mybltimer = gears.timer { timeout = 2.5, }
+local mybltimer = gears.timer { timeout = 2.5, }
 mybltimer:connect_signal("timeout", function()
     --debug_print_perm("mybltimer expired")
     myblwidget.visible = false
@@ -216,13 +216,13 @@ mybltimer:connect_signal("timeout", function()
 mybltimer:start()
 
 -- Create volume widget
-myvoltimer = gears.timer { timeout = 120, }
+local myvoltimer = gears.timer { timeout = 120, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
     helpers.freshVolumeBox(myvolwidget)
 end)
 
-myvolwidget = wibox.widget.textbox()
+local myvolwidget = wibox.widget.textbox()
 helpers.freshVolumeBox(myvolwidget)
 myvolwidget:connect_signal("button::release", function()
     awful.util.spawn("pactl set-sink-mute 0 toggle")
@@ -232,22 +232,22 @@ end)
 myvoltimer:start()
 
 -- Create battery widget
-mybattimer = gears.timer { timeout = 90, }
+local mybattimer = gears.timer { timeout = 90, }
 mybattimer:connect_signal("timeout", function()
     --debug_print_perm("mybattimer expired")
     helpers.freshBatteryBox(mybatwidget)
 end)
 
-mybatwidget = wibox.widget.textbox()
+local mybatwidget = wibox.widget.textbox()
 helpers.freshBatteryBox(mybatwidget)
 mybattimer:start()
 
 -- Create net widget
-mynetwidget = wibox.widget.textbox()
+local mynetwidget = wibox.widget.textbox()
 vicious.register(mynetwidget, vicious.widgets.net, helpers.getNetworkStats, 1)
 
 -- Create CPU widgets
-cpudata = {}
+local cpudata = {}
 
 -- CPU: usage
 cpudata.usage = wibox.widget.textbox()
@@ -255,7 +255,7 @@ vicious.register(cpudata.usage, vicious.widgets.cpu, function(widget, args)
     return string.format("%02d", args[1]).."%" end, 1)
 
 -- CPU: thermal
-cpud_temp = {}
+local cpud_temp = {}
 for i = 2,1+numCores do
     local c = wibox.widget.textbox()
     vicious.register(c, vicious.widgets.thermal,
@@ -810,6 +810,4 @@ client.connect_signal("unfocus", function(c)
                                    c.border_color = beautiful.border_normal
                                    c.opacity = 0.96
                                  end)
---client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
---client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
