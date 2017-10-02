@@ -106,7 +106,7 @@ end
 local function updateScreenCount(s)
     num_screen = screen.count()
     def_screen = math.floor(num_screen / 3) + 1
-    debug_print("num_screen="..num_screen.."\ndef_screen="..def_screen)
+    --debug_print("num_screen="..num_screen.."\ndef_screen="..def_screen)
 end
 
 local function client_menu_toggle_fn()
@@ -208,9 +208,6 @@ local myvolwidget = wibox.widget.textbox()
 local myvoltimer = gears.timer { timeout = 120, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
-    if(myvolwidget == nil) then
-        debug_print_perm("myvolwidget widget was nil")
-    end
     helpers.freshVolumeBox(myvolwidget)
 end)
 myvolwidget:connect_signal("button::release", function()
@@ -226,9 +223,6 @@ local mybatwidget = wibox.widget.textbox()
 local mybattimer = gears.timer { timeout = 90, }
 mybattimer:connect_signal("timeout", function()
     --debug_print_perm("mybattimer expired")
-    if(mybatwidget == nil) then
-        debug_print_perm("mybatwidget widget was nil")
-    end
     helpers.freshBatteryBox(mybatwidget)
 end)
 
