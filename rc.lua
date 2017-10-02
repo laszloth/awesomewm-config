@@ -79,6 +79,7 @@ locker_cmd  = "light-locker-command -l"
 modkey = "Mod4"
 
 -- Widget variables
+local num_screen = 1
 local def_screen = 1
 local numCores = helpers.getCPUCoreCnt()
 
@@ -103,10 +104,9 @@ local function notify_print(msg)
 end
 
 local function updateScreenCount(s)
-    if screen.count() > 1 then
-        def_screen = 2
-    end
-    debug_print("def_screen="..def_screen)
+    num_screen = screen.count()
+    def_screen = math.floor(num_screen / 3) + 1
+    debug_print("num_screen="..num_screen.."\ndef_screen="..def_screen)
 end
 
 local function client_menu_toggle_fn()
@@ -713,13 +713,13 @@ awful.rules.rules = {
       }, properties = { titlebars_enabled = false }
     },
 
-    -- Set Firefox to always map on the tag named "2" on screen 1.
-    -- { rule = { class = "Firefox" },
-    --   properties = { screen = 1, tag = "2" } },
-
     -- Set Firefox to always map on www tag on def_screen
     { rule = { class = "Firefox" },
       properties = { screen = def_screen, tag = "www" } },
+
+    -- Set Chrome to always map on www tag on last screen
+    { rule = { class = "Google-chrome" },
+      properties = { screen = num_screen, tag = "www" } },
 
     -- Set Evolution to always map to first tag on first screen
     { rule = { class = "Evolution" },
