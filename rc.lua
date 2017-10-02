@@ -204,29 +204,34 @@ mybltimer:connect_signal("timeout", function()
 mybltimer:start()
 
 -- Create volume widget
+local myvolwidget = wibox.widget.textbox()
 local myvoltimer = gears.timer { timeout = 120, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
+    if(myvolwidget == nil) then
+        debug_print_perm("myvolwidget widget was nil")
+    end
     helpers.freshVolumeBox(myvolwidget)
 end)
-
-local myvolwidget = wibox.widget.textbox()
-helpers.freshVolumeBox(myvolwidget)
 myvolwidget:connect_signal("button::release", function()
     awful.util.spawn("pactl set-sink-mute 0 toggle")
     helpers.freshVolumeBox(myvolwidget)
 end)
 
+helpers.freshVolumeBox(myvolwidget)
 myvoltimer:start()
 
 -- Create battery widget
+local mybatwidget = wibox.widget.textbox()
 local mybattimer = gears.timer { timeout = 90, }
 mybattimer:connect_signal("timeout", function()
     --debug_print_perm("mybattimer expired")
+    if(mybatwidget == nil) then
+        debug_print_perm("mybatwidget widget was nil")
+    end
     helpers.freshBatteryBox(mybatwidget)
 end)
 
-local mybatwidget = wibox.widget.textbox()
 helpers.freshBatteryBox(mybatwidget)
 mybattimer:start()
 
