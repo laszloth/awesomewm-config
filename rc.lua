@@ -25,8 +25,8 @@ local hotkeys_popup = require("awful.hotkeys_popup").widget
 local vicious = require("vicious")
 -- C API
 local capi = { awesome = awesome }
--- own helpers
-local helpers = require("helpers")
+-- own helpmod
+local helpmod = require("helpmod")
 
 -- Load Debian menu entries
 --require("debian.menu")
@@ -81,7 +81,7 @@ modkey = "Mod4"
 -- Widget variables
 local num_screen = 1
 local def_screen = 1
-local numCores = helpers.getCPUCoreCnt()
+local numCores = helpmod.getCPUCoreCnt()
 
 -- {{{ Helper functions
 function debug_print(msg)
@@ -179,7 +179,7 @@ local mytextclock = wibox.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
 
 -- Create systray and its separator
 local mystseparator = wibox.widget.textbox()
-mystseparator.text = helpers.separtxt
+mystseparator.text = helpmod.separtxt
 local mysystray = wibox.widget.systray()
 mysystray:connect_signal("widget::redraw_needed", function()
     local entries = capi.awesome.systray()
@@ -193,7 +193,7 @@ end)
 
 -- Create backlight widget
 local myblwidget = wibox.widget.textbox()
-helpers.freshBacklightBox(myblwidget)
+helpmod.freshBacklightBox(myblwidget)
 
 -- timer to hide backlight textbox
 local mybltimer = gears.timer { timeout = 2.5, }
@@ -208,14 +208,14 @@ local myvolwidget = wibox.widget.textbox()
 local myvoltimer = gears.timer { timeout = 120, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
-    helpers.freshVolumeBox(myvolwidget)
+    helpmod.freshVolumeBox(myvolwidget)
 end)
 myvolwidget:connect_signal("button::release", function()
     awful.util.spawn("pactl set-sink-mute 0 toggle")
-    helpers.freshVolumeBox(myvolwidget)
+    helpmod.freshVolumeBox(myvolwidget)
 end)
 
-helpers.freshVolumeBox(myvolwidget)
+helpmod.freshVolumeBox(myvolwidget)
 myvoltimer:start()
 
 -- Create battery widget
@@ -223,15 +223,15 @@ local mybatwidget = wibox.widget.textbox()
 local mybattimer = gears.timer { timeout = 90, }
 mybattimer:connect_signal("timeout", function()
     --debug_print_perm("mybattimer expired")
-    helpers.freshBatteryBox(mybatwidget)
+    helpmod.freshBatteryBox(mybatwidget)
 end)
 
-helpers.freshBatteryBox(mybatwidget)
+helpmod.freshBatteryBox(mybatwidget)
 mybattimer:start()
 
 -- Create net widget
 local mynetwidget = wibox.widget.textbox()
-vicious.register(mynetwidget, vicious.widgets.net, helpers.getNetworkStats, 1)
+vicious.register(mynetwidget, vicious.widgets.net, helpmod.getNetworkStats, 1)
 
 -- Create CPU widgets
 local cpudata = {}
@@ -246,7 +246,7 @@ local cpud_temp = {}
 for i = 2,1+numCores do
     local c = wibox.widget.textbox()
     vicious.register(c, vicious.widgets.thermal,
-        function(widget, args) return helpers.getCoreTempText(args[1], i) end,
+        function(widget, args) return helpmod.getCoreTempText(args[1], i) end,
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
     table.insert(cpud_temp, c)
@@ -255,9 +255,9 @@ end
 function eventHandler(e)
     --debug_print("DBUS EVENT: "..e)
     if e == "acpi_jack" then
-        helpers.freshVolumeBox(myvolwidget)
+        helpmod.freshVolumeBox(myvolwidget)
     elseif e == "acpi_ac" then
-        helpers.freshBatteryBox(mybatwidget)
+        helpmod.freshBatteryBox(mybatwidget)
     else
         debug_print("Wrong event string:"..e)
     end
@@ -373,19 +373,19 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- {{{ spaces and separator
     local space1 = wibox.widget.textbox()
-    space1.text = helpers.spacetxt
+    space1.text = helpmod.spacetxt
     --local space2 = wibox.widget.textbox()
-    --space2.text = helpers.spacetxt2
+    --space2.text = helpmod.spacetxt2
     --local space3 = wibox.widget.textbox()
-    --space3.text = helpers.spacetxt3
+    --space3.text = helpmod.spacetxt3
     local separator = wibox.widget.textbox()
-    separator.text = helpers.separtxt
+    separator.text = helpmod.separtxt
 
     -- }}}
 
     local dprompt = wibox.container.background(s.mypromptbox)
-    dprompt:set_fg(helpers.prompt_fg)
-    dprompt:set_bg(helpers.prompt_bg)
+    dprompt:set_fg(helpmod.prompt_fg)
+    dprompt:set_bg(helpmod.prompt_bg)
 
     -- Add widgets to the wibox
     local leftl = { -- Left widgets
@@ -541,13 +541,13 @@ globalkeys = awful.util.table.join(
         awful.util.spawn(locker_cmd) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
         awful.util.spawn("pactl set-sink-volume 0 -2%")
-        helpers.freshVolumeBox(myvolwidget) end),
+        helpmod.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
         awful.util.spawn("pactl set-sink-volume 0 +2%")
-        helpers.freshVolumeBox(myvolwidget) end),
+        helpmod.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioMute", function()
         awful.util.spawn("pactl set-sink-mute 0 toggle")
-        helpers.freshVolumeBox(myvolwidget) end),
+        helpmod.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioNext", function()
         awful.util.spawn("dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next") end),
     awful.key({ }, "XF86AudioPrev", function()
@@ -560,12 +560,12 @@ globalkeys = awful.util.table.join(
         awful.spawn.with_shell("~/.config/awesome/scripts/dell_touch.sh") end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         awful.util.spawn("xbacklight -dec 10")
-        helpers.freshBacklightBox(myblwidget)
+        helpmod.freshBacklightBox(myblwidget)
         mybltimer:again()
         end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         awful.util.spawn("xbacklight -inc 10")
-        helpers.freshBacklightBox(myblwidget)
+        helpmod.freshBacklightBox(myblwidget)
         mybltimer:again()
         end),
 
