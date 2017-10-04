@@ -5,7 +5,7 @@ CMD_NOTF=0
 function run {
   if ! command -v $1 ;then
     CMD_NOTF=$((CMD_NOTF+1))
-    echo "debug_print(\"command not found: '$1'\")" | awesome-client
+    echo "debug_print_perm(\"command not found: '$1'\")" | awesome-client
     return
   fi
 
@@ -13,6 +13,9 @@ function run {
     $@&
   fi
 }
+
+# test 'em
+run laptop-detect
 
 # run 'em
 run xcompmgr

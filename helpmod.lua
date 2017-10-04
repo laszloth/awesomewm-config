@@ -56,6 +56,11 @@ end
 function helpmod.freshVolumeBox(box)
     local volcmd = {"bash", "-c", "pactl list sinks | grep \"^\\s\\+Volume\" | awk '{print $5}' | tr -d '%'"}
     awful.spawn.easy_async(volcmd, function(stdout, stderr, reason, exit_code)
+        if exit_code ~= 0 then
+            box.markup = "err"
+            return
+        end
+
         local vol = tonumber(stdout)
         local pref = 'SPKR:'
 
@@ -80,6 +85,10 @@ function helpmod.freshBacklightBox(box)
     local blcmd = {"bash", "-c", "xbacklight -get"}
     local pref = 'backlight: '
     awful.spawn.easy_async(blcmd, function(stdout, stderr, reason, exit_code)
+        if exit_code ~= 0 then
+            box.markup = "err"
+            return
+        end
         box.visible = true
         box.markup = helpmod.separtxt..pref..
             '<span foreground="'..helpmod.warn_color..'">'..math.floor(tonumber(stdout))..'</span>'
@@ -90,13 +99,13 @@ function helpmod.freshBatteryBox(box)
     local batcmd = {"bash", "-c", "cat /sys/class/power_supply/BAT0/capacity"}
 
     awful.spawn.easy_async(batcmd, function(stdout, stderr, reason, exit_code)
+        if exit_code ~= 0 then
+            box.markup = "no battery"
+            return
+        end
+
         local cap = tonumber(stdout)
         local accmd = "cat /sys/class/power_supply/AC/online"
-
-        -- check if battery is present
-        if cap == nil then
-            box.markup = "no battery"
-        end
 
         -- workaround for capacity containing 100+ value
         if cap > 100 then cap = 100 end
@@ -149,19 +158,24 @@ function helpmod.getNetworkStats(widget,args)
     return 'No network'
 end
 
-function helpmod.getCoreTempText(t, n)
-        local ctemp = tonumber(t)
-        local s = 'Core ' ..(n-2).. ': '
+function helpmod.getCoreTempText(temp, n)
+    local label = 'Core ' ..(n-2).. ': '
+    if temp <= helpmod.cpu_temp_mid then
+        label = label..'<span color="'..helpmod.cpu_temp_low_color..'">'
+    elseif temp <= helpmod.cpu_temp_high  then
+        label = label..'<span color="'..helpmod.cpu_temp_medium_color..'">'
+    else
+        label = label..'<span color="'..helpmod.cpu_temp_high_color..'">'
+    end
+    return label..temp..'°C</span>'
+end
 
-        if ctemp <= helpmod.cpu_temp_mid then
-          s = s..'<span color="'..helpmod.cpu_temp_low_color..'">'
-        elseif ctemp <= helpmod.cpu_temp_high  then
-          s = s..'<span color="'..helpmod.cpu_temp_medium_color..'">'
-        else
-          s = s..'<span color="'..helpmod.cpu_temp_high_color..'">'
-        end
-
-        return s..t..'°C</span>'
+-- called once at startup, popen is fine for now
+function helpmod.onLaptop()
+    local h = assert(io.popen("laptop-detect; echo $?"))
+    local ret = h:read("*n")
+    h:close()
+    return ret == 0
 end
 
 -- called once at startup, popen is fine for now

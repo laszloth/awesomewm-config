@@ -82,6 +82,7 @@ modkey = "Mod4"
 local num_screen = 1
 local def_screen = 1
 local numCores = helpmod.getCPUCoreCnt()
+local onLaptop = helpmod.onLaptop()
 
 -- {{{ Helper functions
 function debug_print(msg)
@@ -91,7 +92,7 @@ function debug_print(msg)
         text = tostring(msg) })
 end
 
-local function debug_print_perm(msg)
+function debug_print_perm(msg)
     naughty.notify({ preset = naughty.config.presets.critical,
         title = "DEBUG MESSAGE",
         text = tostring(msg) })
@@ -219,15 +220,19 @@ helpmod.freshVolumeBox(myvolwidget)
 myvoltimer:start()
 
 -- Create battery widget
-local mybatwidget = wibox.widget.textbox()
-local mybattimer = gears.timer { timeout = 90, }
-mybattimer:connect_signal("timeout", function()
-    --debug_print_perm("mybattimer expired")
-    helpmod.freshBatteryBox(mybatwidget)
-end)
+local mybatwidget = nil
+local mybattimer = nil
+if onLaptop then
+    mybatwidget = wibox.widget.textbox()
+    mybattimer = gears.timer { timeout = 90, }
+    mybattimer:connect_signal("timeout", function()
+        --debug_print_perm("mybattimer expired")
+        helpmod.freshBatteryBox(mybatwidget)
+    end)
 
-helpmod.freshBatteryBox(mybatwidget)
-mybattimer:start()
+    helpmod.freshBatteryBox(mybatwidget)
+    mybattimer:start()
+end
 
 -- Create net widget
 local mynetwidget = wibox.widget.textbox()
@@ -256,7 +261,7 @@ function eventHandler(e)
     --debug_print("DBUS EVENT: "..e)
     if e == "acpi_jack" then
         helpmod.freshVolumeBox(myvolwidget)
-    elseif e == "acpi_ac" then
+    elseif e == "acpi_ac" and onLaptop then
         helpmod.freshBatteryBox(mybatwidget)
     else
         debug_print("Wrong event string:"..e)
@@ -416,7 +421,7 @@ awful.screen.connect_for_each_screen(function(s)
         table.insert(rightl, myvolwidget)
     end
     table.insert(rightl, separator)
-    table.insert(rightl, mybatwidget) table.insert(rightl, separator)
+    if onLaptop then table.insert(rightl, mybatwidget) table.insert(rightl, separator) end
     table.insert(rightl, mytextclock) table.insert(rightl, space1)
     table.insert(rightl, s.mylayoutbox)
 
