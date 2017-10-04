@@ -353,7 +353,11 @@ awful.screen.connect_for_each_screen(function(s)
             })
 
     -- Create a promptbox for each screen
-    s.mypromptbox = awful.widget.prompt({ prompt = ' Execute: ' })
+    s.mypromptbox = awful.widget.prompt {
+        prompt = ' Execute: ',
+        bg = beautiful.prompt_bg,
+        fg = beautiful.prompt_fg
+    }
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
     s.mylayoutbox = awful.widget.layoutbox(s)
@@ -383,17 +387,12 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- }}}
 
-    local dprompt = wibox.container.background(s.mypromptbox)
-    dprompt:set_fg(helpmod.prompt_fg)
-    dprompt:set_bg(helpmod.prompt_bg)
-
     -- Add widgets to the wibox
     local leftl = { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
             --mylauncher,
             s.mytaglist,
-            --s.mypromptbox,
-            dprompt,
+            s.mypromptbox,
     }
     local middlel = s.mytasklist
     local rightl = { -- Right widgets

@@ -6,9 +6,6 @@ helpmod.net_devices = { "eno1", "wlp3s0" }
 helpmod.warn_color              = '#FECA00'
 helpmod.crit_color              = '#FF0000'
 
-helpmod.prompt_bg               = '#000000'
-helpmod.prompt_fg               = '#00FF00'
-
 helpmod.net_download_color      = '#CC9933'
 helpmod.net_upload_color        = '#7F9F7F'
 helpmod.klimit                  = 1024

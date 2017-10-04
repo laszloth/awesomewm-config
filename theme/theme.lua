@@ -40,7 +40,7 @@ theme.titlebar_bg_normal = "#3F3F3F"
 -- }}}
 
 -- {{{ Prompts
-theme.prompt_bg = theme.bg_normal
+theme.prompt_bg = "#000000"
 theme.prompt_fg = "#FF0000"
 -- }}}
 
