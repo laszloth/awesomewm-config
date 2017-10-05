@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 TPADID=`xinput list | grep -i "touchpad" | grep -o 'id=[0-9]\+' | cut -d '=' -f2`
 

@@ -559,12 +559,12 @@ globalkeys = awful.util.table.join(
     awful.key({ }, "XF86AudioPrev", function()
         awful.util.spawn(helpmod.cmd.prev) end),
     awful.key({ }, "XF86AudioPlay", function()
-        awful.spawn.with_shell(helpmod.cmd.play) end),
+        awful.util.spawn(helpmod.cmd.play) end),
     awful.key({ }, "XF86Calculator", function()
         awful.util.spawn(helpmod.cmd.calc) end),
     awful.key({ }, "XF86TouchpadToggle", function()
         if onLaptop then
-            awful.spawn.with_shell(helpmod.cmd.toggletp)
+            awful.util.spawn(helpmod.cmd.toggletp)
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if onLaptop then

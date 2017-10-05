@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 ARCH_FORMAT=tar.gz
 REPO_NAME=$(basename $(git rev-parse --show-toplevel))
