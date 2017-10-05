@@ -95,12 +95,13 @@ function helpmod.freshBacklightBox(box)
     end)
 end
 
-function helpmod.freshBatteryBox(box)
+function helpmod.freshBatteryBox(box, timer)
     local batcmd = {"bash", "-c", "cat /sys/class/power_supply/BAT0/capacity"}
 
     awful.spawn.easy_async(batcmd, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             box.markup = "no battery"
+            if timer.started then timer:stop() end
             return
         end
 

@@ -216,8 +216,8 @@ myvolwidget:connect_signal("button::release", function()
     helpmod.freshVolumeBox(myvolwidget)
 end)
 
-helpmod.freshVolumeBox(myvolwidget)
 myvoltimer:start()
+helpmod.freshVolumeBox(myvolwidget)
 
 -- Create battery widget
 local mybatwidget = nil
@@ -227,11 +227,11 @@ if onLaptop then
     mybattimer = gears.timer { timeout = 90, }
     mybattimer:connect_signal("timeout", function()
         --debug_print_perm("mybattimer expired")
-        helpmod.freshBatteryBox(mybatwidget)
+        helpmod.freshBatteryBox(mybatwidget, mybattimer)
     end)
 
-    helpmod.freshBatteryBox(mybatwidget)
     mybattimer:start()
+    helpmod.freshBatteryBox(mybatwidget, mybattimer)
 end
 
 -- Create net widget
@@ -262,7 +262,7 @@ function eventHandler(e)
     if e == "acpi_jack" then
         helpmod.freshVolumeBox(myvolwidget)
     elseif e == "acpi_ac" and onLaptop then
-        helpmod.freshBatteryBox(mybatwidget)
+        helpmod.freshBatteryBox(mybatwidget, mybattimer)
     else
         debug_print("Wrong event string:"..e)
     end
