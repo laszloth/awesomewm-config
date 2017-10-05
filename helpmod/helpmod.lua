@@ -1,51 +1,22 @@
 local awful = require("awful")
+
 local helpmod = {}
 
-helpmod.net_devices = { "eno1", "wlp3s0" }
+helpmod.cmd = require("helpmod.helpmod-cmd")
+helpmod.cfg = require("helpmod.helpmod-cfg")
 
-helpmod.warn_color              = '#FECA00'
-helpmod.crit_color              = '#FF0000'
-
-helpmod.net_download_color      = '#CC9933'
-helpmod.net_upload_color        = '#7F9F7F'
-helpmod.klimit                  = 1024
-
-helpmod.cpu_temp_low_color      = '#7FAE5A'
-helpmod.cpu_temp_medium_color   = helpmod.warn_color
-helpmod.cpu_temp_high_color     = helpmod.crit_color
-helpmod.cpu_temp_high           = 85
-helpmod.cpu_temp_mid            = 55
-
-helpmod.volume_high             = 65
-helpmod.volume_mid              = 40
-helpmod.volume_high_color       = helpmod.crit_color
-helpmod.volume_mid_color        = helpmod.warn_color
-helpmod.volume_mute_color       = '#5C5C5C'
-
-helpmod.battery_low             = 15
-helpmod.battery_low_color       = helpmod.crit_color
-helpmod.battery_charge_color    = '#7FAE5A'
-
-helpmod.spacetxt = ' '
-helpmod.spacetxt2 = '  '
-helpmod.spacetxt3 = '   '
-helpmod.separtxt = ' | '
-
+-- will be called in async callback
 function helpmod.isJackPlugged()
-    local jackcmd = "cat /proc/asound/card1/codec#0 | grep 'Pin-ctls:'" ..
-                "| head -3 | tail -1 | grep -c OUT"
-    -- will be called in async callback
-    local h = assert(io.popen(jackcmd))
+    local h = assert(io.popen(helpmod.cmd.jack))
     local ret = h:read("*n")
     h:close()
     return ret == 0
 end
 
+-- will be called in async callback
 function helpmod.isMuted()
-    local mutedcmd = "pactl list sinks | grep \"^\\s\\+Mute: yes\" | awk '{print $2}'"
     local ret = 0
-    -- will be called in async callback
-    local h = assert(io.popen(mutedcmd))
+    local h = assert(io.popen(helpmod.cmd.ismuted))
     if h:read("*l") == "yes" then
         ret = 1
     end
@@ -54,8 +25,7 @@ function helpmod.isMuted()
 end
 
 function helpmod.freshVolumeBox(box)
-    local volcmd = {"bash", "-c", "pactl list sinks | grep \"^\\s\\+Volume\" | awk '{print $5}' | tr -d '%'"}
-    awful.spawn.easy_async(volcmd, function(stdout, stderr, reason, exit_code)
+    awful.spawn.easy_async(helpmod.cmd.volume, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             box.markup = "err"
             return
@@ -70,11 +40,11 @@ function helpmod.freshVolumeBox(box)
 
         if helpmod.isMuted() then
             pref = 'MUTED:'
-            box.markup = '<span foreground="'..helpmod.volume_mute_color..'">'..pref..vol..'</span>'
-        elseif vol >= helpmod.volume_high then
-            box.markup = '<span foreground="'..helpmod.volume_high_color..'">'..pref..vol..'</span>'
-        elseif vol >= helpmod.volume_mid then
-            box.markup = '<span foreground="'..helpmod.volume_mid_color..'">'..pref..vol..'</span>'
+            box.markup = '<span foreground="'..helpmod.cfg.volume_mute_color..'">'..pref..vol..'</span>'
+        elseif vol >= helpmod.cfg.volume_high then
+            box.markup = '<span foreground="'..helpmod.cfg.volume_high_color..'">'..pref..vol..'</span>'
+        elseif vol >= helpmod.cfg.volume_mid then
+            box.markup = '<span foreground="'..helpmod.cfg.volume_mid_color..'">'..pref..vol..'</span>'
         else
             box.markup = pref..vol
         end
@@ -82,23 +52,20 @@ function helpmod.freshVolumeBox(box)
 end
 
 function helpmod.freshBacklightBox(box)
-    local blcmd = {"bash", "-c", "xbacklight -get"}
-    local pref = 'backlight: '
-    awful.spawn.easy_async(blcmd, function(stdout, stderr, reason, exit_code)
+    awful.spawn.easy_async(helpmod.cmd.backlight, function(stdout, stderr, reason, exit_code)
+        local pref = 'backlight: '
         if exit_code ~= 0 then
             box.markup = "err"
             return
         end
         box.visible = true
-        box.markup = helpmod.separtxt..pref..
-            '<span foreground="'..helpmod.warn_color..'">'..math.floor(tonumber(stdout))..'</span>'
+        box.markup = helpmod.cfg.separtxt..pref..
+            '<span foreground="'..helpmod.cfg.warn_color..'">'..math.floor(tonumber(stdout))..'</span>'
     end)
 end
 
 function helpmod.freshBatteryBox(box, timer)
-    local batcmd = {"bash", "-c", "cat /sys/class/power_supply/BAT0/capacity"}
-
-    awful.spawn.easy_async(batcmd, function(stdout, stderr, reason, exit_code)
+    awful.spawn.easy_async(helpmod.cmd.battery, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             box.markup = "no battery"
             if timer.started then timer:stop() end
@@ -106,49 +73,48 @@ function helpmod.freshBatteryBox(box, timer)
         end
 
         local cap = tonumber(stdout)
-        local accmd = "cat /sys/class/power_supply/AC/online"
 
         -- workaround for capacity containing 100+ value
         if cap > 100 then cap = 100 end
 
-        local h = assert(io.popen(accmd))
+        local h = assert(io.popen(helpmod.cmd.aconline))
         local ac = h:read("*n")
         h:close()
         if ac == 0 then
-            if cap <= helpmod.battery_low then
-                box.markup = '<span foreground="'..helpmod.battery_low_color..'">B:'..cap..'</span>'
+            if cap <= helpmod.cfg.battery_low then
+                box.markup = '<span foreground="'..helpmod.cfg.battery_low_color..'">B:'..cap..'</span>'
             else
                 box.markup = "B:"..cap
             end
         else
-            box.markup = '<span foreground="'..helpmod.battery_charge_color..'">B:'..cap..'</span>'
+            box.markup = '<span foreground="'..helpmod.cfg.battery_charge_color..'">B:'..cap..'</span>'
         end
     end)
 end
 
 function helpmod.getNetworkStats(widget,args)
     local text=""
-    for i = 1, #helpmod.net_devices do
-      local ndev = helpmod.net_devices[i]
+    for i = 1, #helpmod.cfg.net_devices do
+      local ndev = helpmod.cfg.net_devices[i]
       if args["{"..ndev.." carrier}"] == 1 then
           local upv = args['{'..ndev..' up_kb}']
           local dnv = args['{'..ndev..' down_kb}']
           local upunit = "K"
           local dnunit = "K"
 
-          if tonumber(upv) >= helpmod.klimit then
+          if tonumber(upv) >= helpmod.cfg.klimit then
             upunit = "M"
             upv = args['{'..ndev..' up_mb}']
           end
 
-          if tonumber(dnv) >= helpmod.klimit then
+          if tonumber(dnv) >= helpmod.cfg.klimit then
             dnunit = "M"
             dnv = args['{'..ndev..' down_mb}']
           end
 
           local upspeed = upv..' '..upunit
           local dnspeed = dnv..' '..dnunit
-          text=text..'|'..ndev..':<span color="'..helpmod.net_download_color..'"> down: '..dnspeed..'</span> <span color="'..helpmod.net_upload_color..'">up: '..upspeed..'</span>'
+          text=text..'|'..ndev..':<span color="'..helpmod.cfg.net_download_color..'"> down: '..dnspeed..'</span> <span color="'..helpmod.cfg.net_upload_color..'">up: '..upspeed..'</span>'
       end
     end
 
@@ -161,19 +127,19 @@ end
 
 function helpmod.getCoreTempText(temp, n)
     local label = 'Core ' ..(n-2).. ': '
-    if temp <= helpmod.cpu_temp_mid then
-        label = label..'<span color="'..helpmod.cpu_temp_low_color..'">'
-    elseif temp <= helpmod.cpu_temp_high  then
-        label = label..'<span color="'..helpmod.cpu_temp_medium_color..'">'
+    if temp <= helpmod.cfg.cpu_temp_mid then
+        label = label..'<span color="'..helpmod.cfg.cpu_temp_low_color..'">'
+    elseif temp <= helpmod.cfg.cpu_temp_high  then
+        label = label..'<span color="'..helpmod.cfg.cpu_temp_medium_color..'">'
     else
-        label = label..'<span color="'..helpmod.cpu_temp_high_color..'">'
+        label = label..'<span color="'..helpmod.cfg.cpu_temp_high_color..'">'
     end
     return label..temp..'°C</span>'
 end
 
 -- called once at startup, popen is fine for now
 function helpmod.onLaptop()
-    local h = assert(io.popen("laptop-detect; echo $?"))
+    local h = assert(io.popen(helpmod.cmd.onlaptop))
     local ret = h:read("*n")
     h:close()
     return ret == 0
@@ -181,8 +147,7 @@ end
 
 -- called once at startup, popen is fine for now
 function helpmod.getCPUCoreCnt()
-    local corecmd = "awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo"
-    local h = assert(io.popen(corecmd))
+    local h = assert(io.popen(helpmod.cmd.corecount))
     local num = h:read("*n")
     h:close()
     return num

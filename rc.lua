@@ -66,10 +66,8 @@ awful.spawn.with_shell("~/.config/awesome/scripts/autorun.sh &>/dev/null")
 beautiful.init("~/.config/awesome/theme/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal    = "konsole"
-editor      = "vim"
-editor_cmd  = terminal .. " -e " .. editor
-locker_cmd  = "light-locker-command -l"
+terminal    = helpmod.cmd.terminal
+editor_cmd  = terminal .. " -e " .. helpmod.cmd.editor
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -180,7 +178,7 @@ local mytextclock = wibox.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
 
 -- Create systray and its separator
 local mystseparator = wibox.widget.textbox()
-mystseparator.text = helpmod.separtxt
+mystseparator.text = helpmod.cfg.separtxt
 local mysystray = wibox.widget.systray()
 mysystray:connect_signal("widget::redraw_needed", function()
     local entries = capi.awesome.systray()
@@ -216,7 +214,7 @@ myvoltimer:connect_signal("timeout", function()
     helpmod.freshVolumeBox(myvolwidget)
 end)
 myvolwidget:connect_signal("button::release", function()
-    awful.util.spawn("pactl set-sink-mute 0 toggle")
+    awful.util.spawn(helpmod.cmd.togglemute)
     helpmod.freshVolumeBox(myvolwidget)
 end)
 
@@ -386,13 +384,13 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- {{{ spaces and separator
     local space1 = wibox.widget.textbox()
-    space1.text = helpmod.spacetxt
+    space1.text = helpmod.cfg.spacetxt
     --local space2 = wibox.widget.textbox()
-    --space2.text = helpmod.spacetxt2
+    --space2.text = helpmod.cfg.spacetxt2
     --local space3 = wibox.widget.textbox()
-    --space3.text = helpmod.spacetxt3
+    --space3.text = helpmod.cfg.spacetxt3
     local separator = wibox.widget.textbox()
-    separator.text = helpmod.separtxt
+    separator.text = helpmod.cfg.separtxt
 
     -- }}}
 
@@ -546,37 +544,37 @@ globalkeys = awful.util.table.join(
 
     -- Assign special keys
     awful.key({ "Control", "Mod1" }, "Delete", function()
-        awful.util.spawn(locker_cmd) end),
+        awful.util.spawn(helpmod.cmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        awful.util.spawn("pactl set-sink-volume 0 -2%")
+        awful.util.spawn(helpmod.cmd.lowervol)
         helpmod.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        awful.util.spawn("pactl set-sink-volume 0 +2%")
+        awful.util.spawn(helpmod.cmd.raisevol)
         helpmod.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioMute", function()
-        awful.util.spawn("pactl set-sink-mute 0 toggle")
+        awful.util.spawn(helpmod.cmd.togglemute)
         helpmod.freshVolumeBox(myvolwidget) end),
     awful.key({ }, "XF86AudioNext", function()
-        awful.util.spawn("dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next") end),
+        awful.util.spawn(helpmod.cmd.next) end),
     awful.key({ }, "XF86AudioPrev", function()
-        awful.util.spawn("dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous") end),
+        awful.util.spawn(helpmod.cmd.prev) end),
     awful.key({ }, "XF86AudioPlay", function()
-        awful.spawn.with_shell("~/.config/awesome/scripts/XF86Play.sh") end),
+        awful.spawn.with_shell(helpmod.cmd.play) end),
     awful.key({ }, "XF86Calculator", function()
-        awful.util.spawn("gnome-calculator") end),
+        awful.util.spawn(helpmod.cmd.calc) end),
     awful.key({ }, "XF86TouchpadToggle", function()
         if onLaptop then
-            awful.spawn.with_shell("~/.config/awesome/scripts/dell_touch.sh")
+            awful.spawn.with_shell(helpmod.cmd.toggletp)
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if onLaptop then
-            awful.util.spawn("xbacklight -dec 10")
+            awful.util.spawn(helpmod.cmd.brightdown)
             helpmod.freshBacklightBox(myblwidget)
             mybltimer:again()
         end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         if onLaptop then
-            awful.util.spawn("xbacklight -inc 10")
+            awful.util.spawn(helpmod.cmd.brightup)
             helpmod.freshBacklightBox(myblwidget)
             mybltimer:again()
         end end),
