@@ -26,7 +26,7 @@ local vicious = require("vicious")
 -- C API
 local capi = { awesome = awesome }
 -- own helpmod
-local helpmod = require("helpmod")
+local helpmod = require("helpmod.helpmod")
 
 -- Load Debian menu entries
 --require("debian.menu")
