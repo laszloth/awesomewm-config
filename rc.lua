@@ -193,16 +193,20 @@ mysystray:connect_signal("widget::redraw_needed", function()
 end)
 
 -- Create backlight widget
-local myblwidget = wibox.widget.textbox()
-helpmod.freshBacklightBox(myblwidget)
+local myblwidget = nil
+local mybltimer = nil
+if onLaptop then
+    myblwidget = wibox.widget.textbox()
+    helpmod.freshBacklightBox(myblwidget)
 
--- timer to hide backlight textbox
-local mybltimer = gears.timer { timeout = 2.5, }
-mybltimer:connect_signal("timeout", function()
-    --debug_print_perm("mybltimer expired")
-    myblwidget.visible = false
-    mybltimer:stop() end)
-mybltimer:start()
+    -- timer to hide backlight textbox
+    mybltimer = gears.timer { timeout = 2.5, }
+    mybltimer:connect_signal("timeout", function()
+        --debug_print_perm("mybltimer expired")
+        myblwidget.visible = false
+        mybltimer:stop() end)
+    mybltimer:start()
+end
 
 -- Create volume widget
 local myvolwidget = wibox.widget.textbox()
@@ -561,17 +565,21 @@ globalkeys = awful.util.table.join(
     awful.key({ }, "XF86Calculator", function()
         awful.util.spawn("gnome-calculator") end),
     awful.key({ }, "XF86TouchpadToggle", function()
-        awful.spawn.with_shell("~/.config/awesome/scripts/dell_touch.sh") end),
+        if onLaptop then
+            awful.spawn.with_shell("~/.config/awesome/scripts/dell_touch.sh")
+        end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
-        awful.util.spawn("xbacklight -dec 10")
-        helpmod.freshBacklightBox(myblwidget)
-        mybltimer:again()
-        end),
+        if onLaptop then
+            awful.util.spawn("xbacklight -dec 10")
+            helpmod.freshBacklightBox(myblwidget)
+            mybltimer:again()
+        end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
-        awful.util.spawn("xbacklight -inc 10")
-        helpmod.freshBacklightBox(myblwidget)
-        mybltimer:again()
-        end),
+        if onLaptop then
+            awful.util.spawn("xbacklight -inc 10")
+            helpmod.freshBacklightBox(myblwidget)
+            mybltimer:again()
+        end end),
 
     -- Menubar
     awful.key({ modkey }, "p", function() menubar.show() end,
