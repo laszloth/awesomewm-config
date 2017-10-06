@@ -5,8 +5,8 @@ hcfg.net_devices = { "eno1", "wlp3s0" }
 hcfg.warn_color              = '#FECA00'
 hcfg.crit_color              = '#FF0000'
 
-hcfg.net_download_color      = '#CC9933'
-hcfg.net_upload_color        = '#7F9F7F'
+hcfg.net_download_color      = '#41F468'
+hcfg.net_upload_color        = '#4179F4'
 hcfg.klimit                  = 1024
 
 hcfg.cpu_temp_low_color      = '#7FAE5A'
