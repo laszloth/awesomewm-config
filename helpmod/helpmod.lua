@@ -92,34 +92,38 @@ function helpmod.freshBatteryBox(box, timer)
     end)
 end
 
-function helpmod.getNetworkStats(widget,args)
-    local text=""
+function helpmod.getNetworkStats(widget, args)
+    local text = ""
     for i = 1, #helpmod.cfg.net_devices do
-      local ndev = helpmod.cfg.net_devices[i]
-      if args["{"..ndev.." carrier}"] == 1 then
-          local upv = args['{'..ndev..' up_kb}']
-          local dnv = args['{'..ndev..' down_kb}']
-          local upunit = "K"
-          local dnunit = "K"
+        local nwdev = helpmod.cfg.net_devices[i]
+        if args["{"..nwdev.." carrier}"] == 1 then
+            local up_val = args['{'..nwdev..' up_kb}']
+            local down_val = args['{'..nwdev..' down_kb}']
+            local up_unit = "K"
+            local down_unit = "K"
 
-          if tonumber(upv) >= helpmod.cfg.klimit then
-            upunit = "M"
-            upv = args['{'..ndev..' up_mb}']
-          end
+            if tonumber(up_val) >= helpmod.cfg.klimit then
+                up_unit = "M"
+                up_val = args['{'..nwdev..' up_mb}']
+            end
 
-          if tonumber(dnv) >= helpmod.cfg.klimit then
-            dnunit = "M"
-            dnv = args['{'..ndev..' down_mb}']
-          end
+            if tonumber(down_val) >= helpmod.cfg.klimit then
+                down_unit = "M"
+                down_val = args['{'..nwdev..' down_mb}']
+            end
 
-          local upspeed = upv..' '..upunit
-          local dnspeed = dnv..' '..dnunit
-          text=text..'|'..ndev..':<span color="'..helpmod.cfg.net_download_color..'"> down: '..dnspeed..'</span> <span color="'..helpmod.cfg.net_upload_color..'">up: '..upspeed..'</span>'
+            local up_label = up_val..' '..up_unit
+            local down_label = down_val..' '..down_unit
+
+            text = text..' - '..nwdev..':<span color="'..helpmod.cfg.net_download_color..
+                '"> down: '..down_label..'</span> <span color="'..helpmod.cfg.net_upload_color..
+                '">up: '..up_label..'</span>'
       end
     end
 
-    if string.len(text)>0 then
-        return string.sub(text,2,-1)
+    -- remove separator
+    if string.len(text) > 0 then
+        return string.sub(text, 4, -1)
     end
 
     return 'No network'
