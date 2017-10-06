@@ -138,7 +138,7 @@ function helpmod.getCoreTempText(temp, n)
     else
         label = label..'<span color="'..helpmod.cfg.cpu_temp_high_color..'">'
     end
-    return label..temp..'°C</span>'
+    return label..temp..'°C</span>'..helpmod.cfg.separtxt
 end
 
 -- called once at startup, popen is fine for now

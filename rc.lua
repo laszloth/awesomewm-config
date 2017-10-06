@@ -241,23 +241,28 @@ local mynetwidget = wibox.widget.textbox()
 vicious.register(mynetwidget, vicious.widgets.net, helpmod.getNetworkStats, 1)
 
 -- Create CPU widgets
-local cpudata = {}
-
--- CPU: usage
-cpudata.usage = wibox.widget.textbox()
-vicious.register(cpudata.usage, vicious.widgets.cpu, function(widget, args)
-    return string.format("%02d", args[1]).."%" end, 1)
 
 -- CPU: thermal
 local cpud_temp = {}
 for i = 2,1+numCores do
     local c = wibox.widget.textbox()
+    c.visible = false
     vicious.register(c, vicious.widgets.thermal,
         function(widget, args) return helpmod.getCoreTempText(args[1], i) end,
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
     table.insert(cpud_temp, c)
 end
+
+-- CPU: usage
+local myusagewidget = wibox.widget.textbox()
+vicious.register(myusagewidget, vicious.widgets.cpu, function(widget, args)
+    return string.format("%02d", args[1]).."%" end, 1)
+myusagewidget:connect_signal("button::release", function()
+    for i = 1, #cpud_temp do
+        cpud_temp[i].visible = not cpud_temp[i].visible
+    end
+end)
 
 function eventHandler(e)
     --debug_print("DBUS EVENT: "..e)
@@ -406,12 +411,12 @@ awful.screen.connect_for_each_screen(function(s)
             layout = wibox.layout.fixed.horizontal,
             --mykeyboardlayout,
             space1,
-            cpudata.usage,
+            myusagewidget,
     }
 
     if firstScreen then
         table.insert(rightl, separator)
-        for key,val in pairs(cpud_temp) do table.insert(rightl, val) table.insert(rightl, separator) end
+        for key,val in pairs(cpud_temp) do table.insert(rightl, val) end
         table.insert(rightl, mynetwidget) table.insert(rightl, separator)
         table.insert(rightl, mysystray) table.insert(rightl, mystseparator)
         table.insert(rightl, myvolwidget)
