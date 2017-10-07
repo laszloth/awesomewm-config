@@ -102,7 +102,7 @@ local function notify_print(msg)
         text = tostring(msg) })
 end
 
-local function updateScreenCount(s)
+local function updateScreenCount()
     num_screen = screen.count()
     def_screen = math.floor(num_screen / 3) + 1
     --debug_print("num_screen="..num_screen.."\ndef_screen="..def_screen)
@@ -162,8 +162,8 @@ mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesom
                                   }
                         })
 
-mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mymainmenu })
+--mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
+  --                                   menu = mymainmenu })
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
@@ -385,7 +385,7 @@ awful.screen.connect_for_each_screen(function(s)
     s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, tasklist_buttons)
 
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "bottom", height = 24, screen = s })
+    s.mywibox = awful.wibar({ position = "bottom", height = 22, screen = s })
 
     -- {{{ spaces and separator
     local space1 = wibox.widget.textbox()
