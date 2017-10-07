@@ -405,6 +405,7 @@ awful.screen.connect_for_each_screen(function(s)
             --mylauncher,
             s.mytaglist,
             s.mypromptbox,
+            separator,
     }
     local middlel = s.mytasklist
     local rightl = { -- Right widgets
