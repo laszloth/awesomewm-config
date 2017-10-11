@@ -1,9 +1,8 @@
 #!/bin/sh
 
-SPOTPID=$(pidof spotify)
-
-if [ $? -eq 1 ]; then
-    spotify --minimized %U
+if ! pidof spotify >/dev/null 2>&1; then
+    spotify &
 else
-    dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause
+    $(dirname $(realpath $0))/spotify_dbus.sh c PlayPause
 fi
+exit 0

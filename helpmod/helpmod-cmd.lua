@@ -5,24 +5,40 @@ hcmd.editor = "vim"
 hcmd.locker = "light-locker-command -l"
 hcmd.calc = "gnome-calculator"
 
-hcmd.jack = "cat /proc/asound/card1/codec#0 | grep 'Pin-ctls:' | head -3 | tail -1 | grep -c OUT"
-hcmd.ismuted = "pactl list sinks | grep \"^\\s\\+Mute: yes\" | awk '{print $2}'"
-hcmd.volume = {"sh", "-c", "pactl list sinks | grep \"^\\s\\+Volume\" | awk '{print $5}' | tr -d '%'"}
-hcmd.backlight = {"sh", "-c", "xbacklight -get"}
-hcmd.battery = {"sh", "-c", "cat /sys/class/power_supply/BAT0/capacity"}
-hcmd.aconline = "cat /sys/class/power_supply/AC/online"
-hcmd.onlaptop = "laptop-detect; echo $?"
-hcmd.corecount = "awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo"
+hcmd.jack = [[cat /proc/asound/card1/codec#0 | grep 'Pin-ctls:' | head -3 | tail -1 | grep -c OUT]]
+hcmd.ismuted = [[pactl list sinks | grep "^\s\+Mute: yes" | awk '{print $2}']]
+hcmd.battery = [[sh -c "cat /sys/class/power_supply/BAT0/capacity"]]
+hcmd.aconline = [[cat /sys/class/power_supply/AC/online]]
+hcmd.onlaptop = [[laptop-detect; echo $?]]
+hcmd.corecount = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 
-hcmd.play = {"sh", "-c", "~/.config/awesome/scripts/XF86Play.sh"}
-hcmd.next = "dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
-hcmd.prev = "dbus-send --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
-hcmd.togglemute = "pactl set-sink-mute 0 toggle"
-hcmd.lowervol = "pactl set-sink-volume 0 -2%"
-hcmd.raisevol = "pactl set-sink-volume 0 +2%"
+-- raw commands
+local _volume = [[pactl list sinks | grep "^\s\+Volume" | awk '{print $5}' | tr -d '%']]
+local _backlight = [[xbacklight -get]]
+local _play = [[~/.config/awesome/scripts/XF86Play.sh >/dev/null 2>&1]]
+local _next = [[~/.config/awesome/scripts/spotify_dbus.sh c Next >/dev/null 2>&1]]
+local _prev = [[~/.config/awesome/scripts/spotify_dbus.sh c Previous >/dev/null 2>&1]]
+local _mpstatus = [[~/.config/awesome/scripts/spotify_dbus.sh q PlaybackStatus]]
+local _togglemute = [[pactl set-sink-mute 0 toggle >/dev/null 2>&1]]
+local _toggletp = [[~/.config/awesome/scripts/dell_touch.sh >/dev/null 2>&1]]
 
-hcmd.toggletp = {"sh", "-c", "~/.config/awesome/scripts/dell_touch.sh"}
-hcmd.brightdown = "xbacklight -dec 10"
-hcmd.brightup = "xbacklight -inc 10"
+-- for spawn open a shell before
+hcmd.volume = {"sh", "-c", _volume}
+hcmd.backlight = {"sh", "-c", _backlight}
+hcmd.mpstatus = {"sh", "-c", _mpstatus}
+
+-- Spotify will report false values just after startup, wait a bit
+local sync = ";sleep 0.1;"
+-- set-get commands for syncronization
+hcmd.play = {"sh", "-c", _play..sync.._mpstatus}
+hcmd.next = {"sh", "-c", _next..sync.._mpstatus}
+hcmd.prev = {"sh", "-c", _prev..sync.._mpstatus}
+hcmd.lowervol = {"sh", "-c", "pactl set-sink-volume 0 -2% >/dev/null 2>&1;".._volume}
+hcmd.raisevol = {"sh", "-c", "pactl set-sink-volume 0 +2% >/dev/null 2>&1;".._volume}
+hcmd.togglemute = {"sh", "-c", _togglemute..';'.._volume}
+hcmd.brightdown = {"sh", "-c", "xbacklight -dec 10 >/dev/null 2>&1;".._backlight}
+hcmd.brightup = {"sh", "-c", "xbacklight -inc 10 >/dev/null 2>&1;".._backlight}
+-- just set
+hcmd.toggletp = {"sh", "-c", _toggletp}
 
 return hcmd

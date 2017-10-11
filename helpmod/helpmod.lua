@@ -24,13 +24,43 @@ function helpmod.isMuted()
     return ret == 1
 end
 
-function helpmod.freshVolumeBox(box)
-    awful.spawn.easy_async(helpmod.cmd.volume, function(stdout, stderr, reason, exit_code)
+function helpmod.freshMPStateBox(boxes, imgs, run, run_cmd)
+    local cmd = helpmod.cmd.mpstatus
+    if run then
+        cmd = run_cmd
+    end
+    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
+        --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+        if exit_code ~= 0 then
+            for i = 1, #boxes do
+                boxes[i].visible = false
+            end
+            return
+        end
+
+        local state = string.gsub(stdout, "\n", "")
+        if state == "Playing" then
+            boxes[1].image = imgs[1]
+        else
+            boxes[1].image = imgs[2]
+        end
+        for i = 1, #boxes do
+            boxes[i].visible = true 
+        end
+    end)
+end
+
+function helpmod.freshVolumeBox(box, run, run_cmd)
+    local cmd = helpmod.cmd.volume
+    if run then
+        cmd = run_cmd
+    end
+    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
+        --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
             box.markup = "err"
             return
         end
-
         local vol = tonumber(stdout)
         local pref = 'SPKR:'
 
@@ -51,8 +81,13 @@ function helpmod.freshVolumeBox(box)
     end)
 end
 
-function helpmod.freshBacklightBox(box)
-    awful.spawn.easy_async(helpmod.cmd.backlight, function(stdout, stderr, reason, exit_code)
+function helpmod.freshBacklightBox(box, run, run_cmd)
+    local cmd = helpmod.cmd.backlight
+    if run then
+        cmd = run_cmd
+    end
+    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
+        --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local pref = 'backlight: '
         if exit_code ~= 0 then
             box.markup = "err"
@@ -66,6 +101,7 @@ end
 
 function helpmod.freshBatteryBox(box, timer)
     awful.spawn.easy_async(helpmod.cmd.battery, function(stdout, stderr, reason, exit_code)
+        --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
             box.markup = "no battery"
             if timer.started then timer:stop() end

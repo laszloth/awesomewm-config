@@ -54,14 +54,8 @@ theme.prompt_fg = "#FF0000"
 -- }}}
 
 -- {{{ Widgets
--- You can add as many variables as
--- you wish and access them by using
--- beautiful.variable in your rc.lua
---theme.fg_widget        = "#AECF96"
---theme.fg_center_widget = "#88A175"
---theme.fg_end_widget    = "#FF5656"
---theme.bg_widget        = "#494B4F"
---theme.border_widget    = "#3F3F3F"
+theme.playing = "~/.config/awesome/theme/icons/play.png"
+theme.paused = "~/.config/awesome/theme/icons/pause.png"
 -- }}}
 
 -- {{{ Mouse finder
