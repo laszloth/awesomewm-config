@@ -259,9 +259,14 @@ vicious.register(mynetwidget, vicious.widgets.net, helpmod.getNetworkStats, 1)
 
 -- CPU: thermal
 local cpud_temp = {}
-for i = 2,1+numCores do
+for i = 2, 1 + numCores do
     local c = wibox.widget.textbox()
     c.visible = false
+    c:connect_signal("button::release", function()
+        for i = 1, #cpud_temp do
+            cpud_temp[i].visible = not cpud_temp[i].visible
+        end
+    end)
     vicious.register(c, vicious.widgets.thermal,
         function(widget, args) return helpmod.getCoreTempText(args[1], i) end,
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
