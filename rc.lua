@@ -229,7 +229,7 @@ myvoltimer:connect_signal("timeout", function()
     helpmod.freshVolumeBox(myvolwidget, false)
 end)
 myvolwidget:connect_signal("button::release", function()
-    awful.util.spawn(helpmod.cmd.togglemute)
+    awful.util.spawn(helpmod.cmd.sg_togglemute)
     helpmod.freshVolumeBox(myvolwidget, false)
 end)
 
@@ -574,37 +574,37 @@ globalkeys = awful.util.table.join(
     awful.key({ "Control", "Mod1" }, "Delete", function()
         awful.util.spawn(helpmod.cmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.lowervol) end),
+        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.sg_lowervol) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.raisevol) end),
+        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.sg_raisevol) end),
     awful.key({ }, "XF86AudioMute", function()
-        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.togglemute) end),
+        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.sg_togglemute) end),
     awful.key({ }, "XF86AudioNext", function()
         helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused },
-            true, helpmod.cmd.next)
+            true, helpmod.cmd.sg_next)
         end),
     awful.key({ }, "XF86AudioPrev", function()
         helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused },
-            true, helpmod.cmd.prev)
+            true, helpmod.cmd.sg_prev)
         end),
     awful.key({ }, "XF86AudioPlay", function()
         helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused },
-            true, helpmod.cmd.play)
+            true, helpmod.cmd.sg_play)
         end),
     awful.key({ }, "XF86Calculator", function()
         awful.util.spawn(helpmod.cmd.calc) end),
     awful.key({ }, "XF86TouchpadToggle", function()
         if onLaptop then
-            awful.util.spawn(helpmod.cmd.toggletp)
+            awful.util.spawn(helpmod.cmd.s_toggletp)
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if onLaptop then
-            helpmod.freshBacklightBox(myblwidget, true, helpmod.cmd.brightdown)
+            helpmod.freshBacklightBox(myblwidget, true, helpmod.cmd.sg_brightdown)
             mybltimer:again()
         end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         if onLaptop then
-            helpmod.freshBacklightBox(myblwidget, true, helpmod.cmd.brightup)
+            helpmod.freshBacklightBox(myblwidget, true, helpmod.cmd.sg_brightup)
             mybltimer:again()
         end end),
 

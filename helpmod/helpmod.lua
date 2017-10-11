@@ -7,7 +7,7 @@ helpmod.cfg = require("helpmod.helpmod-cfg")
 
 -- will be called in async callback
 function helpmod.isJackPlugged()
-    local h = assert(io.popen(helpmod.cmd.jack))
+    local h = assert(io.popen(helpmod.cmd.g_jack))
     local ret = h:read("*n")
     h:close()
     return ret == 0
@@ -16,7 +16,7 @@ end
 -- will be called in async callback
 function helpmod.isMuted()
     local ret = 0
-    local h = assert(io.popen(helpmod.cmd.ismuted))
+    local h = assert(io.popen(helpmod.cmd.g_ismuted))
     if h:read("*l") == "yes" then
         ret = 1
     end
@@ -25,7 +25,7 @@ function helpmod.isMuted()
 end
 
 function helpmod.freshMPStateBox(boxes, imgs, run, run_cmd)
-    local cmd = helpmod.cmd.mpstatus
+    local cmd = helpmod.cmd.g_mpstatus
     if run then
         cmd = run_cmd
     end
@@ -51,7 +51,7 @@ function helpmod.freshMPStateBox(boxes, imgs, run, run_cmd)
 end
 
 function helpmod.freshVolumeBox(box, run, run_cmd)
-    local cmd = helpmod.cmd.volume
+    local cmd = helpmod.cmd.g_volume
     if run then
         cmd = run_cmd
     end
@@ -82,7 +82,7 @@ function helpmod.freshVolumeBox(box, run, run_cmd)
 end
 
 function helpmod.freshBacklightBox(box, run, run_cmd)
-    local cmd = helpmod.cmd.backlight
+    local cmd = helpmod.cmd.g_backlight
     if run then
         cmd = run_cmd
     end
@@ -100,7 +100,7 @@ function helpmod.freshBacklightBox(box, run, run_cmd)
 end
 
 function helpmod.freshBatteryBox(box, timer)
-    awful.spawn.easy_async(helpmod.cmd.battery, function(stdout, stderr, reason, exit_code)
+    awful.spawn.easy_async(helpmod.cmd.g_battery, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
             box.markup = "no battery"
@@ -113,7 +113,7 @@ function helpmod.freshBatteryBox(box, timer)
         -- workaround for capacity containing 100+ value
         if cap > 100 then cap = 100 end
 
-        local h = assert(io.popen(helpmod.cmd.aconline))
+        local h = assert(io.popen(helpmod.cmd.g_aconline))
         local ac = h:read("*n")
         h:close()
         if ac == 0 then
@@ -179,7 +179,7 @@ end
 
 -- called once at startup, popen is fine for now
 function helpmod.onLaptop()
-    local h = assert(io.popen(helpmod.cmd.onlaptop))
+    local h = assert(io.popen(helpmod.cmd.g_onlaptop))
     local ret = h:read("*n")
     h:close()
     return ret == 0
@@ -187,7 +187,7 @@ end
 
 -- called once at startup, popen is fine for now
 function helpmod.getCPUCoreCnt()
-    local h = assert(io.popen(helpmod.cmd.corecount))
+    local h = assert(io.popen(helpmod.cmd.g_corecnt))
     local num = h:read("*n")
     h:close()
     return num

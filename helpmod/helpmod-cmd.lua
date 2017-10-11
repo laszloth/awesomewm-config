@@ -5,12 +5,12 @@ hcmd.editor = "vim"
 hcmd.locker = "light-locker-command -l"
 hcmd.calc = "gnome-calculator"
 
-hcmd.jack = [[cat /proc/asound/card1/codec#0 | grep 'Pin-ctls:' | head -3 | tail -1 | grep -c OUT]]
-hcmd.ismuted = [[pactl list sinks | grep "^\s\+Mute: yes" | awk '{print $2}']]
-hcmd.battery = [[sh -c "cat /sys/class/power_supply/BAT0/capacity"]]
-hcmd.aconline = [[cat /sys/class/power_supply/AC/online]]
-hcmd.onlaptop = [[laptop-detect; echo $?]]
-hcmd.corecount = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
+hcmd.g_jack = [[cat /proc/asound/card1/codec#0 | grep 'Pin-ctls:' | head -3 | tail -1 | grep -c OUT]]
+hcmd.g_ismuted = [[pactl list sinks | grep "^\s\+Mute: yes" | awk '{print $2}']]
+hcmd.g_battery = [[sh -c "cat /sys/class/power_supply/BAT0/capacity"]]
+hcmd.g_aconline = [[cat /sys/class/power_supply/AC/online]]
+hcmd.g_onlaptop = [[laptop-detect; echo $?]]
+hcmd.g_corecnt = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 
 -- raw commands
 local _volume = [[pactl list sinks | grep "^\s\+Volume" | awk '{print $5}' | tr -d '%']]
@@ -23,22 +23,22 @@ local _togglemute = [[pactl set-sink-mute 0 toggle >/dev/null 2>&1]]
 local _toggletp = [[~/.config/awesome/scripts/dell_touch.sh >/dev/null 2>&1]]
 
 -- for spawn open a shell before
-hcmd.volume = {"sh", "-c", _volume}
-hcmd.backlight = {"sh", "-c", _backlight}
-hcmd.mpstatus = {"sh", "-c", _mpstatus}
+hcmd.g_volume = {"sh", "-c", _volume}
+hcmd.g_backlight = {"sh", "-c", _backlight}
+hcmd.g_mpstatus = {"sh", "-c", _mpstatus}
 
 -- Spotify will report false values just after startup, wait a bit
 local sync = ";sleep 0.1;"
 -- set-get commands for syncronization
-hcmd.play = {"sh", "-c", _play..sync.._mpstatus}
-hcmd.next = {"sh", "-c", _next..sync.._mpstatus}
-hcmd.prev = {"sh", "-c", _prev..sync.._mpstatus}
-hcmd.lowervol = {"sh", "-c", "pactl set-sink-volume 0 -2% >/dev/null 2>&1;".._volume}
-hcmd.raisevol = {"sh", "-c", "pactl set-sink-volume 0 +2% >/dev/null 2>&1;".._volume}
-hcmd.togglemute = {"sh", "-c", _togglemute..';'.._volume}
-hcmd.brightdown = {"sh", "-c", "xbacklight -dec 10 >/dev/null 2>&1;".._backlight}
-hcmd.brightup = {"sh", "-c", "xbacklight -inc 10 >/dev/null 2>&1;".._backlight}
--- just set
-hcmd.toggletp = {"sh", "-c", _toggletp}
+hcmd.sg_play = {"sh", "-c", _play..sync.._mpstatus}
+hcmd.sg_next = {"sh", "-c", _next..sync.._mpstatus}
+hcmd.sg_prev = {"sh", "-c", _prev..sync.._mpstatus}
+hcmd.sg_lowervol = {"sh", "-c", "pactl set-sink-volume 0 -2% >/dev/null 2>&1;".._volume}
+hcmd.sg_raisevol = {"sh", "-c", "pactl set-sink-volume 0 +2% >/dev/null 2>&1;".._volume}
+hcmd.sg_togglemute = {"sh", "-c", _togglemute..';'.._volume}
+hcmd.sg_brightdown = {"sh", "-c", "xbacklight -dec 10 >/dev/null 2>&1;".._backlight}
+hcmd.sg_brightup = {"sh", "-c", "xbacklight -inc 10 >/dev/null 2>&1;".._backlight}
+
+hcmd.s_toggletp = {"sh", "-c", _toggletp}
 
 return hcmd
