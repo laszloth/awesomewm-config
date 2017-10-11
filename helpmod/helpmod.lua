@@ -45,7 +45,7 @@ function helpmod.freshMPStateBox(boxes, imgs, run, run_cmd)
             boxes[1].image = imgs[2]
         end
         for i = 1, #boxes do
-            boxes[i].visible = true 
+            boxes[i].visible = true
         end
     end)
 end
