@@ -177,19 +177,17 @@ local mykeyboardlayout = awful.widget.keyboardlayout()
 local mytextclock = wibox.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
 
 -- Create music player state indicator
+local mpspace = wibox.widget.textbox()
+mpspace.text = helpmod.cfg.spacetxt
 local mympstate = wibox.widget.imagebox(beautiful.paused, true)
 mympstate.forced_width = 14
 mympstate.opacity = 0.8
 local myplacedmpstate = wibox.container.place(mympstate)
-local mpspace = wibox.widget.textbox()
-mpspace.text = helpmod.cfg.spacetxt
-local mymptimer = gears.timer { timeout = 10, }
-mymptimer :connect_signal("timeout", function()
-    helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused }, false)
+myplacedmpstate:connect_signal("button::release", function()
+    awful.util.spawn(helpmod.cmd.s_playtoggle)
 end)
 
-mymptimer:start()
-helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused }, false)
+helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused })
 
 -- Create systray and its separator
 local mystseparator = wibox.widget.textbox()
@@ -283,14 +281,26 @@ myusagewidget:connect_signal("button::release", function()
     end
 end)
 
-function eventHandler(e)
-    --debug_print("DBUS EVENT: "..e)
-    if e == "acpi_jack" then
+function eventHandler(event, data)
+    --debug_print("DBUS EVENT: "..event)
+    if event == "acpi_jack" then
         helpmod.freshVolumeBox(myvolwidget, false)
-    elseif e == "acpi_ac" and onLaptop then
+    elseif event == "acpi_ac" and onLaptop then
         helpmod.freshBatteryBox(mybatwidget, mybattimer)
+    elseif event == "mp_stat" and data ~= nil then
+        --debug_print("status:"..data)
+        if data == "Playing" then
+            mympstate.image = beautiful.playing
+        else
+            mympstate.image = beautiful.paused
+        end
+        mympstate.visible = true
+        mpspace.visible = true
+    elseif event == "mp_quit" then
+        mympstate.visible = false
+        mpspace.visible = false
     else
-        debug_print("Wrong event string:"..e)
+        debug_print_perm("Wrong event string:"..event)
     end
 end
 
@@ -579,16 +589,13 @@ globalkeys = awful.util.table.join(
     awful.key({ }, "XF86AudioMute", function()
         helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.sg_togglemute) end),
     awful.key({ }, "XF86AudioNext", function()
-        helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused },
-            true, helpmod.cmd.sg_next)
+        awful.util.spawn(helpmod.cmd.s_next)
         end),
     awful.key({ }, "XF86AudioPrev", function()
-        helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused },
-            true, helpmod.cmd.sg_prev)
+        awful.util.spawn(helpmod.cmd.s_prev)
         end),
     awful.key({ }, "XF86AudioPlay", function()
-        helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused },
-            true, helpmod.cmd.sg_play)
+        awful.util.spawn(helpmod.cmd.s_playtoggle)
         end),
     awful.key({ }, "XF86Calculator", function()
         awful.util.spawn(helpmod.cmd.calc) end),

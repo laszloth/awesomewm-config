@@ -1,6 +1,7 @@
 #!/bin/bash
 
 CMD_NOTF=0
+SCRIPTDIR=$(dirname $(realpath $0))
 
 function run {
   if ! command -v $1 ;then
@@ -9,7 +10,7 @@ function run {
     return
   fi
 
-  if ! pgrep $1 ;then
+  if ! pgrep -f $1 ;then
     $@&
   fi
 }
@@ -22,5 +23,6 @@ run xcompmgr
 run light-locker
 #run conky -q -c ~/.config/awesome/conky.cfg
 run parcellite
+run $SCRIPTDIR/dbus_proxy.py
 
 exit $CMD_NOTF

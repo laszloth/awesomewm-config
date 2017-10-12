@@ -24,13 +24,8 @@ function helpmod.isMuted()
     return ret == 1
 end
 
-function helpmod.freshMPStateBox(boxes, imgs, run, run_cmd)
-    local cmd = helpmod.cmd.g_mpstatus
-    if run then
-        cmd = run_cmd
-    end
-    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
-        --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+function helpmod.freshMPStateBox(boxes, imgs)
+    awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             for i = 1, #boxes do
                 boxes[i].visible = false
