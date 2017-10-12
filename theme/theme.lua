@@ -8,7 +8,9 @@
 
 -- {{{ Main
 local theme = {}
-theme.wallpaper = "~/.config/awesome/theme/minimal-background.jpg"
+--theme.wallpaper = "~/.config/awesome/theme/minimal-background.jpg"
+theme.wallpaper = "~/.config/awesome/theme/xfce-background.png"
+--theme.wallpaper = "~/.config/awesome/theme/zenburn-background.png"
 -- }}}
 
 -- {{{ Styles
