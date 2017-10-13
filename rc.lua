@@ -174,7 +174,7 @@ local mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- {{{ Wibar
 -- Create a textclock widget
-local mytextclock = wibox.widget.textclock("%Y-%m-%d %H:%M:%S", 1)
+local mytextclock = wibox.widget.textclock("%Y-%m-%d %a %H:%M:%S", 1)
 
 -- Create music player state indicator
 local mpspace = wibox.widget.textbox()
