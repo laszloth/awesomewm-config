@@ -124,14 +124,17 @@ function helpmod.freshBatteryBox(box, timer)
 end
 
 function helpmod.getNetworkStats(widget, args)
+    local up_unit = "K"
+    local down_unit = "K"
+    local down_label = "Rx"
+    local up_label = "Tx"
     local text = ""
+
     for i = 1, #helpmod.cfg.net_devices do
         local nwdev = helpmod.cfg.net_devices[i]
         if args["{"..nwdev.." carrier}"] == 1 then
             local up_val = args['{'..nwdev..' up_kb}']
             local down_val = args['{'..nwdev..' down_kb}']
-            local up_unit = "K"
-            local down_unit = "K"
 
             if tonumber(up_val) >= helpmod.cfg.klimit then
                 up_unit = "M"
@@ -143,12 +146,12 @@ function helpmod.getNetworkStats(widget, args)
                 down_val = args['{'..nwdev..' down_mb}']
             end
 
-            local up_label = up_val..' '..up_unit
-            local down_label = down_val..' '..down_unit
+            local up_data = up_val..' '..up_unit
+            local down_data = down_val..' '..down_unit
 
             text = text..' - '..nwdev..':<span color="'..helpmod.cfg.net_download_color..
-                '"> down: '..down_label..'</span> <span color="'..helpmod.cfg.net_upload_color..
-                '">up: '..up_label..'</span>'
+                    '"> '..down_label..' '..down_data..'</span> / <span color="'..
+                    helpmod.cfg.net_upload_color..'">'..up_label..' '..up_data..'</span>'
       end
     end
 
