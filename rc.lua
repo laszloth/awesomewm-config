@@ -407,7 +407,7 @@ awful.screen.connect_for_each_screen(function(s)
     -- Each screen has its own tag table.
     --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
     awful.tag({ firstTag, "main", "www", "term", "kreat", "riddler" }, s,
-            { awful.layout.layouts[1], -- var. firstTag
+            { awful.layout.layouts[3], -- var. firstTag
               awful.layout.layouts[1], -- main
               awful.layout.layouts[3], -- www
               awful.layout.layouts[2], -- term
@@ -745,7 +745,7 @@ awful.rules.rules = {
                      buttons = clientbuttons,
                      screen = awful.screen.preferred,
                      -- no_offscreen totally overriding under_mouse or centered, wa. added
-                     placement = awful.placement.under_mouse
+                     placement = awful.placement.centered
                                 --+awful.placement.no_offscreen
      }
     },
@@ -793,10 +793,11 @@ awful.rules.rules = {
     { rule = { class = "Evolution" },
       properties = { screen = 1, tag = "evol" } },
 
-    -- Set Pidgin to always map to 'evol' tag and be floating on first screen
+    -- Set Pidgin to always map to 'evol' tag and be br. floating on first screen
     { rule = { class = "Pidgin" },
       properties = { screen = 1, tag = "evol",
-                     floating = true } },
+                     floating = true,
+                     placement = awful.placement.bottom_right } },
     -- Set Spotify to always map to 'kreat' tag on def_screen
     { rule = { class = "Spotify" },
       properties = { screen = def_screen, tag = "kreat" } },
