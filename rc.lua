@@ -120,6 +120,28 @@ local function client_menu_toggle_fn()
         end
     end
 end
+
+local function printTable(t, depth)
+    depth = depth or 0
+
+    if type(t) ~= "table" then
+        return tostring(t)
+    end
+
+    local dpref = " "
+    for i = 1, depth do
+        dpref = dpref.." "
+    end
+
+    local str = "{ "
+    for key, value in pairs(t) do
+        str = str.."\n"..dpref.."["..key.."] = "..
+                printTable(value, depth+1)..", "
+    end
+    return str.."}"
+end
+
+
 -- }}}
 
 -- Default screen settings for Firefox and others
@@ -722,7 +744,9 @@ awful.rules.rules = {
                      keys = clientkeys,
                      buttons = clientbuttons,
                      screen = awful.screen.preferred,
-                     placement = awful.placement.no_overlap+awful.placement.no_offscreen
+                     -- no_offscreen totally overriding under_mouse or centered, wa. added
+                     placement = awful.placement.under_mouse
+                                --+awful.placement.no_offscreen
      }
     },
 
@@ -782,13 +806,17 @@ awful.rules.rules = {
 -- {{{ Signals
 -- Signal function to execute when a new client appears.
 client.connect_signal("manage", function (c)
+    local shints = c.size_hints
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
     -- if not awesome.startup then awful.client.setslave(c) end
 
-    if awesome.startup and
-      not c.size_hints.user_position
-      and not c.size_hints.program_position then
+    --debug_print_perm(string.format("name=%q\nhints=%s", c.name, printTable(shints)))
+
+    -- workaround for no_offscreen totally overriding under_mouse or centered
+    if --awesome.startup and
+      not shints.user_position
+      and not shints.program_position then
         -- Prevent clients from being unreachable after screen count changes.
         awful.placement.no_offscreen(c)
     end
