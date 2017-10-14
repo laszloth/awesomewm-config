@@ -1,2 +1,2 @@
 event=ac_adapter
-action=/etc/acpi/aw_ac_event.sh
+action=/etc/acpi/aw_send_event.sh acpi_ac

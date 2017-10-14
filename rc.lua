@@ -309,7 +309,7 @@ function eventHandler(event, data)
         helpmod.freshVolumeBox(myvolwidget, false)
     elseif event == "acpi_ac" and onLaptop then
         helpmod.freshBatteryBox(mybatwidget, mybattimer)
-    elseif event == "mp_stat" and data ~= nil then
+    elseif event == "mp_stat" and data then
         --debug_print("status:"..data)
         if data == "Playing" then
             mympstate.image = beautiful.playing
