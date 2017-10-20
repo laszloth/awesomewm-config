@@ -216,7 +216,7 @@ helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.p
 local mystseparator = wibox.widget.textbox()
 mystseparator.text = helpmod.cfg.separtxt
 local mysystray = wibox.widget.systray()
-mysystray:connect_signal("widget::redraw_needed", function()
+local function checkSystray()
     local entries = capi.awesome.systray()
     --debug_print("systray entries="..entries)
     if entries == 0 then
@@ -224,7 +224,9 @@ mysystray:connect_signal("widget::redraw_needed", function()
     else
         mystseparator.visible = true
     end
-end)
+end
+mysystray:connect_signal("widget::redraw_needed", checkSystray)
+checkSystray()
 
 -- Create backlight widget
 local myblwidget = nil
