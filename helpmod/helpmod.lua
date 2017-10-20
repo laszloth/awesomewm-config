@@ -28,6 +28,7 @@ function helpmod.freshMPStateBox(boxes, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             for i = 1, #boxes do
+                --debug_print_perm("MP_stderr="..stderr)
                 boxes[i].visible = false
             end
             return
@@ -53,6 +54,7 @@ function helpmod.freshVolumeBox(box, run, run_cmd)
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
+            debug_print_perm("VB_stderr="..stderr)
             box.markup = "err"
             return
         end
@@ -85,6 +87,7 @@ function helpmod.freshBacklightBox(box, run, run_cmd)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local pref = 'backlight: '
         if exit_code ~= 0 then
+            debug_print_perm("BL_stderr="..stderr)
             box.markup = "err"
             return
         end
@@ -98,6 +101,7 @@ function helpmod.freshBatteryBox(box, timer)
     awful.spawn.easy_async(helpmod.cmd.g_battery, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
+            debug_print_perm("BB_stderr="..stderr)
             box.markup = "no battery"
             if timer.started then timer:stop() end
             return
