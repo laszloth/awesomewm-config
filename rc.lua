@@ -473,8 +473,10 @@ awful.screen.connect_for_each_screen(function(s)
         table.insert(rightl, mysystray) table.insert(rightl, mystseparator)
         table.insert(rightl, myplacedmpstate) table.insert(rightl, mpspace)
         table.insert(rightl, myvolwidget)
-        -- separator included
-        table.insert(rightl, myblwidget)
+        if onLaptop then
+            -- separator included
+            table.insert(rightl, myblwidget)
+        end
     else
         table.insert(rightl, separator)
         table.insert(rightl, mynetwidget) table.insert(rightl, separator)
