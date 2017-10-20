@@ -81,6 +81,7 @@ local num_screen = 1
 local def_screen = 1
 local numCores = helpmod.getCPUCoreCnt()
 local onLaptop = helpmod.onLaptop()
+local netdevs = helpmod.getNetDevs()
 
 -- {{{ Helper functions
 function debug_print(msg)
@@ -272,7 +273,9 @@ end
 
 -- Create net widget
 local mynetwidget = wibox.widget.textbox()
-vicious.register(mynetwidget, vicious.widgets.net, helpmod.getNetworkStats, 1)
+vicious.register(mynetwidget, vicious.widgets.net, function(widget, args)
+    return helpmod.getNetworkStats(widget, args, netdevs)
+end, 1)
 
 -- Create CPU widgets
 

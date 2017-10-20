@@ -11,6 +11,7 @@ hcmd.g_ismuted = [[pactl list sinks | grep "^\s\+Mute: yes" | awk '{print $2}'; 
 hcmd.g_aconline = [[cat /sys/class/power_supply/AC/online]]
 hcmd.g_onlaptop = [[laptop-detect; echo $?]]
 hcmd.g_corecnt = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
+hcmd.g_netdevs = [[ls /sys/class/net/]]
 
 -- raw commands
 local _volume = [[pactl list sinks | grep "^\s\+Volume" | awk '{print $5}' | tr -d '%'; exit ${PIPESTATUS[0]}]]

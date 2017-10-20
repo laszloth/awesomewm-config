@@ -1,7 +1,5 @@
 local hcfg = {}
 
-hcfg.net_devices = { "eno1", "wlp3s0" }
-
 hcfg.warn_color              = '#FECA00'
 hcfg.crit_color              = '#FF0000'
 

@@ -127,15 +127,15 @@ function helpmod.freshBatteryBox(box, timer)
     end)
 end
 
-function helpmod.getNetworkStats(widget, args)
+function helpmod.getNetworkStats(widget, args, netdevs)
     local up_unit = "K"
     local down_unit = "K"
     local down_label = "Rx"
     local up_label = "Tx"
     local text = ""
 
-    for i = 1, #helpmod.cfg.net_devices do
-        local nwdev = helpmod.cfg.net_devices[i]
+    for i = 1, #netdevs do
+        local nwdev = netdevs[i]
         if args["{"..nwdev.." carrier}"] == 1 then
             local up_val = args['{'..nwdev..' up_kb}']
             local down_val = args['{'..nwdev..' down_kb}']
@@ -193,6 +193,22 @@ function helpmod.getCPUCoreCnt()
     local num = h:read("*n")
     h:close()
     return num
+end
+
+local function strToArray(string, delimiter, exclude)
+    local arr = {}
+    for m in string.gmatch(string, "[^"..delimiter.."]+") do
+        if m ~= exclude then table.insert(arr, m) end
+    end
+    return arr
+end
+
+-- called once at startup, popen is fine for now
+function helpmod.getNetDevs()
+    local h = assert(io.popen(helpmod.cmd.g_netdevs))
+    local ret = h:read("*a")
+    h:close()
+    return strToArray(ret, "%s", "lo")
 end
 
 return helpmod

@@ -4,7 +4,7 @@ configuration for awesome window manager
 based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## TODO
-- [ ] detect network dev names
+- [x] detect network dev names
 - [ ] detect distro/disable systray
 - [ ] CPU temp visible only on the screen where it was clicked
 - [ ] enable transparency for conky (X_ChangeWindowAttributes error)
