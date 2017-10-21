@@ -420,6 +420,12 @@ awful.screen.connect_for_each_screen(function(s)
               awful.layout.layouts[1], -- riddler
             })
 
+    -- create a last, hidden tag on the first screen
+    if firstScreen then
+        hiddentag = awful.tag({ "hidden" }, s, awful.layout.layouts[1])
+        awful.tag.setproperty(hiddentag[1], "hide", true)
+    end
+
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt {
         prompt = ' Execute: ',
@@ -787,6 +793,11 @@ awful.rules.rules = {
     { rule_any = {type = { "normal", "dialog" }
       }, properties = { titlebars_enabled = false }
     },
+
+    -- Set Conky to be on a hidden tag without centering
+    { rule = { class = "Conky" },
+      properties = { placement = awful.placement.no_offscreen,
+                     tag = hiddentag[1] } },
 
     -- Set Firefox to always map on www tag on def_screen
     { rule = { class = "Firefox" },
