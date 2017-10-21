@@ -3,8 +3,6 @@
 --    By Adrian C. (anrxc)            --
 ----------------------------------------
 
--- Alternative icon sets and widget icons:
---  * http://awesome.naquadah.org/wiki/Nice_Icons
 
 -- {{{ Main
 local theme = {}
@@ -15,6 +13,7 @@ theme.wallpaper = "~/.config/awesome/theme/xfce-background.png"
 
 -- {{{ Styles
 theme.font      = "sans 8"
+-- }}}
 
 -- {{{ Base colors
 theme.fg_normal  = "#DCDCCC"
@@ -45,19 +44,13 @@ theme.prompt_bg = "#000000"
 theme.prompt_fg = "#FF0000"
 -- }}}
 
--- There are other variable sets
--- overriding the default one when
--- defined, the sets are:
--- [taglist|tasklist]_[bg|fg]_[focus|urgent]
--- titlebar_[normal|focus]
--- tooltip_[font|opacity|fg_color|bg_color|border_width|border_color]
--- Example:
---theme.taglist_bg_focus = "#CC9393"
--- }}}
-
 -- {{{ Widgets
 theme.playing = "~/.config/awesome/theme/icons/play.png"
 theme.paused = "~/.config/awesome/theme/icons/pause.png"
+-- }}}
+
+-- {{{ Widgets
+theme.notification_icon_size = 120
 -- }}}
 
 -- {{{ Mouse finder
