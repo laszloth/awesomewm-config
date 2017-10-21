@@ -1,6 +1,6 @@
-awesome v4.2 (Human after all)
+awesome v4.2-130-gc8fac75 (Human after all)
  • Compiled against Lua 5.3.4 (running with Lua 5.3)
  • D-Bus support: ✔
  • execinfo support: ✔
  • xcb-randr version: 1.4
- • LGI version: 0.9.1
+ • LGI version: 0.9.2

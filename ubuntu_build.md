@@ -11,8 +11,8 @@
  - make linux test
  - sudo make INSTALL_TOP=/usr/local install
 
-## lgi 0.9.1 deps, compilation & install
- - https://github.com/pavouk/lgi/archive/0.9.1.tar.gz
+## lgi 0.9.2 deps, compilation & install
+ - https://github.com/pavouk/lgi/archive/0.9.2.tar.gz
  - sudo apt-get install libgirepository1.0-dev
  - make LUA_VERSION=5.3
  - sudo make PREFIX=/usr/local LUA_VERSION=5.3 install
