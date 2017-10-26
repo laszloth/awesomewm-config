@@ -50,7 +50,7 @@ theme.paused = "~/.config/awesome/theme/icons/pause.png"
 -- }}}
 
 -- {{{ Widgets
-theme.notification_icon_size = 120
+theme.notification_icon_size = 140
 -- }}}
 
 -- {{{ Mouse finder
