@@ -19,7 +19,7 @@ hcfg.volume_high_color       = hcfg.crit_color
 hcfg.volume_mid_color        = hcfg.warn_color
 hcfg.volume_mute_color       = '#5C5C5C'
 
-hcfg.battery_low             = 15
+hcfg.battery_low             = 20
 hcfg.battery_low_color       = hcfg.crit_color
 hcfg.battery_charge_color    = '#7FAE5A'
 
