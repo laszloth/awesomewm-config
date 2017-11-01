@@ -391,14 +391,12 @@ screen.connect_signal("property::geometry", set_wallpaper)
 
 awful.screen.connect_for_each_screen(function(s)
     local firstScreen = false
-    local firstTag = "null"
 
     -- Wallpaper
     set_wallpaper(s)
 
     if s.index == 1 then
         firstScreen = true
-        firstTag = "evol"
         s:connect_signal("removed", function()
             debug_print("screen removed")
             updateScreenCount()
@@ -411,8 +409,8 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Each screen has its own tag table.
     --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-    awful.tag({ firstTag, "main", "www", "term", "kreat", "riddler" }, s,
-            { awful.layout.layouts[3], -- var. firstTag
+    awful.tag({ "null", "main", "www", "term", "kreat", "riddler" }, s,
+            { awful.layout.layouts[3], -- null
               awful.layout.layouts[1], -- main
               awful.layout.layouts[3], -- www
               awful.layout.layouts[2], -- term
@@ -809,11 +807,11 @@ awful.rules.rules = {
 
     -- Set Evolution to always map to first tag on first screen
     { rule = { class = "Evolution" },
-      properties = { screen = 1, tag = "evol" } },
+      properties = { screen = 1, tag = "null" } },
 
-    -- Set Pidgin to always map to 'evol' tag and be br. floating on first screen
+    -- Set Pidgin to always map to first tag and be br. floating on first screen
     { rule = { class = "Pidgin" },
-      properties = { screen = 1, tag = "evol",
+      properties = { screen = 1, tag = "null",
                      floating = true,
                      placement = awful.placement.bottom_right } },
     -- Set Spotify to always map to 'kreat' tag on def_screen
