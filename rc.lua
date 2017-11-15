@@ -83,6 +83,15 @@ local numCores = helpmod.getCPUCoreCnt()
 local onLaptop = helpmod.onLaptop()
 local netdevs = helpmod.getNetDevs()
 
+-- could be added to the format function, but
+-- it's an overkill to check this every second
+-- TODO: maybe there is an event
+local netdevtimer = gears.timer { timeout = 30, }
+netdevtimer:connect_signal("timeout", function()
+    netdevs = helpmod.getNetDevs()
+end)
+netdevtimer:start()
+
 -- {{{ Helper functions
 function debug_print(msg)
     naughty.notify({ preset = naughty.config.presets.critical,
@@ -122,7 +131,7 @@ local function client_menu_toggle_fn()
     end
 end
 
-local function printTable(t, depth)
+local function tableToString(t, depth)
     depth = depth or 0
 
     if type(t) ~= "table" then
@@ -136,12 +145,15 @@ local function printTable(t, depth)
 
     local str = "{ "
     for key, value in pairs(t) do
-        str = str.."\n"..dpref.."["..key.."] = "..
-                printTable(value, depth+1)..", "
+        str = str.."\n"..dpref.."["..tostring(key).."] = "..
+                tableToString(value, depth+1)..", "
     end
     return str.."}"
 end
 
+local function printTable(t)
+    debug_print_perm(tableToString(t))
+end
 
 -- }}}
 
@@ -456,52 +468,48 @@ awful.screen.connect_for_each_screen(function(s)
     --space3.text = helpmod.cfg.spacetxt3
     local separator = wibox.widget.textbox()
     separator.text = helpmod.cfg.separtxt
-
     -- }}}
 
     -- Add widgets to the wibox
-    local leftl = { -- Left widgets
-            layout = wibox.layout.fixed.horizontal,
+    local leftl = wibox.layout.fixed.horizontal(
             --mylauncher,
             s.mytaglist,
             s.mypromptbox,
-            separator,
-    }
+            separator)
+
     local middlel = s.mytasklist
-    local rightl = { -- Right widgets
-            layout = wibox.layout.fixed.horizontal,
+    local rightl = wibox.layout.fixed.horizontal(
             --mykeyboardlayout,
             space1,
             myusagewidget,
-    }
+            separator)
+
+    for key,val in pairs(cpud_temp) do rightl:add(val) end
+    rightl:add(mynetwidget) rightl:add(separator)
 
     if firstScreen then
-        table.insert(rightl, separator)
-        for key,val in pairs(cpud_temp) do table.insert(rightl, val) end
-        table.insert(rightl, mynetwidget) table.insert(rightl, separator)
-        table.insert(rightl, mysystray) table.insert(rightl, mystseparator)
-        table.insert(rightl, myplacedmpstate) table.insert(rightl, mpspace)
-        table.insert(rightl, myvolwidget)
+        rightl:add(mysystray) rightl:add(mystseparator)
+        rightl:add(myplacedmpstate) rightl:add(mpspace)
+        rightl:add(myvolwidget)
         if onLaptop then
             -- separator included
-            table.insert(rightl, myblwidget)
+            rightl:add(myblwidget)
         end
     else
-        table.insert(rightl, separator)
-        table.insert(rightl, mynetwidget) table.insert(rightl, separator)
-        table.insert(rightl, myplacedmpstate) table.insert(rightl, mpspace)
-        table.insert(rightl, myvolwidget)
+        rightl:add(myplacedmpstate) rightl:add(mpspace)
+        rightl:add(myvolwidget)
     end
-    table.insert(rightl, separator)
-    if onLaptop then table.insert(rightl, mybatwidget) table.insert(rightl, separator) end
-    table.insert(rightl, mytextclock) table.insert(rightl, space1)
-    table.insert(rightl, s.mylayoutbox)
+
+    rightl:add(separator)
+    if onLaptop then rightl:add(mybatwidget) rightl:add(separator) end
+    rightl:add(mytextclock) rightl:add(space1)
+    rightl:add(s.mylayoutbox)
 
     s.mywibox:setup {
-        layout = wibox.layout.align.horizontal,
         leftl,
         middlel,
         rightl,
+        layout = wibox.layout.align.horizontal,
     }
 
 end)
@@ -828,7 +836,7 @@ client.connect_signal("manage", function (c)
     -- i.e. put it at the end of others instead of setting it master.
     -- if not awesome.startup then awful.client.setslave(c) end
 
-    --debug_print_perm(string.format("name=%q\nhints=%s", c.name, printTable(shints)))
+    --debug_print_perm(string.format("name=%q\nhints=%s", c.name, tableToString(shints)))
 
     -- workaround for no_offscreen totally overriding under_mouse or centered
     if --awesome.startup and

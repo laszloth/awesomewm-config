@@ -5,12 +5,12 @@ based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
 - [ ] support for usb sound card
-- [ ] support for dynamic net interfaces (e.g. tun0)
-- [ ] clean up adding wibox widgets
 - [ ] CPU temp visible only on the screen where it was clicked
 - [ ] remove under_mouse/centered+no_offscreen workaround
 
 ## done
+- [x] support for dynamic net interfaces (e.g. tun0)
+- [x] clean up adding wibox widgets
 - [x] smaller notification with its image resized
 - [x] detect network dev names
 - [x] disable systray if empty
