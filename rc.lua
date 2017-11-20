@@ -294,20 +294,19 @@ end, 1)
 -- Create CPU widgets
 
 -- CPU: thermal
-local cpud_temp = {}
+local cputemps = {}
+local mycputempwidget = wibox.layout.fixed.horizontal()
 for i = 2, 1 + numCores do
     local c = wibox.widget.textbox()
-    c.visible = false
     c:connect_signal("button::release", function()
-        for i = 1, #cpud_temp do
-            cpud_temp[i].visible = not cpud_temp[i].visible
-        end
+        local s = mouse.screen.index
+        cputemps[s].visible = not cputemps[s].visible
     end)
     vicious.register(c, vicious.widgets.thermal,
         function(widget, args) return helpmod.getCoreTempText(args[1], i) end,
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
-    table.insert(cpud_temp, c)
+    mycputempwidget:add(c)
 end
 
 -- CPU: usage
@@ -315,9 +314,8 @@ local myusagewidget = wibox.widget.textbox()
 vicious.register(myusagewidget, vicious.widgets.cpu, function(widget, args)
     return string.format("%02d", args[1]).."%" end, 1)
 myusagewidget:connect_signal("button::release", function()
-    for i = 1, #cpud_temp do
-        cpud_temp[i].visible = not cpud_temp[i].visible
-    end
+    local s = mouse.screen.index
+    cputemps[s].visible = not cputemps[s].visible
 end)
 
 function eventHandler(event, data)
@@ -484,7 +482,10 @@ awful.screen.connect_for_each_screen(function(s)
             myusagewidget,
             separator)
 
-    for key,val in pairs(cpud_temp) do rightl:add(val) end
+    local ctc = wibox.container.background(mycputempwidget)
+    ctc.visible = false
+    cputemps[s.index] = ctc
+    rightl:add(ctc)
     rightl:add(mynetwidget) rightl:add(separator)
 
     if firstScreen then
