@@ -5,25 +5,6 @@ local helpmod = {}
 helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
 
--- will be called in async callback
-function helpmod.isJackPlugged()
-    local h = assert(io.popen(helpmod.cmd.g_jack))
-    local ret = h:read("*n")
-    h:close()
-    return ret == 0
-end
-
--- will be called in async callback
-function helpmod.isMuted()
-    local ret = 0
-    local h = assert(io.popen(helpmod.cmd.g_ismuted))
-    if h:read("*l") == "yes" then
-        ret = 1
-    end
-    h:close()
-    return ret == 1
-end
-
 function helpmod.freshMPStateBox(boxes, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
@@ -46,11 +27,8 @@ function helpmod.freshMPStateBox(boxes, imgs)
     end)
 end
 
-function helpmod.freshVolumeBox(box, run, run_cmd)
-    local cmd = helpmod.cmd.g_volume
-    if run then
-        cmd = run_cmd
-    end
+function helpmod.freshVolumeBox(box, run_cmd)
+    local cmd = run_cmd or helpmod.cmd.g_soundinfo
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
@@ -58,22 +36,37 @@ function helpmod.freshVolumeBox(box, run, run_cmd)
             box.markup = "no sound"
             return
         end
-        local vol = tonumber(stdout)
-        local pref = 'SPKR:'
 
-        if helpmod.isJackPlugged() then
+        local rawdata = helpmod.strToArray(stdout, "%s")
+        -- unused
+        -- local sink_index = tonumber(rawdata[1])
+        local muted = tonumber(rawdata[2]) == 1
+        local vol = tonumber(rawdata[3])
+        local bus = rawdata[4]
+        local jack = tonumber(rawdata[5]) == 1
+        local isusb = bus == "usb"
+
+        local pref = 'SPKR:'
+        if isusb then
+            pref = "USB:"
+        elseif jack then
             pref = 'JACK:'
         end
 
-        if helpmod.isMuted() then
+        if muted then
             pref = 'MUTED:'
             box.markup = '<span foreground="'..helpmod.cfg.volume_mute_color..'">'..pref..vol..'</span>'
-        elseif vol >= helpmod.cfg.volume_high then
-            box.markup = '<span foreground="'..helpmod.cfg.volume_high_color..'">'..pref..vol..'</span>'
-        elseif vol >= helpmod.cfg.volume_mid then
-            box.markup = '<span foreground="'..helpmod.cfg.volume_mid_color..'">'..pref..vol..'</span>'
+        -- no different level colors for usb card as 100% is the normal volume
+        elseif not isusb then
+            if vol >= helpmod.cfg.volume_high then
+                box.markup = '<span foreground="'..helpmod.cfg.volume_high_color..'">'..pref..vol..'</span>'
+            elseif vol >= helpmod.cfg.volume_mid then
+                box.markup = '<span foreground="'..helpmod.cfg.volume_mid_color..'">'..pref..vol..'</span>'
+            else
+                box.markup = pref..vol
+            end
         else
-            box.markup = pref..vol
+            box.markup = '<span foreground="'..helpmod.cfg.usb_card_color..'">'..pref..vol..'</span>'
         end
     end)
 end
@@ -195,7 +188,7 @@ function helpmod.getCPUCoreCnt()
     return num
 end
 
-local function strToArray(string, delimiter, exclude)
+function helpmod.strToArray(string, delimiter, exclude)
     local arr = {}
     for m in string.gmatch(string, "[^"..delimiter.."]+") do
         if m ~= exclude then table.insert(arr, m) end
@@ -208,7 +201,7 @@ function helpmod.getNetDevs()
     local h = assert(io.popen(helpmod.cmd.g_netdevs))
     local ret = h:read("*a")
     h:close()
-    return strToArray(ret, "%s", "lo")
+    return helpmod.strToArray(ret, "%s", "lo")
 end
 
 return helpmod

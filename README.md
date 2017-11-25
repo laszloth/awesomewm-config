@@ -4,10 +4,11 @@ configuration for awesome window manager
 based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
-- [ ] support for usb sound card
+- [ ] make volume buttons more flexible for usb sound card
 - [ ] remove under_mouse/centered+no_offscreen workaround
 
 ## done
+- [x] support for usb sound card
 - [x] CPU temp visible only on the screen where it was clicked
 - [x] support for dynamic net interfaces (e.g. tun0)
 - [x] clean up adding wibox widgets

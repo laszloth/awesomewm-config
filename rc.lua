@@ -261,14 +261,14 @@ local myvolwidget = wibox.widget.textbox()
 local myvoltimer = gears.timer { timeout = 120, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
-    helpmod.freshVolumeBox(myvolwidget, false)
+    helpmod.freshVolumeBox(myvolwidget)
 end)
 myvolwidget:connect_signal("button::release", function()
-    helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.sg_togglemute)
+    helpmod.freshVolumeBox(myvolwidget, helpmod.cmd.sg_togglemute)
 end)
 
 myvoltimer:start()
-helpmod.freshVolumeBox(myvolwidget, false)
+helpmod.freshVolumeBox(myvolwidget)
 
 -- Create battery widget
 local mybatwidget = nil
@@ -321,7 +321,7 @@ end)
 function eventHandler(event, data)
     --debug_print("DBUS EVENT: "..event)
     if event == "acpi_jack" then
-        helpmod.freshVolumeBox(myvolwidget, false)
+        helpmod.freshVolumeBox(myvolwidget)
     elseif event == "acpi_ac" and onLaptop then
         helpmod.freshBatteryBox(mybatwidget, mybattimer)
     elseif event == "mp_stat" and data then
@@ -625,11 +625,11 @@ globalkeys = awful.util.table.join(
     awful.key({ "Control", "Mod1" }, "Delete", function()
         awful.util.spawn(helpmod.cmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.sg_lowervol) end),
+        helpmod.freshVolumeBox(myvolwidget, helpmod.cmd.sg_lowervol) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.sg_raisevol) end),
+        helpmod.freshVolumeBox(myvolwidget, helpmod.cmd.sg_raisevol) end),
     awful.key({ }, "XF86AudioMute", function()
-        helpmod.freshVolumeBox(myvolwidget, true, helpmod.cmd.sg_togglemute) end),
+        helpmod.freshVolumeBox(myvolwidget, helpmod.cmd.sg_togglemute) end),
     awful.key({ }, "XF86AudioNext", function()
         awful.util.spawn(helpmod.cmd.s_next)
         end),
