@@ -2,6 +2,10 @@
 
 get_info() {
     DEF_SINK=$(pactl info | awk -F": " '/^Default Sink: /{print $2}')
+    if [ -z "$DEF_SINK" ]; then
+        >&2 echo "pactl error"
+        exit 1
+    fi
     DEF_SINK_INDEX=$(pactl list sinks short | grep "$DEF_SINK" | awk '{print $1}')
     SINK_DATA=$(pactl list sinks | awk "/Sink #$DEF_SINK_INDEX/,/Ports:/" | sed 's/^\s*//g')
     MUTED=$(echo "$SINK_DATA" | grep -c "Mute: no")
