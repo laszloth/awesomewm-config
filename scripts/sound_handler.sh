@@ -17,10 +17,20 @@ get_info() {
 print_info() {
     echo "DEF_SINK=$DEF_SINK"
     echo "DEF_SINK_INDEX=$DEF_SINK_INDEX"
-    echo "MUTED=$MUTED"
-    echo "VOLUME=$VOLUME"
+    echo -n "MUTED="
+        if [ $MUTED -eq 0 ]; then
+            echo "true"
+        else
+            echo "false"
+        fi
+    echo "VOLUME=$VOLUME%"
     echo "BUS=$BUS"
-    echo "JACK=$JACK"
+    echo -n "JACK="
+        if [ $JACK -eq 0 ]; then
+            echo "plugged"
+        else
+            echo "unplugged"
+        fi
 }
 
 case $1 in
@@ -51,7 +61,7 @@ case $1 in
     ;;
     vol)
         get_info
-        echo $VOLUME
+        echo "$VOLUME%"
     ;;
     bus)
         get_info
