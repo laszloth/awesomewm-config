@@ -29,7 +29,7 @@ local vol_step = 2 --percent
 local usb_step = 25 --percent
 
 -- get commands w/ shell
-hcmd.g_soundinfo = {"sh", "-c", _soundinfo}
+hcmd.g_soundinfo = {"bash", "-c", _soundinfo}
 hcmd.g_backlight = {"sh", "-c", _backlight}
 hcmd.g_battery = {"sh", "-c", _battery}
 hcmd.g_mpstatus = {"sh", "-c", _mpstatus}
@@ -41,8 +41,8 @@ hcmd.s_prev = {"sh", "-c", _prev}
 hcmd.s_toggletp = {"sh", "-c", _toggletp}
 
 -- set-get commands for syncronization
-hcmd.sg_lowervol = {"sh", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol - "..vol_step.." "..usb_step}
-hcmd.sg_raisevol = {"sh", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol + "..vol_step.." "..usb_step}
+hcmd.sg_lowervol = {"bash", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol - "..vol_step.." "..usb_step}
+hcmd.sg_raisevol = {"bash", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol + "..vol_step.." "..usb_step}
 hcmd.sg_togglemute = {"sh", "-c", _togglemute..';'.._soundinfo}
 hcmd.sg_brightdown = {"sh", "-c", "xbacklight -dec "..bl_step.." >/dev/null 2>&1;".._backlight}
 hcmd.sg_brightup = {"sh", "-c", "xbacklight -inc "..bl_step.." >/dev/null 2>&1;".._backlight}

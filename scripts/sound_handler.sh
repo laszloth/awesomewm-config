@@ -1,6 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
-get_info() {
+LOCKFILE="/var/lock/aw_sound_handler.lock"
+exec 200>$LOCKFILE
+flock --wait 1 200
+echo $$ 1>&200
+
+function get_info {
     DEF_SINK=$(pactl info | awk -F": " '/^Default Sink: /{print $2}')
     if [ -z "$DEF_SINK" ]; then
         >&2 echo "pactl error"
@@ -14,7 +19,7 @@ get_info() {
     JACK=$(cat /proc/asound/card1/codec#0 | grep "Pin-ctls:" | head -3 | tail -1 | grep -c OUT)
 }
 
-print_info() {
+function print_info {
     echo "DEF_SINK=$DEF_SINK"
     echo "DEF_SINK_INDEX=$DEF_SINK_INDEX"
     echo -n "MUTED="
@@ -36,7 +41,7 @@ print_info() {
 # $1: - or +
 # $2: base step
 # $3: usb step
-vol_handler() {
+function vol_handler {
     STEP=$2
     # set step according to bus type
     if [ "$BUS" = "usb" ]; then

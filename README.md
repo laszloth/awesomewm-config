@@ -4,10 +4,10 @@ configuration for awesome window manager
 based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
-- [ ] volume can be a little bit off sync on rapid vol. up/down presses
 - [ ] remove under_mouse/centered+no_offscreen workaround
 
 ## done
+- [x] volume can be a little bit off sync on rapid vol. up/down presses
 - [x] make volume buttons more flexible for usb sound card
 - [x] support for usb sound card
 - [x] CPU temp visible only on the screen where it was clicked
