@@ -33,11 +33,37 @@ print_info() {
         fi
 }
 
+# $1: - or +
+# $2: base step
+# $3: usb step
+vol_handler() {
+    STEP=$2
+    # set step according to bus type
+    if [ "$BUS" = "usb" ]; then
+        STEP=$3
+    fi
+
+    # pactl stops at 0
+    NEWVOL=$((VOLUME${1}STEP))
+    if [ $NEWVOL -lt 0 ]; then
+        NEWVOL=0
+    fi
+
+    pactl set-sink-volume $DEF_SINK_INDEX ${1}${STEP}%
+
+    # "send" results
+    echo -n $DEF_SINK_INDEX $((1-MUTED)) $NEWVOL $BUS $((1-JACK))
+}
+
 case $1 in
     # used by awesome
     raw)
         get_info
         echo -n $DEF_SINK_INDEX $((1-MUTED)) $VOLUME $BUS $((1-JACK))
+    ;;
+    setvol)
+        get_info
+        vol_handler $2 $3 $4
     ;;
     info)
         get_info
@@ -76,7 +102,7 @@ case $1 in
         fi
     ;;
     *)
-        echo "Usage: $(basename $0) {raw|info|index|name|muted|vol|bus|jack}"
+        echo "Usage: $(basename $0) {raw|setvol|info|index|name|muted|vol|bus|jack}"
         exit 1
     ;;
 esac
