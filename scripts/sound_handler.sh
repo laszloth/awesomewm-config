@@ -2,7 +2,7 @@
 
 LOCKFILE="/var/lock/aw_sound_handler.lock"
 exec 200>$LOCKFILE
-flock --wait 1 200
+flock --wait 1 200 || exit 1
 echo $$ 1>&200
 
 function get_info {
