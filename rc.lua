@@ -321,6 +321,7 @@ end)
 function eventHandler(event, data)
     --debug_print("DBUS EVENT: "..event)
     if event == "acpi_jack" then
+        awful.util.spawn(helpmod.cmd.s_pause)
         helpmod.freshVolumeBox(myvolwidget)
     elseif event == "acpi_ac" and onLaptop then
         helpmod.freshBatteryBox(mybatwidget, mybattimer)

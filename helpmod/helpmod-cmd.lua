@@ -18,6 +18,7 @@ local _togglemute = [[pactl set-sink-mute 0 toggle >/dev/null 2>&1]]
 local _backlight = [[xbacklight -get]]
 local _battery = [[cat /sys/class/power_supply/BAT0/capacity]]
 local _play = [[~/.config/awesome/scripts/XF86Play.sh >/dev/null 2>&1]]
+local _pause = [[~/.config/awesome/scripts/spotify_dbus.sh c Pause >/dev/null 2>&1]]
 local _next = [[~/.config/awesome/scripts/spotify_dbus.sh c Next >/dev/null 2>&1]]
 local _prev = [[~/.config/awesome/scripts/spotify_dbus.sh c Previous >/dev/null 2>&1]]
 local _mpstatus = [[~/.config/awesome/scripts/spotify_dbus.sh q PlaybackStatus]]
@@ -36,6 +37,7 @@ hcmd.g_mpstatus = {"sh", "-c", _mpstatus}
 
 -- set commands w/ shell
 hcmd.s_playtoggle = {"sh", "-c", _play}
+hcmd.s_pause = {"sh", "-c", _pause}
 hcmd.s_next = {"sh", "-c", _next}
 hcmd.s_prev = {"sh", "-c", _prev}
 hcmd.s_toggletp = {"sh", "-c", _toggletp}
