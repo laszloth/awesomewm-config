@@ -275,7 +275,7 @@ local mybatwidget = nil
 local mybattimer = nil
 if onLaptop then
     mybatwidget = wibox.widget.textbox()
-    mybattimer = gears.timer { timeout = 90, }
+    mybattimer = gears.timer { timeout = 60, }
     mybattimer:connect_signal("timeout", function()
         --debug_print_perm("mybattimer expired")
         helpmod.freshBatteryBox(mybatwidget, mybattimer)
