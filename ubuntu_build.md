@@ -19,9 +19,11 @@
 
 ## awesome 4.2 compilation & install
  - https://github.com/awesomeWM/awesome/releases/download/v4.2/awesome-4.2.tar.bz2
+ - or git clone git@github.com:awesomeWM/awesome.git
  - CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr/local" make
  - make package
- - sudo dpkg -i build/awesome-4.2.0.0-Linux.deb
+ - sudo dpkg -i build/awesome-<version>-Linux.deb
 
 ## vicious
- - https://github.com/Mic92/vicious/archive/v2.2.0.tar.gz
+ - https://github.com/Mic92/vicious/archive/v2.3.1.tar.gz
+ - untar to /usr/local/lib/lua/5.3/vicious
