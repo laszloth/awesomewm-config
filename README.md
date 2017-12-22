@@ -5,6 +5,7 @@ based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
+- [ ] low battery warning
 
 ## done
 - [x] volume can be a little bit off sync on rapid vol. up/down presses
