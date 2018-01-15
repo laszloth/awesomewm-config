@@ -4,6 +4,7 @@ configuration for awesome window manager
 based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
+- [ ] quick setting of tag names
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] low battery warning
 
