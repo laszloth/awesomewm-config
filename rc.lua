@@ -82,6 +82,7 @@ local def_screen = 1
 local numCores = helpmod.getCPUCoreCnt()
 local onLaptop = helpmod.onLaptop()
 local netdevs = helpmod.getNetDevs()
+local tagnames = { "null", "main", "www", "term", "kreat", "riddler" }
 
 -- could be added to the format function, but
 -- it's an overkill to check this every second
@@ -153,6 +154,28 @@ end
 
 local function printTable(t)
     debug_print_perm(tableToString(t))
+end
+
+local function renameCurrentTag()
+    awful.prompt.run {
+        prompt       = ' Tag name: ',
+        textbox      = mouse.screen.mypromptbox.widget,
+        exe_callback = function(name)
+            if not name or #name == 0 then return end
+
+            local ctag = mouse.screen.selected_tag
+            if ctag then
+                ctag.name = name
+            end
+        end
+    }
+end
+
+local function resetTags()
+    local tags = root.tags()
+    for i = 1, #tagnames do
+        tags[i].name = tagnames[i]
+    end
 end
 
 -- }}}
@@ -420,7 +443,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Each screen has its own tag table.
     --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-    awful.tag({ "null", "main", "www", "term", "kreat", "riddler" }, s,
+    awful.tag( tagnames, s,
             { awful.layout.layouts[3], -- null
               awful.layout.layouts[1], -- main
               awful.layout.layouts[3], -- www
@@ -608,8 +631,16 @@ globalkeys = awful.util.table.join(
               {description = "restore minimized", group = "client"}),
 
     -- Prompt
-    awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
+    awful.key({ modkey },            "r", function () awful.screen.focused().mypromptbox:run() end,
               {description = "run prompt", group = "launcher"}),
+
+    -- Rename current tag
+    awful.key({ modkey },            "t", function () renameCurrentTag() end,
+              {description = "rename current tag", group = "awesome"}),
+
+    -- Reset all tags
+    awful.key({ modkey, "Control" }, "t", function () resetTags() end,
+              {description = "reset tags", group = "awesome"}),
 
     awful.key({ modkey }, "x",
               function ()

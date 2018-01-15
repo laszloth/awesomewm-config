@@ -4,11 +4,12 @@ configuration for awesome window manager
 based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
-- [ ] quick setting of tag names
+- [ ] more dynamic tag names and layouts config
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] low battery warning
 
 ## done
+- [x] quick setting of tag names
 - [x] volume can be a little bit off sync on rapid vol. up/down presses
 - [x] make volume buttons more flexible for usb sound card
 - [x] support for usb sound card
