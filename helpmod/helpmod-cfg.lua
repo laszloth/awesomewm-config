@@ -22,6 +22,7 @@ hcfg.usb_card_color          = '#BA4100'
 
 hcfg.battery_low             = 20
 hcfg.battery_low_color       = hcfg.crit_color
+hcfg.battery_low_notif_gap   = 5
 hcfg.battery_charge_color    = '#7FAE5A'
 
 hcfg.spacetxt   = ' '

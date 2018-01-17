@@ -107,6 +107,13 @@ function debug_print_perm(msg)
         text = tostring(msg) })
 end
 
+function warn_print(msg)
+    naughty.notify({ preset = naughty.config.presets.critical,
+        timeout = 10,
+        title = "warning",
+        text = tostring(msg) })
+end
+
 local function notify_print(msg)
     naughty.notify({ preset = naughty.config.presets.normal,
         title = "notification",

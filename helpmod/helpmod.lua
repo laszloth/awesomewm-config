@@ -1,9 +1,10 @@
 local awful = require("awful")
 
 local helpmod = {}
-
 helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
+
+local prev_batt_level = 100
 
 function helpmod.freshMPStateBox(boxes, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
@@ -111,6 +112,10 @@ function helpmod.freshBatteryBox(box, timer)
         if ac == 0 then
             if cap <= helpmod.cfg.battery_low then
                 box.markup = '<span foreground="'..helpmod.cfg.battery_low_color..'">B:'..cap..'</span>'
+                if cap < prev_batt_level and math.fmod(cap, helpmod.cfg.battery_low_notif_gap) == 0 then
+                    prev_batt_level = cap
+                    warn_print("low battery: "..cap.."%")
+                end
             else
                 box.markup = "B:"..cap
             end
