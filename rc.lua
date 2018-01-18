@@ -87,7 +87,7 @@ local tagnames = { "null", "main", "www", "term", "kreat", "riddler" }
 -- could be added to the format function, but
 -- it's an overkill to check this every second
 -- TODO: maybe there is an event
-local netdevtimer = gears.timer { timeout = 30, }
+local netdevtimer = gears.timer { timeout = helpmod.cfg.netdev_timeout, }
 netdevtimer:connect_signal("timeout", function()
     netdevs = helpmod.getNetDevs()
 end)
@@ -279,7 +279,7 @@ if onLaptop then
     helpmod.freshBacklightBox(myblwidget, false)
 
     -- timer to hide backlight textbox
-    mybltimer = gears.timer { timeout = 2.5, }
+    mybltimer = gears.timer { timeout = helpmod.cfg.backlight_timeout, }
     mybltimer:connect_signal("timeout", function()
         --debug_print_perm("mybltimer expired")
         myblwidget.visible = false
@@ -289,7 +289,7 @@ end
 
 -- Create volume widget
 local myvolwidget = wibox.widget.textbox()
-local myvoltimer = gears.timer { timeout = 120, }
+local myvoltimer = gears.timer { timeout = helpmod.cfg.volume_timeout, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
     helpmod.freshVolumeBox(myvolwidget)
@@ -306,7 +306,7 @@ local mybatwidget = nil
 local mybattimer = nil
 if onLaptop then
     mybatwidget = wibox.widget.textbox()
-    mybattimer = gears.timer { timeout = 60, }
+    mybattimer = gears.timer { timeout = helpmod.cfg.battery_timeout, }
     mybattimer:connect_signal("timeout", function()
         --debug_print_perm("mybattimer expired")
         helpmod.freshBatteryBox(mybatwidget, mybattimer)
