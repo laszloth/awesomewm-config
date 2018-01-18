@@ -27,6 +27,8 @@ local vicious = require("vicious")
 local capi = { awesome = awesome }
 -- own helpmod
 local helpmod = require("helpmod.helpmod")
+local hcfg = helpmod.cfg
+local hcmd = helpmod.cmd
 
 -- Load Debian menu entries
 --require("debian.menu")
@@ -66,8 +68,8 @@ awful.spawn.with_shell("~/.config/awesome/scripts/autorun.sh &>/dev/null")
 beautiful.init("~/.config/awesome/theme/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal    = helpmod.cmd.terminal
-editor_cmd  = terminal .. " -e " .. helpmod.cmd.editor
+terminal    = hcmd.terminal
+editor_cmd  = terminal .. " -e " .. hcmd.editor
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -87,7 +89,7 @@ local tagnames = { "null", "main", "www", "term", "kreat", "riddler" }
 -- could be added to the format function, but
 -- it's an overkill to check this every second
 -- TODO: maybe there is an event
-local netdevtimer = gears.timer { timeout = helpmod.cfg.netdev_timeout, }
+local netdevtimer = gears.timer { timeout = hcfg.netdev_timeout, }
 netdevtimer:connect_signal("timeout", function()
     netdevs = helpmod.getNetDevs()
 end)
@@ -244,20 +246,20 @@ local mytextclock = wibox.widget.textclock("%Y-%m-%d %a %H:%M:%S", 1)
 
 -- Create music player state indicator
 local mpspace = wibox.widget.textbox()
-mpspace.text = helpmod.cfg.spacetxt
+mpspace.text = hcfg.spacetxt
 local mympstate = wibox.widget.imagebox(beautiful.paused, true)
 mympstate.forced_width = 14
 mympstate.opacity = 0.8
 local myplacedmpstate = wibox.container.place(mympstate)
 myplacedmpstate:connect_signal("button::release", function()
-    awful.util.spawn(helpmod.cmd.s_playtoggle)
+    awful.util.spawn(hcmd.s_playtoggle)
 end)
 
 helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused })
 
 -- Create systray and its separator
 local mystseparator = wibox.widget.textbox()
-mystseparator.text = helpmod.cfg.separtxt
+mystseparator.text = hcfg.separtxt
 local mysystray = wibox.widget.systray()
 local function checkSystray()
     local entries = capi.awesome.systray()
@@ -279,7 +281,7 @@ if onLaptop then
     helpmod.freshBacklightBox(myblwidget, false)
 
     -- timer to hide backlight textbox
-    mybltimer = gears.timer { timeout = helpmod.cfg.backlight_timeout, }
+    mybltimer = gears.timer { timeout = hcfg.backlight_timeout, }
     mybltimer:connect_signal("timeout", function()
         --debug_print_perm("mybltimer expired")
         myblwidget.visible = false
@@ -289,13 +291,13 @@ end
 
 -- Create volume widget
 local myvolwidget = wibox.widget.textbox()
-local myvoltimer = gears.timer { timeout = helpmod.cfg.volume_timeout, }
+local myvoltimer = gears.timer { timeout = hcfg.volume_timeout, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
     helpmod.freshVolumeBox(myvolwidget)
 end)
 myvolwidget:connect_signal("button::release", function()
-    helpmod.freshVolumeBox(myvolwidget, helpmod.cmd.sg_togglemute)
+    helpmod.freshVolumeBox(myvolwidget, hcmd.sg_togglemute)
 end)
 
 myvoltimer:start()
@@ -306,7 +308,7 @@ local mybatwidget = nil
 local mybattimer = nil
 if onLaptop then
     mybatwidget = wibox.widget.textbox()
-    mybattimer = gears.timer { timeout = helpmod.cfg.battery_timeout, }
+    mybattimer = gears.timer { timeout = hcfg.battery_timeout, }
     mybattimer:connect_signal("timeout", function()
         --debug_print_perm("mybattimer expired")
         helpmod.freshBatteryBox(mybatwidget, mybattimer)
@@ -352,7 +354,7 @@ end)
 function eventHandler(event, data)
     --debug_print("DBUS EVENT: "..event)
     if event == "acpi_jack" then
-        awful.util.spawn(helpmod.cmd.s_pause)
+        awful.util.spawn(hcmd.s_pause)
         helpmod.freshVolumeBox(myvolwidget)
     elseif event == "acpi_ac" and onLaptop then
         helpmod.freshBatteryBox(mybatwidget, mybattimer)
@@ -491,13 +493,13 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- {{{ spaces and separator
     local space1 = wibox.widget.textbox()
-    space1.text = helpmod.cfg.spacetxt
+    space1.text = hcfg.spacetxt
     --local space2 = wibox.widget.textbox()
-    --space2.text = helpmod.cfg.spacetxt2
+    --space2.text = hcfg.spacetxt2
     --local space3 = wibox.widget.textbox()
-    --space3.text = helpmod.cfg.spacetxt3
+    --space3.text = hcfg.spacetxt3
     local separator = wibox.widget.textbox()
-    separator.text = helpmod.cfg.separtxt
+    separator.text = hcfg.separtxt
     -- }}}
 
     -- Add widgets to the wibox
@@ -663,36 +665,36 @@ globalkeys = awful.util.table.join(
 
     -- Assign special keys
     awful.key({ "Control", "Mod1" }, "Delete", function()
-        awful.util.spawn(helpmod.cmd.locker) end),
+        awful.util.spawn(hcmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        helpmod.freshVolumeBox(myvolwidget, helpmod.cmd.sg_lowervol) end),
+        helpmod.freshVolumeBox(myvolwidget, hcmd.sg_lowervol) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        helpmod.freshVolumeBox(myvolwidget, helpmod.cmd.sg_raisevol) end),
+        helpmod.freshVolumeBox(myvolwidget, hcmd.sg_raisevol) end),
     awful.key({ }, "XF86AudioMute", function()
-        helpmod.freshVolumeBox(myvolwidget, helpmod.cmd.sg_togglemute) end),
+        helpmod.freshVolumeBox(myvolwidget, hcmd.sg_togglemute) end),
     awful.key({ }, "XF86AudioNext", function()
-        awful.util.spawn(helpmod.cmd.s_next)
+        awful.util.spawn(hcmd.s_next)
         end),
     awful.key({ }, "XF86AudioPrev", function()
-        awful.util.spawn(helpmod.cmd.s_prev)
+        awful.util.spawn(hcmd.s_prev)
         end),
     awful.key({ }, "XF86AudioPlay", function()
-        awful.util.spawn(helpmod.cmd.s_playtoggle)
+        awful.util.spawn(hcmd.s_playtoggle)
         end),
     awful.key({ }, "XF86Calculator", function()
-        awful.util.spawn(helpmod.cmd.calc) end),
+        awful.util.spawn(hcmd.calc) end),
     awful.key({ }, "XF86TouchpadToggle", function()
         if onLaptop then
-            awful.util.spawn(helpmod.cmd.s_toggletp)
+            awful.util.spawn(hcmd.s_toggletp)
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if onLaptop then
-            helpmod.freshBacklightBox(myblwidget, true, helpmod.cmd.sg_brightdown)
+            helpmod.freshBacklightBox(myblwidget, true, hcmd.sg_brightdown)
             mybltimer:again()
         end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         if onLaptop then
-            helpmod.freshBacklightBox(myblwidget, true, helpmod.cmd.sg_brightup)
+            helpmod.freshBacklightBox(myblwidget, true, hcmd.sg_brightup)
             mybltimer:again()
         end end),
 
