@@ -179,9 +179,10 @@ local function renameCurrentTag()
 end
 
 local function resetTags()
-    local tags = root.tags()
-    for i = 1, #tagnames do
-        tags[i].name = tagnames[i]
+    for s in screen do
+        for i = 1, #tagnames do
+            s.tags[i].name = tagnames[i]
+        end
     end
 end
 
