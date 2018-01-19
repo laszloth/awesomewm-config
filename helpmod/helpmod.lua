@@ -6,7 +6,7 @@ helpmod.cfg = require("helpmod.helpmod-cfg")
 
 local prev_batt_level = 100
 
-function helpmod.freshMPStateBox(boxes, imgs)
+function helpmod.fresh_mpstate_box(boxes, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             for i = 1, #boxes do
@@ -28,7 +28,7 @@ function helpmod.freshMPStateBox(boxes, imgs)
     end)
 end
 
-function helpmod.freshVolumeBox(box, run_cmd)
+function helpmod.fresh_volume_box(box, run_cmd)
     local cmd = run_cmd or helpmod.cmd.g_soundinfo
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
@@ -38,7 +38,7 @@ function helpmod.freshVolumeBox(box, run_cmd)
             return
         end
 
-        local rawdata = helpmod.strToArray(stdout, "%s")
+        local rawdata = helpmod.str_to_array(stdout, "%s")
         -- unused
         -- local sink_index = tonumber(rawdata[1])
         local muted = tonumber(rawdata[2]) == 1
@@ -72,7 +72,7 @@ function helpmod.freshVolumeBox(box, run_cmd)
     end)
 end
 
-function helpmod.freshBacklightBox(box, run, run_cmd)
+function helpmod.fresh_backlight_box(box, run, run_cmd)
     local cmd = helpmod.cmd.g_backlight
     if run then
         cmd = run_cmd
@@ -86,12 +86,12 @@ function helpmod.freshBacklightBox(box, run, run_cmd)
             return
         end
         box.visible = true
-        box.markup = helpmod.cfg.separtxt..pref..
+        box.markup = helpmod.cfg.separ_txt..pref..
             '<span foreground="'..helpmod.cfg.warn_color..'">'..math.floor(tonumber(stdout))..'</span>'
     end)
 end
 
-function helpmod.freshBatteryBox(box, timer)
+function helpmod.fresh_battery_box(box, timer)
     awful.spawn.easy_async(helpmod.cmd.g_battery, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
@@ -125,7 +125,7 @@ function helpmod.freshBatteryBox(box, timer)
     end)
 end
 
-function helpmod.getNetworkStats(widget, args, netdevs)
+function helpmod.get_network_stats(widget, args, netdevs)
     local up_unit = "K"
     local down_unit = "K"
     local down_label = "Rx"
@@ -138,12 +138,12 @@ function helpmod.getNetworkStats(widget, args, netdevs)
             local up_val = args['{'..nwdev..' up_kb}']
             local down_val = args['{'..nwdev..' down_kb}']
 
-            if tonumber(up_val) >= helpmod.cfg.klimit then
+            if tonumber(up_val) >= helpmod.cfg.kilo_limit then
                 up_unit = "M"
                 up_val = args['{'..nwdev..' up_mb}']
             end
 
-            if tonumber(down_val) >= helpmod.cfg.klimit then
+            if tonumber(down_val) >= helpmod.cfg.kilo_limit then
                 down_unit = "M"
                 down_val = args['{'..nwdev..' down_mb}']
             end
@@ -165,7 +165,7 @@ function helpmod.getNetworkStats(widget, args, netdevs)
     return 'No network'
 end
 
-function helpmod.getCoreTempText(temp, n)
+function helpmod.get_coretemp_text(temp, n)
     local label = 'Core ' ..(n-2).. ': '
     if temp <= helpmod.cfg.cpu_temp_mid then
         label = label..'<span color="'..helpmod.cfg.cpu_temp_low_color..'">'
@@ -174,11 +174,11 @@ function helpmod.getCoreTempText(temp, n)
     else
         label = label..'<span color="'..helpmod.cfg.cpu_temp_high_color..'">'
     end
-    return label..temp..'°C</span>'..helpmod.cfg.separtxt
+    return label..temp..'°C</span>'..helpmod.cfg.separ_txt
 end
 
 -- called once at startup, popen is fine for now
-function helpmod.onLaptop()
+function helpmod.is_on_laptop()
     local h = assert(io.popen(helpmod.cmd.g_onlaptop))
     local ret = h:read("*n")
     h:close()
@@ -186,14 +186,14 @@ function helpmod.onLaptop()
 end
 
 -- called once at startup, popen is fine for now
-function helpmod.getCPUCoreCnt()
+function helpmod.get_cpu_core_count()
     local h = assert(io.popen(helpmod.cmd.g_corecnt))
     local num = h:read("*n")
     h:close()
     return num
 end
 
-function helpmod.strToArray(string, delimiter, exclude)
+function helpmod.str_to_array(string, delimiter, exclude)
     local arr = {}
     for m in string.gmatch(string, "[^"..delimiter.."]+") do
         if m ~= exclude then table.insert(arr, m) end
@@ -202,11 +202,11 @@ function helpmod.strToArray(string, delimiter, exclude)
 end
 
 -- called once at startup, popen is fine for now
-function helpmod.getNetDevs()
+function helpmod.get_net_devices()
     local h = assert(io.popen(helpmod.cmd.g_netdevs))
     local ret = h:read("*a")
     h:close()
-    return helpmod.strToArray(ret, "%s", "lo")
+    return helpmod.str_to_array(ret, "%s", "lo")
 end
 
 return helpmod

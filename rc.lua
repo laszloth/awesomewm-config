@@ -117,16 +117,16 @@ local tags_cfg = {
 -- Widget variables
 local num_screen = 1
 local def_screen = 1
-local numCores = helpmod.getCPUCoreCnt()
-local onLaptop = helpmod.onLaptop()
-local netdevs = helpmod.getNetDevs()
+local num_cores = helpmod.get_cpu_core_count()
+local on_laptop = helpmod.is_on_laptop()
+local net_devs = helpmod.get_net_devices()
 
 -- could be added to the format function, but
 -- it's an overkill to check this every second
 -- TODO: maybe there is an event
-local netdevtimer = gears.timer { timeout = hcfg.netdev_timeout, }
+local netdevtimer = gears.timer { timeout = hcfg.net_devs_timeout, }
 netdevtimer:connect_signal("timeout", function()
-    netdevs = helpmod.getNetDevs()
+    net_devs = helpmod.get_net_devices()
 end)
 netdevtimer:start()
 
@@ -157,7 +157,7 @@ local function notify_print(msg)
         text = tostring(msg) })
 end
 
-local function updateScreenCount()
+local function update_screen_count()
     num_screen = screen.count()
     def_screen = math.floor(num_screen / 3) + 1
     --debug_print("num_screen="..num_screen.."\ndef_screen="..def_screen)
@@ -176,7 +176,7 @@ local function client_menu_toggle_fn()
     end
 end
 
-local function tableToString(t, depth)
+local function table_to_str(t, depth)
     depth = depth or 0
 
     if type(t) ~= "table" then
@@ -191,16 +191,16 @@ local function tableToString(t, depth)
     local str = "{ "
     for key, value in pairs(t) do
         str = str.."\n"..dpref.."["..tostring(key).."] = "..
-                tableToString(value, depth+1)..", "
+                table_to_str(value, depth+1)..", "
     end
     return str.."}"
 end
 
-local function printTable(t)
-    debug_print_perm(tableToString(t))
+local function print_table(t)
+    debug_print_perm(table_to_str(t))
 end
 
-local function renameCurrentTag()
+local function rename_current_tag()
     awful.prompt.run {
         prompt       = ' Tag name: ',
         textbox      = mouse.screen.mypromptbox.widget,
@@ -215,7 +215,7 @@ local function renameCurrentTag()
     }
 end
 
-local function resetTags()
+local function reset_all_tags()
     for s in screen do
         for i = 1, #tags_cfg.names do
             s.tags[i].name = tags_cfg.names[i]
@@ -226,7 +226,7 @@ end
 -- }}}
 
 -- Default screen settings for Firefox and others
-updateScreenCount()
+update_screen_count()
 
 -- {{{ Menu
 -- Create a launcher widget and a main menu
@@ -260,7 +260,7 @@ local mytextclock = wibox.widget.textclock("%Y-%m-%d %a %H:%M:%S", 1)
 
 -- Create music player state indicator
 local mpspace = wibox.widget.textbox()
-mpspace.text = hcfg.spacetxt
+mpspace.text = hcfg.space_txt
 local mympstate = wibox.widget.imagebox(beautiful.paused, true)
 mympstate.forced_width = 14
 mympstate.opacity = 0.8
@@ -269,13 +269,13 @@ myplacedmpstate:connect_signal("button::release", function()
     awful.util.spawn(hcmd.s_playtoggle)
 end)
 
-helpmod.freshMPStateBox({ mympstate, mpspace }, { beautiful.playing, beautiful.paused })
+helpmod.fresh_mpstate_box({ mympstate, mpspace }, { beautiful.playing, beautiful.paused })
 
 -- Create systray and its separator
 local mystseparator = wibox.widget.textbox()
-mystseparator.text = hcfg.separtxt
+mystseparator.text = hcfg.separ_txt
 local mysystray = wibox.widget.systray()
-local function checkSystray()
+local function check_systray()
     local entries = capi.awesome.systray()
     --debug_print("systray entries="..entries)
     if entries == 0 then
@@ -284,15 +284,15 @@ local function checkSystray()
         mystseparator.visible = true
     end
 end
-mysystray:connect_signal("widget::redraw_needed", checkSystray)
-checkSystray()
+mysystray:connect_signal("widget::redraw_needed", check_systray)
+check_systray()
 
 -- Create backlight widget
 local myblwidget = nil
 local mybltimer = nil
-if onLaptop then
+if on_laptop then
     myblwidget = wibox.widget.textbox()
-    helpmod.freshBacklightBox(myblwidget, false)
+    helpmod.fresh_backlight_box(myblwidget, false)
 
     -- timer to hide backlight textbox
     mybltimer = gears.timer { timeout = hcfg.backlight_timeout, }
@@ -308,34 +308,34 @@ local myvolwidget = wibox.widget.textbox()
 local myvoltimer = gears.timer { timeout = hcfg.volume_timeout, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
-    helpmod.freshVolumeBox(myvolwidget)
+    helpmod.fresh_volume_box(myvolwidget)
 end)
 myvolwidget:connect_signal("button::release", function()
-    helpmod.freshVolumeBox(myvolwidget, hcmd.sg_togglemute)
+    helpmod.fresh_volume_box(myvolwidget, hcmd.sg_togglemute)
 end)
 
 myvoltimer:start()
-helpmod.freshVolumeBox(myvolwidget)
+helpmod.fresh_volume_box(myvolwidget)
 
 -- Create battery widget
 local mybatwidget = nil
 local mybattimer = nil
-if onLaptop then
+if on_laptop then
     mybatwidget = wibox.widget.textbox()
     mybattimer = gears.timer { timeout = hcfg.battery_timeout, }
     mybattimer:connect_signal("timeout", function()
         --debug_print_perm("mybattimer expired")
-        helpmod.freshBatteryBox(mybatwidget, mybattimer)
+        helpmod.fresh_battery_box(mybatwidget, mybattimer)
     end)
 
     mybattimer:start()
-    helpmod.freshBatteryBox(mybatwidget, mybattimer)
+    helpmod.fresh_battery_box(mybatwidget, mybattimer)
 end
 
 -- Create net widget
 local mynetwidget = wibox.widget.textbox()
 vicious.register(mynetwidget, vicious.widgets.net, function(widget, args)
-    return helpmod.getNetworkStats(widget, args, netdevs)
+    return helpmod.get_network_stats(widget, args, net_devs)
 end, 1)
 
 -- Create CPU widgets
@@ -343,14 +343,14 @@ end, 1)
 -- CPU: thermal
 local cputemps = {}
 local mycputempwidget = wibox.layout.fixed.horizontal()
-for i = 2, 1 + numCores do
+for i = 2, 1 + num_cores do
     local c = wibox.widget.textbox()
     c:connect_signal("button::release", function()
         local s = mouse.screen.index
         cputemps[s].visible = not cputemps[s].visible
     end)
     vicious.register(c, vicious.widgets.thermal,
-        function(widget, args) return helpmod.getCoreTempText(args[1], i) end,
+        function(widget, args) return helpmod.get_coretemp_text(args[1], i) end,
         1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
 
     mycputempwidget:add(c)
@@ -365,13 +365,13 @@ myusagewidget:connect_signal("button::release", function()
     cputemps[s].visible = not cputemps[s].visible
 end)
 
-function eventHandler(event, data)
+function ext_event_handler(event, data)
     --debug_print("DBUS EVENT: "..event)
     if event == "acpi_jack" then
         awful.util.spawn(hcmd.s_pause)
-        helpmod.freshVolumeBox(myvolwidget)
-    elseif event == "acpi_ac" and onLaptop then
-        helpmod.freshBatteryBox(mybatwidget, mybattimer)
+        helpmod.fresh_volume_box(myvolwidget)
+    elseif event == "acpi_ac" and on_laptop then
+        helpmod.fresh_battery_box(mybatwidget, mybattimer)
     elseif event == "mp_stat" and data then
         --debug_print("status:"..data)
         if data == "Playing" then
@@ -448,20 +448,20 @@ end
 screen.connect_signal("property::geometry", set_wallpaper)
 
 awful.screen.connect_for_each_screen(function(s)
-    local firstScreen = false
+    local first_screen = false
 
     -- Wallpaper
     set_wallpaper(s)
 
     if s.index == 1 then
-        firstScreen = true
+        first_screen = true
         s:connect_signal("removed", function()
             debug_print("screen removed")
-            updateScreenCount()
+            update_screen_count()
         end)
         s:connect_signal("added", function()
             debug_print("screen added")
-            updateScreenCount()
+            update_screen_count()
         end)
     end
 
@@ -470,7 +470,7 @@ awful.screen.connect_for_each_screen(function(s)
     awful.tag( tags_cfg.names, s, tags_cfg.layouts )
 
     -- create a last, hidden tag on the first screen
-    if firstScreen then
+    if first_screen then
         hiddentag = awful.tag({ "hidden" }, s, awful.layout.layouts[1])
         awful.tag.setproperty(hiddentag[1], "hide", true)
     end
@@ -500,13 +500,13 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- {{{ spaces and separator
     local space1 = wibox.widget.textbox()
-    space1.text = hcfg.spacetxt
+    space1.text = hcfg.space_txt
     --local space2 = wibox.widget.textbox()
-    --space2.text = hcfg.spacetxt2
+    --space2.text = hcfg.space_txt2
     --local space3 = wibox.widget.textbox()
-    --space3.text = hcfg.spacetxt3
+    --space3.text = hcfg.space_txt3
     local separator = wibox.widget.textbox()
-    separator.text = hcfg.separtxt
+    separator.text = hcfg.separ_txt
     -- }}}
 
     -- Add widgets to the wibox
@@ -529,11 +529,11 @@ awful.screen.connect_for_each_screen(function(s)
     rightl:add(ctc)
     rightl:add(mynetwidget) rightl:add(separator)
 
-    if firstScreen then
+    if first_screen then
         rightl:add(mysystray) rightl:add(mystseparator)
         rightl:add(myplacedmpstate) rightl:add(mpspace)
         rightl:add(myvolwidget)
-        if onLaptop then
+        if on_laptop then
             -- separator included
             rightl:add(myblwidget)
         end
@@ -543,7 +543,7 @@ awful.screen.connect_for_each_screen(function(s)
     end
 
     rightl:add(separator)
-    if onLaptop then rightl:add(mybatwidget) rightl:add(separator) end
+    if on_laptop then rightl:add(mybatwidget) rightl:add(separator) end
     rightl:add(mytextclock) rightl:add(space1)
     rightl:add(s.mylayoutbox)
 
@@ -652,11 +652,11 @@ globalkeys = awful.util.table.join(
               {description = "run prompt", group = "launcher"}),
 
     -- Rename current tag
-    awful.key({ modkey },            "t", function () renameCurrentTag() end,
+    awful.key({ modkey },            "t", function () rename_current_tag() end,
               {description = "rename current tag", group = "awesome"}),
 
     -- Reset all tags
-    awful.key({ modkey, "Control" }, "t", function () resetTags() end,
+    awful.key({ modkey, "Control" }, "t", function () reset_all_tags() end,
               {description = "reset tags", group = "awesome"}),
 
     awful.key({ modkey }, "x",
@@ -674,11 +674,11 @@ globalkeys = awful.util.table.join(
     awful.key({ "Control", "Mod1" }, "Delete", function()
         awful.util.spawn(hcmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        helpmod.freshVolumeBox(myvolwidget, hcmd.sg_lowervol) end),
+        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_lowervol) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        helpmod.freshVolumeBox(myvolwidget, hcmd.sg_raisevol) end),
+        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_raisevol) end),
     awful.key({ }, "XF86AudioMute", function()
-        helpmod.freshVolumeBox(myvolwidget, hcmd.sg_togglemute) end),
+        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_togglemute) end),
     awful.key({ }, "XF86AudioNext", function()
         awful.util.spawn(hcmd.s_next)
         end),
@@ -689,19 +689,19 @@ globalkeys = awful.util.table.join(
         awful.util.spawn(hcmd.s_playtoggle)
         end),
     awful.key({ }, "XF86Calculator", function()
-        awful.util.spawn(hcmd.calc) end),
+        awful.util.spawn(hcmd.calculator) end),
     awful.key({ }, "XF86TouchpadToggle", function()
-        if onLaptop then
+        if on_laptop then
             awful.util.spawn(hcmd.s_toggletp)
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
-        if onLaptop then
-            helpmod.freshBacklightBox(myblwidget, true, hcmd.sg_brightdown)
+        if on_laptop then
+            helpmod.fresh_backlight_box(myblwidget, true, hcmd.sg_brightdown)
             mybltimer:again()
         end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
-        if onLaptop then
-            helpmod.freshBacklightBox(myblwidget, true, hcmd.sg_brightup)
+        if on_laptop then
+            helpmod.fresh_backlight_box(myblwidget, true, hcmd.sg_brightup)
             mybltimer:again()
         end end),
 
@@ -886,7 +886,7 @@ client.connect_signal("manage", function (c)
     -- i.e. put it at the end of others instead of setting it master.
     -- if not awesome.startup then awful.client.setslave(c) end
 
-    --debug_print_perm(string.format("name=%q\nhints=%s", c.name, tableToString(shints)))
+    --debug_print_perm(string.format("name=%q\nhints=%s", c.name, table_to_str(shints)))
 
     -- workaround for no_offscreen totally overriding under_mouse or centered
     if --awesome.startup and

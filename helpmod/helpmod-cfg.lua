@@ -1,7 +1,7 @@
 local hcfg = {}
 
 -- thresholds
-hcfg.klimit                  = 1024
+hcfg.kilo_limit              = 1024
 
 hcfg.cpu_temp_high           = 85
 hcfg.cpu_temp_mid            = 55
@@ -32,15 +32,15 @@ hcfg.battery_low_color       = hcfg.crit_color
 hcfg.battery_charge_color    = '#7FAE5A'
 
 -- timeouts
-hcfg.netdev_timeout          = 15
+hcfg.net_devs_timeout        = 15
 hcfg.backlight_timeout       = 2.5
 hcfg.volume_timeout          = 120
 hcfg.battery_timeout         = 30
 
 -- spacing
-hcfg.spacetxt   = ' '
-hcfg.spacetxt2  = '  '
-hcfg.spacetxt3  = '   '
-hcfg.separtxt   = ' | '
+hcfg.space_txt  = ' '
+hcfg.space_txt2 = '  '
+hcfg.space_txt3 = '   '
+hcfg.separ_txt  = ' | '
 
 return hcfg

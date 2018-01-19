@@ -47,9 +47,9 @@ class SpotifyProxy(object):
     def sendEvent(self, event, data, tried=False):
         try:
             if data:
-                self.awesome_remote_if.Eval('eventHandler("{0}", "{1}")'.format(event, data))
+                self.awesome_remote_if.Eval('ext_event_handler("{0}", "{1}")'.format(event, data))
             else:
-                self.awesome_remote_if.Eval('eventHandler("{0}", nil)'.format(event))
+                self.awesome_remote_if.Eval('ext_event_handler("{0}", nil)'.format(event))
         except DBusException, e:
             # awesome was restarted, reinitalize and send again
             #err = e.get_dbus_message()
