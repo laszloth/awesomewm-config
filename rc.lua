@@ -78,13 +78,48 @@ editor_cmd  = terminal .. " -e " .. hcmd.editor
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
 
+-- {{{ Tags configuration
+
+-- Table of layouts to cover with awful.layout.inc, order matters.
+awful.layout.layouts = {
+    awful.layout.suit.floating,
+    awful.layout.suit.tile,
+    awful.layout.suit.max,
+    awful.layout.suit.max.fullscreen,
+    awful.layout.suit.corner.nw,
+    awful.layout.suit.magnifier,
+--    awful.layout.suit.tile.left,
+--    awful.layout.suit.tile.bottom,
+--    awful.layout.suit.tile.top,
+--    awful.layout.suit.fair,
+--    awful.layout.suit.fair.horizontal,
+--    awful.layout.suit.spiral,
+--    awful.layout.suit.spiral.dwindle,
+--    awful.layout.suit.corner.ne,
+--    awful.layout.suit.corner.sw,
+--    awful.layout.suit.corner.se,
+}
+
+local tags_cfg = {
+    names = { "null", "main", "www", "term", "kreat", "riddler" },
+    layouts = {
+           awful.layout.layouts[3], -- null
+           awful.layout.layouts[1], -- main
+           awful.layout.layouts[3], -- www
+           awful.layout.layouts[2], -- term
+           awful.layout.layouts[3], -- kreat
+           awful.layout.layouts[1], -- riddler
+    },
+}
+
+-- }}}
+
 -- Widget variables
 local num_screen = 1
 local def_screen = 1
 local numCores = helpmod.getCPUCoreCnt()
 local onLaptop = helpmod.onLaptop()
 local netdevs = helpmod.getNetDevs()
-local tagnames = { "null", "main", "www", "term", "kreat", "riddler" }
 
 -- could be added to the format function, but
 -- it's an overkill to check this every second
@@ -182,8 +217,8 @@ end
 
 local function resetTags()
     for s in screen do
-        for i = 1, #tagnames do
-            s.tags[i].name = tagnames[i]
+        for i = 1, #tags_cfg.names do
+            s.tags[i].name = tags_cfg.names[i]
         end
     end
 end
@@ -192,27 +227,6 @@ end
 
 -- Default screen settings for Firefox and others
 updateScreenCount()
-
--- Table of layouts to cover with awful.layout.inc, order matters.
-awful.layout.layouts = {
-    awful.layout.suit.floating,
-    awful.layout.suit.tile,
-    awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
-    awful.layout.suit.corner.nw,
-    awful.layout.suit.magnifier,
---    awful.layout.suit.tile.left,
---    awful.layout.suit.tile.bottom,
---    awful.layout.suit.tile.top,
---    awful.layout.suit.fair,
---    awful.layout.suit.fair.horizontal,
---    awful.layout.suit.spiral,
---    awful.layout.suit.spiral.dwindle,
---    awful.layout.suit.corner.ne,
---    awful.layout.suit.corner.sw,
---    awful.layout.suit.corner.se,
-}
--- }}}
 
 -- {{{ Menu
 -- Create a launcher widget and a main menu
@@ -453,14 +467,7 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Each screen has its own tag table.
     --awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-    awful.tag( tagnames, s,
-            { awful.layout.layouts[3], -- null
-              awful.layout.layouts[1], -- main
-              awful.layout.layouts[3], -- www
-              awful.layout.layouts[2], -- term
-              awful.layout.layouts[3], -- kreat
-              awful.layout.layouts[1], -- riddler
-            })
+    awful.tag( tags_cfg.names, s, tags_cfg.layouts )
 
     -- create a last, hidden tag on the first screen
     if firstScreen then
