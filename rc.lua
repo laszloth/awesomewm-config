@@ -101,13 +101,16 @@ awful.layout.layouts = {
 }
 
 local tags_cfg = {
-    names = { "null", "main", "www", "term", "kreat", "riddler" },
+    names = { "null", "head", "main", "www", "term", "kreat", "enigm", "myst", "riddler" },
     layouts = {
            awful.layout.layouts[3], -- null
-           awful.layout.layouts[1], -- main
+           awful.layout.layouts[3], -- head
+           awful.layout.layouts[3], -- main
            awful.layout.layouts[3], -- www
            awful.layout.layouts[2], -- term
            awful.layout.layouts[3], -- kreat
+           awful.layout.layouts[3], -- enigm
+           awful.layout.layouts[3], -- myst
            awful.layout.layouts[1], -- riddler
     },
 }
@@ -745,50 +748,53 @@ clientkeys = awful.util.table.join(
 -- Bind all key numbers to tags.
 -- Be careful: we use keycodes to make it works on any keyboard layout.
 -- This should map on the top row of your keyboard, usually 1 to 9.
-for i = 1, 9 do
+
+-- TODO keycode -> keysym
+local keycodes = {49, 10, 11, 12, 13, 14, 15, 16, 17, 18}
+for index, kcode in pairs(keycodes)  do
     globalkeys = awful.util.table.join(globalkeys,
         -- View tag only.
-        awful.key({ modkey }, "#" .. i + 9,
+        awful.key({ modkey }, "#" .. kcode,
                   function ()
                         local screen = awful.screen.focused()
-                        local tag = screen.tags[i]
+                        local tag = screen.tags[index]
                         if tag then
                            tag:view_only()
                         end
                   end,
-                  {description = "view tag #"..i, group = "tag"}),
+                  {description = "view tag #"..index, group = "tag"}),
         -- Toggle tag display.
-        awful.key({ modkey, "Control" }, "#" .. i + 9,
+        awful.key({ modkey, "Control" }, "#" .. kcode,
                   function ()
                       local screen = awful.screen.focused()
-                      local tag = screen.tags[i]
+                      local tag = screen.tags[index]
                       if tag then
                          awful.tag.viewtoggle(tag)
                       end
                   end,
-                  {description = "toggle tag #" .. i, group = "tag"}),
+                  {description = "toggle tag #"..index, group = "tag"}),
         -- Move client to tag.
-        awful.key({ modkey, "Shift" }, "#" .. i + 9,
+        awful.key({ modkey, "Shift" }, "#" .. kcode,
                   function ()
                       if client.focus then
-                          local tag = client.focus.screen.tags[i]
+                          local tag = client.focus.screen.tags[index]
                           if tag then
                               client.focus:move_to_tag(tag)
                           end
                      end
                   end,
-                  {description = "move focused client to tag #"..i, group = "tag"}),
+                  {description = "move focused client to tag #"..index, group = "tag"}),
         -- Toggle tag on focused client.
-        awful.key({ modkey, "Control", "Shift" }, "#" .. i + 9,
+        awful.key({ modkey, "Control", "Shift" }, "#" .. kcode,
                   function ()
                       if client.focus then
-                          local tag = client.focus.screen.tags[i]
+                          local tag = client.focus.screen.tags[index]
                           if tag then
                               client.focus:toggle_tag(tag)
                           end
                       end
                   end,
-                  {description = "toggle focused client on tag #" .. i, group = "tag"})
+                  {description = "toggle focused client on tag #"..index, group = "tag"})
     )
 end
 
@@ -865,11 +871,11 @@ awful.rules.rules = {
 
     -- Set Evolution to always map to first tag on first screen
     { rule = { class = "Evolution" },
-      properties = { screen = 1, tag = "null" } },
+      properties = { screen = 1, tag = "head" } },
 
     -- Set Pidgin to always map to first tag and be br. floating on first screen
     { rule = { class = "Pidgin" },
-      properties = { screen = 1, tag = "null",
+      properties = { screen = 1, tag = "head",
                      floating = true,
                      placement = awful.placement.bottom_right } },
     -- Set Spotify to always map to 'kreat' tag on def_screen
