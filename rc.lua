@@ -459,11 +459,11 @@ awful.screen.connect_for_each_screen(function(s)
     if s.index == 1 then
         first_screen = true
         s:connect_signal("removed", function()
-            debug_print("screen removed")
+            debug_print_perm("a screen has been removed")
             update_screen_count()
         end)
         s:connect_signal("added", function()
-            debug_print("screen added")
+            debug_print_perm("a screen has been added")
             update_screen_count()
         end)
     end

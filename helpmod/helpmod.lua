@@ -33,8 +33,8 @@ function helpmod.fresh_volume_box(box, run_cmd)
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
-            debug_print("VB_stderr="..stderr)
-            box.markup = "no sound"
+            --debug_print("VB_stderr="..stderr)
+            box.markup = "<error>"
             return
         end
 
@@ -81,8 +81,8 @@ function helpmod.fresh_backlight_box(box, run, run_cmd)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local pref = 'backlight: '
         if exit_code ~= 0 then
-            debug_print("BL_stderr="..stderr)
-            box.markup = "err"
+            --debug_print("BL_stderr="..stderr)
+            box.markup = "<error>"
             return
         end
         box.visible = true
@@ -95,7 +95,7 @@ function helpmod.fresh_battery_box(box, timer)
     awful.spawn.easy_async(helpmod.cmd.g_battery, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
-            debug_print("BB_stderr="..stderr)
+            --debug_print("BB_stderr="..stderr)
             box.markup = "no battery"
             if timer.started then timer:stop() end
             return
@@ -162,11 +162,11 @@ function helpmod.get_network_stats(widget, args, netdevs)
         return string.sub(text, 4, -1)
     end
 
-    return 'No network'
+    return 'no network'
 end
 
 function helpmod.get_coretemp_text(temp, n)
-    local label = 'Core ' ..(n-2).. ': '
+    local label = 'core ' ..(n-2).. ': '
     if temp <= helpmod.cfg.cpu_temp_mid then
         label = label..'<span color="'..helpmod.cfg.cpu_temp_low_color..'">'
     elseif temp <= helpmod.cfg.cpu_temp_high  then
