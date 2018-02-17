@@ -102,10 +102,6 @@ function helpmod.fresh_battery_box(box, timer)
         end
 
         local cap = tonumber(stdout)
-
-        -- workaround for capacity containing 100+ value
-        if cap > 100 then cap = 100 end
-
         local h = assert(io.popen(helpmod.cmd.g_aconline))
         local ac = h:read("*n")
         h:close()
