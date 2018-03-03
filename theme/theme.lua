@@ -6,9 +6,8 @@
 
 -- {{{ Main
 local theme = {}
---theme.wallpaper = "~/.config/awesome/theme/minimal-background.jpg"
-theme.wallpaper = "~/.config/awesome/theme/xfce-background.png"
 --theme.wallpaper = "~/.config/awesome/theme/zenburn-background.png"
+theme.wallpaper = "~/awesome/awesome-wallpaper"
 -- }}}
 
 -- {{{ Styles
@@ -66,7 +65,6 @@ theme.menu_height = 15
 theme.menu_width  = 100
 -- }}}
 
--- {{{ Icons
 -- {{{ Taglist
 theme.taglist_squares_sel   = "~/.config/awesome/theme/taglist/squarefz.png"
 theme.taglist_squares_unsel = "~/.config/awesome/theme/taglist/squarez.png"
@@ -120,7 +118,6 @@ theme.titlebar_maximized_button_focus_active  = "~/.config/awesome/theme/titleba
 theme.titlebar_maximized_button_normal_active = "~/.config/awesome/theme/titlebar/maximized_normal_active.png"
 theme.titlebar_maximized_button_focus_inactive  = "~/.config/awesome/theme/titlebar/maximized_focus_inactive.png"
 theme.titlebar_maximized_button_normal_inactive = "~/.config/awesome/theme/titlebar/maximized_normal_inactive.png"
--- }}}
 -- }}}
 
 return theme
