@@ -21,6 +21,7 @@ run laptop-detect
 # run 'em
 run xcompmgr
 run light-locker
+run numlockx on
 run conky -q -c ~/.config/awesome/conky.cfg
 run $SCRIPTDIR/dbus_proxy.py
 
