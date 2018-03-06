@@ -7,7 +7,6 @@ based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
-- [ ] show numlock somehow
 
 ## done
 - [x] more dynamic tag names and layouts config
