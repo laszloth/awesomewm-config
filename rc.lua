@@ -124,10 +124,7 @@ local num_cores = helpmod.get_cpu_core_count()
 local on_laptop = helpmod.is_on_laptop()
 local net_devs = helpmod.get_net_devices()
 
--- could be added to the format function, but
--- it's an overkill to check this every second
--- TODO: maybe there is an event
-local netdevtimer = gears.timer { timeout = hcfg.net_devs_timeout, }
+local netdevtimer = gears.timer { timeout = 120, }
 netdevtimer:connect_signal("timeout", function()
     net_devs = helpmod.get_net_devices()
 end)
@@ -387,8 +384,12 @@ function ext_event_handler(event, data)
     elseif event == "mp_quit" then
         mympstate.visible = false
         mpspace.visible = false
+    elseif event == "net" then
+        net_devs = helpmod.get_net_devices()
+        debug_print("net event, net_devs:"..table_to_str(net_devs))
     else
-        debug_print_perm("Wrong event string:"..event)
+        event = event or "nil"
+        debug_print("Wrong event string:"..event)
     end
 end
 

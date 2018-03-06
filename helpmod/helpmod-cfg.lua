@@ -32,7 +32,6 @@ hcfg.battery_low_color       = hcfg.crit_color
 hcfg.battery_charge_color    = '#7FAE5A'
 
 -- timeouts
-hcfg.net_devs_timeout        = 15
 hcfg.backlight_timeout       = 2.5
 hcfg.volume_timeout          = 120
 hcfg.battery_timeout         = 30
