@@ -7,6 +7,9 @@ based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
+- [ ] add event based net if refresh
+- [ ] hide base net if if there is a tunnel
+- [ ] then show base net if on click
 
 ## done
 - [x] more dynamic tag names and layouts config
