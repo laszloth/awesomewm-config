@@ -662,7 +662,7 @@ globalkeys = awful.util.table.join(
               {description = "run prompt", group = "launcher"}),
 
     -- Rename current tag
-    awful.key({ modkey },            "t", function () rename_current_tag() end,
+    awful.key({ modkey, "Shift" },   "t", function () rename_current_tag() end,
               {description = "rename current tag", group = "awesome"}),
 
     -- Reset all tags
