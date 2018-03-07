@@ -196,8 +196,14 @@ local function table_to_str(t, depth)
     return str.."}"
 end
 
-local function print_table(t)
-    debug_print_perm(table_to_str(t))
+local function print_table(t, name)
+    name = name or "table"
+    debug_print(name..' '..table_to_str(t))
+end
+
+local function print_table_perm(t, name)
+    name = name or "table"
+    debug_print_perm(name..' '..table_to_str(t))
 end
 
 local function rename_current_tag()
@@ -386,10 +392,10 @@ function ext_event_handler(event, data)
         mpspace.visible = false
     elseif event == "net" then
         net_devs = helpmod.get_net_devices()
-        debug_print("net event, net_devs:"..table_to_str(net_devs))
+        --print_table(net_devs, "netdevs")
     else
         event = event or "nil"
-        debug_print("Wrong event string:"..event)
+        debug_print('Wrong event string: "'..event..'"')
     end
 end
 
