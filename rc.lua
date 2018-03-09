@@ -735,7 +735,7 @@ clientkeys = awful.util.table.join(
               {description = "move to master", group = "client"}),
     awful.key({ modkey,           }, "o",      function (c) c:move_to_screen(c.screen.index+1) end,
               {description = "move to next screen", group = "client"}),
-    awful.key({ modkey, "Control" }, "o",      function (c) c:move_to_screen(c.screen.index-1) end,
+    awful.key({ modkey, "Shift"   }, "o",      function (c) c:move_to_screen(c.screen.index-1) end,
               {description = "move to prev. screen", group = "client"}),
     awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop              end,
               {description = "toggle keep on top", group = "client"}),

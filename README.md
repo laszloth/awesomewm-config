@@ -7,6 +7,7 @@ based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
+- [ ] usb sound card: set initial volume
 
 ## done
 - [x] add event based net if refresh
