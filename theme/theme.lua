@@ -6,8 +6,7 @@
 
 -- {{{ Main
 local theme = {}
---theme.wallpaper = "~/.config/awesome/theme/zenburn-background.png"
-theme.wallpaper = "~/awesome/awesome-wallpaper"
+theme.wallpaper = "~/.config/awesome/awesome-wallpaper"
 -- }}}
 
 -- {{{ Styles
