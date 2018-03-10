@@ -6,9 +6,10 @@ based on Ubuntu's default rc.lua and zenburn theme
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] usb sound card: set initial volume
-- [ ] rebase rc.lua with awesomerc.lua
+- [ ] rebase theme
 
 ## done
+- [x] rebase rc.lua with awesomerc.lua
 - [x] add event based net if refresh
 - [x] more dynamic tag names and layouts config
 - [x] low battery warning
