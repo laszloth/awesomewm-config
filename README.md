@@ -1,13 +1,12 @@
 # awesomewm-config
 configuration for awesome window manager
 
-wallpaper path: ~/awesome/awesome-wallpaper
-
-based on Ubuntu's default awesome 3.5.6 & 4.0 rc.lua and zenburn theme
+based on Ubuntu's default rc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] usb sound card: set initial volume
+- [ ] rebase rc.lua with awesomerc.lua
 
 ## done
 - [x] add event based net if refresh
