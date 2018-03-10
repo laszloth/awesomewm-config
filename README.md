@@ -6,6 +6,7 @@ based on awesome's awesomerc.lua and zenburn theme
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] usb sound card: set initial volume
+- [ ] keycode to keysym
 
 ## done
 - [x] rebase theme
