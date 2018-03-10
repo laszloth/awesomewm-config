@@ -224,7 +224,12 @@ end
 local function reset_all_tags()
     for s in screen do
         for i = 1, #tags_cfg.names do
-            s.tags[i].name = tags_cfg.names[i]
+            local tag = s.tags[i]
+            local orig_name = tags_cfg.names[i]
+            if tag and tag.name ~= orig_name
+            then
+                tag.name = orig_name
+            end
         end
     end
 end
