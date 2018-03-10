@@ -3,6 +3,7 @@
 --    By Adrian C. (anrxc)            --
 ----------------------------------------
 
+local dpi = require("beautiful.xresources").apply_dpi
 
 -- {{{ Main
 local theme = {}
@@ -27,6 +28,8 @@ theme.bg_systray = "#212121"
 
 -- {{{ Borders
 theme.border_width  = 0
+theme.useless_gap   = dpi(0)
+--theme.border_width  = dpi(2)
 theme.border_normal = "#FFFFFF"
 theme.border_focus  = "#FECA00"
 theme.border_marked = "#CC9393"
@@ -60,8 +63,8 @@ theme.mouse_finder_color = "#CC9393"
 -- Variables set for theming the menu:
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
-theme.menu_height = 15
-theme.menu_width  = 100
+theme.menu_height = dpi(15)
+theme.menu_width  = dpi(100)
 -- }}}
 
 -- {{{ Taglist
@@ -98,6 +101,9 @@ theme.layout_cornerse   = "~/.config/awesome/theme/layouts/cornerse.png"
 theme.titlebar_close_button_focus  = "~/.config/awesome/theme/titlebar/close_focus.png"
 theme.titlebar_close_button_normal = "~/.config/awesome/theme/titlebar/close_normal.png"
 
+theme.titlebar_minimize_button_normal = "~/.config/awesome/theme/titlebar/minimize_normal.png"
+theme.titlebar_minimize_button_focus  = "~/.config/awesome/theme/titlebar/minimize_focus.png"
+
 theme.titlebar_ontop_button_focus_active  = "~/.config/awesome/theme/titlebar/ontop_focus_active.png"
 theme.titlebar_ontop_button_normal_active = "~/.config/awesome/theme/titlebar/ontop_normal_active.png"
 theme.titlebar_ontop_button_focus_inactive  = "~/.config/awesome/theme/titlebar/ontop_focus_inactive.png"
@@ -120,3 +126,5 @@ theme.titlebar_maximized_button_normal_inactive = "~/.config/awesome/theme/title
 -- }}}
 
 return theme
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

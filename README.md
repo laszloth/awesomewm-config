@@ -1,14 +1,14 @@
 # awesomewm-config
 configuration for awesome window manager
 
-based on Ubuntu's default rc.lua and zenburn theme
+based on awesome's awesomerc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] usb sound card: set initial volume
-- [ ] rebase theme
 
 ## done
+- [x] rebase theme
 - [x] rebase rc.lua with awesomerc.lua
 - [x] add event based net if refresh
 - [x] more dynamic tag names and layouts config
