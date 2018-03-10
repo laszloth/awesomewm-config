@@ -64,21 +64,20 @@ do
 end
 -- }}}
 
--- {{{ Autorun script start
-awful.spawn.with_shell("~/.config/awesome/scripts/autorun.sh &>/dev/null")
--- }}}
+-- Get config dir and start autorun script
+local config_dir = gears.filesystem.get_configuration_dir()
+awful.spawn.with_shell(config_dir .. "scripts/autorun.sh &>/dev/null")
 
 -- {{{ Variable definitions
 -- @DOC_LOAD_THEME@
 -- Themes define colours, icons, font and wallpapers.
---beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
-beautiful.init("~/.config/awesome/theme/theme.lua")
+beautiful.init(config_dir .. "theme/theme.lua")
 
 -- @DOC_DEFAULT_APPLICATIONS@
 -- This is used later as the default terminal and editor to run.
 terminal    = hcmd.terminal
---editor = os.getenv("EDITOR") or "nano"
-editor_cmd  = terminal .. " -e " .. hcmd.editor
+editor      = os.getenv("EDITOR") or hcmd.editor
+editor_cmd  = terminal .. " -e " .. editor
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -243,6 +242,10 @@ local function client_menu_toggle_fn()
     end
 end
 -- }}}
+
+---------------------------------
+-- all vars and helpers set up --
+---------------------------------
 
 -- Default screen settings for Firefox and others
 update_screen_count()
@@ -545,7 +548,6 @@ awful.screen.connect_for_each_screen(function(s)
     --space3.text = hcfg.space_txt3
     local separator = wibox.widget.textbox()
     separator.text = hcfg.separ_txt
-    -- }}}
 
     -- Add widgets to the wibox
     local leftl = wibox.layout.fixed.horizontal(
