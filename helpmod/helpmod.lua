@@ -39,7 +39,7 @@ function helpmod.fresh_volume_box(box, run_cmd)
         end
 
         local rawdata = helpmod.str_to_array(stdout, "%s")
-        -- unused
+        -- currently unused
         -- local sink_index = tonumber(rawdata[1])
         local muted = tonumber(rawdata[2]) == 1
         local vol = tonumber(rawdata[3])
@@ -47,15 +47,15 @@ function helpmod.fresh_volume_box(box, run_cmd)
         local jack = tonumber(rawdata[5]) == 1
         local isusb = bus == "usb"
 
-        local pref = 'SPKR:'
+        local pref = helpmod.cfg.label_speaker
         if isusb then
-            pref = "USB:"
+            pref = helpmod.cfg.label_usb
         elseif jack then
-            pref = 'JACK:'
+            pref = helpmod.cfg.label_jack
         end
 
         if muted then
-            pref = 'MUTED:'
+            pref = helpmod.cfg.label_muted
             box.markup = '<span foreground="'..helpmod.cfg.volume_mute_color..'">'..pref..vol..'</span>'
         -- no different level colors for usb card as 100% is the normal volume
         elseif not isusb then

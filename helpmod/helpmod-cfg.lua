@@ -12,6 +12,12 @@ hcfg.volume_mid              = 40
 hcfg.battery_low             = 20
 hcfg.battery_low_notif_gap   = 5
 
+-- labels
+hcfg.label_speaker           = 'SPKR:'
+hcfg.label_jack              = 'JACK:'
+hcfg.label_usb               = 'USB:'
+hcfg.label_muted             = 'MUTED:'
+
 -- colors
 hcfg.warn_color              = '#FECA00'
 hcfg.crit_color              = '#FF0000'
