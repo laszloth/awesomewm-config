@@ -9,6 +9,7 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] usb sound card: set initial volume
 - [ ] keycode to keysym
 - [ ] use sink name instead of index
+- [ ] add new module for helper functions only
 
 ## done
 - [x] rebase theme

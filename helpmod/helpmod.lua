@@ -8,7 +8,7 @@ local prev_batt_level = 100
 
 local function _get_sound_info(script_output)
     local sound_info = {}
-    local rawdata = helpmod.str_to_array(script_output, "%s")
+    local rawdata = helpmod.str_to_table(script_output, "%s")
     sound_info["sink_index"] = tonumber(rawdata[1])
     sound_info["is_muted"] = (tonumber(rawdata[2]) == 1)
     sound_info["volume"] = tonumber(rawdata[3])
@@ -200,7 +200,15 @@ function helpmod.get_cpu_core_count()
     return num
 end
 
-function helpmod.str_to_array(string, delimiter, exclude)
+-- called once at startup, popen is fine for now
+function helpmod.get_net_devices()
+    local h = assert(io.popen(helpmod.cmd.g_netdevs))
+    local ret = h:read("*a")
+    h:close()
+    return helpmod.str_to_table(ret, "%s", "lo")
+end
+
+function helpmod.str_to_table(string, delimiter, exclude)
     local arr = {}
     for m in string.gmatch(string, "[^"..delimiter.."]+") do
         if m ~= exclude then table.insert(arr, m) end
@@ -208,12 +216,24 @@ function helpmod.str_to_array(string, delimiter, exclude)
     return arr
 end
 
--- called once at startup, popen is fine for now
-function helpmod.get_net_devices()
-    local h = assert(io.popen(helpmod.cmd.g_netdevs))
-    local ret = h:read("*a")
-    h:close()
-    return helpmod.str_to_array(ret, "%s", "lo")
+function helpmod.table_to_str(t, depth)
+    depth = depth or 0
+
+    if type(t) ~= "table" then
+        return tostring(t)
+    end
+
+    local dpref = " "
+    for i = 1, depth do
+        dpref = dpref.." "
+    end
+
+    local str = "{ "
+    for key, value in pairs(t) do
+        str = str.."\n"..dpref.."["..tostring(key).."] = "..
+                helpmod.table_to_str(value, depth+1)..", "
+    end
+    return str.."}"
 end
 
 return helpmod
