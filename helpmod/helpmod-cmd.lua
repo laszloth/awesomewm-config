@@ -12,7 +12,7 @@ hcmd.g_corecnt  = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 hcmd.g_netdevs  = [[ls /sys/class/net/]]
 
 -- raw commands
-local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh raw]]
+local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh --raw]]
 local _togglemute = [[pactl set-sink-mute 0 toggle >/dev/null 2>&1]]
 local _backlight  = [[xbacklight -get]]
 local _battery    = [[cat /sys/class/power_supply/BAT0/capacity]]
@@ -42,8 +42,8 @@ hcmd.s_prev       = {"sh", "-c", _prev}
 hcmd.s_toggletp   = {"sh", "-c", _toggletp}
 
 -- set-get commands for syncronization
-hcmd.sg_lowervol   = {"bash", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol - "..vol_step.." "..usb_step}
-hcmd.sg_raisevol   = {"bash", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol + "..vol_step.." "..usb_step}
+--hcmd.sg_lowervol   = {"bash", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol - "..vol_step.." "..usb_step}
+--hcmd.sg_raisevol   = {"bash", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol + "..vol_step.." "..usb_step}
 hcmd.sg_togglemute = {"sh", "-c", _togglemute..';'.._soundinfo}
 hcmd.sg_brightdown = {"sh", "-c", "xbacklight -dec "..bl_step.." >/dev/null 2>&1;".._backlight}
 hcmd.sg_brightup   = {"sh", "-c", "xbacklight -inc "..bl_step.." >/dev/null 2>&1;".._backlight}
