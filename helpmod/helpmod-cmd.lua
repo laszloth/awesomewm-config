@@ -13,7 +13,7 @@ hcmd.g_netdevs  = [[ls /sys/class/net/]]
 
 -- raw commands
 local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh --raw]]
-local _togglemute = [[pactl set-sink-mute 0 toggle >/dev/null 2>&1]]
+local _togglemute = [[~/.config/awesome/scripts/sound_handler.sh --toggle-mute]]
 local _backlight  = [[xbacklight -get]]
 local _battery    = [[cat /sys/class/power_supply/BAT0/capacity]]
 local _play       = [[~/.config/awesome/scripts/XF86Play.sh >/dev/null 2>&1]]

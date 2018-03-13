@@ -11,6 +11,7 @@ Usage: $(basename $0) [option]
   -i, --info: print every info collected
   -r, --raw: print info in raw, short format
   -s, --set-volume: set volume on sink or on default
+  -t, --toggle-mute: toggle mute on sink or on default
 
   -I, --index: print index of default sink
   -n, --name: print name of default sink
@@ -56,6 +57,16 @@ function set_volume {
     pactl set-sink-volume $sink $volume%
 }
 
+function toggle_mute {
+    if [ -z "$1" ]; then
+        get_info
+        sink=$DEF_SINK
+    else
+        sink=$1
+    fi
+    pactl set-sink-mute $sink toggle
+}
+
 case $1 in
     -i|--info)
         get_info
@@ -68,6 +79,10 @@ case $1 in
     -s|--set-volume)
         shift
         set_volume $@
+    ;;
+    -t|--toggle-mute)
+        shift
+        toggle_mute $@
     ;;
     -I|--index)
         get_info
