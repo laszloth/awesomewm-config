@@ -236,4 +236,14 @@ function helpmod.table_to_str(t, depth)
     return str.."}"
 end
 
+function helpmod.print_table(t, name)
+    name = name or "table"
+    debug_print(name..' '..helpmod.table_to_str(t))
+end
+
+function helpmod.print_table_perm(t, name)
+    name = name or "table"
+    debug_print_perm(name..' '..helpmod.table_to_str(t))
+end
+
 return helpmod

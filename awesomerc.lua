@@ -171,16 +171,6 @@ local function update_screen_count()
     --debug_print("num_screen="..num_screen.."\ndef_screen="..def_screen)
 end
 
-local function print_table(t, name)
-    name = name or "table"
-    debug_print(name..' '..helpmod.table_to_str(t))
-end
-
-local function print_table_perm(t, name)
-    name = name or "table"
-    debug_print_perm(name..' '..helpmod.table_to_str(t))
-end
-
 local function rename_current_tag()
     awful.prompt.run {
         prompt       = ' Tag name: ',
@@ -388,7 +378,7 @@ function ext_event_handler(event, data)
         mpspace.visible = false
     elseif event == "net" then
         net_devs = helpmod.get_net_devices()
-        --print_table(net_devs, "netdevs")
+        --helpmod.print_table(net_devs, "netdevs")
     else
         event = event or "nil"
         debug_print('Wrong event string: "'..event..'"')
