@@ -8,6 +8,7 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] remove relative volume handling
 - [ ] usb sound card: set initial volume
 - [ ] keycode to keysym
+- [ ] use sink name instead of index
 
 ## done
 - [x] rebase theme

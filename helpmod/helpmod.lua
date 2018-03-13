@@ -6,6 +6,17 @@ helpmod.cfg = require("helpmod.helpmod-cfg")
 
 local prev_batt_level = 100
 
+local function _get_sound_info(script_output)
+    local sound_info = {}
+    local rawdata = helpmod.str_to_array(script_output, "%s")
+    sound_info["sink_index"] = tonumber(rawdata[1])
+    sound_info["is_muted"] = (tonumber(rawdata[2]) == 1)
+    sound_info["volume"] = tonumber(rawdata[3])
+    sound_info["bus_type"] = rawdata[4]
+    sound_info["jack_plugged"] = (tonumber(rawdata[5]) == 1)
+    return sound_info
+end
+
 function helpmod.fresh_mpstate_box(boxes, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
@@ -38,23 +49,18 @@ function helpmod.fresh_volume_box(box, run_cmd)
             return
         end
 
-        local rawdata = helpmod.str_to_array(stdout, "%s")
-        -- currently unused
-        -- local sink_index = tonumber(rawdata[1])
-        local muted = tonumber(rawdata[2]) == 1
-        local vol = tonumber(rawdata[3])
-        local bus = rawdata[4]
-        local jack = tonumber(rawdata[5]) == 1
-        local isusb = bus == "usb"
+        local sinfo = _get_sound_info(stdout)
+        local isusb = (sinfo.bus_type == "usb")
+        local vol = sinfo.volume
 
         local pref = helpmod.cfg.label_speaker
         if isusb then
             pref = helpmod.cfg.label_usb
-        elseif jack then
+        elseif sinfo.jack_plugged then
             pref = helpmod.cfg.label_jack
         end
 
-        if muted then
+        if sinfo.is_muted then
             pref = helpmod.cfg.label_muted
             box.markup = '<span foreground="'..helpmod.cfg.volume_mute_color..'">'..pref..vol..'</span>'
         -- no different level colors for usb card as 100% is the normal volume
