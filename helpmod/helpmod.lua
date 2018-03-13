@@ -147,7 +147,12 @@ function helpmod.get_network_stats(widget, args, netdevs)
             local up_data = up_val..' '..up_unit
             local down_data = down_val..' '..down_unit
 
-            text = text..' - '..nwdev..':<span color="'..helpmod.cfg.net_download_color..
+            if string.match(nwdev, "tun") then
+                nwdev = '<span color="'..helpmod.cfg.net_tunnel_color..'">'..nwdev..':</span>'
+            else
+                nwdev = nwdev .. ':'
+            end
+            text = text..' - '..nwdev..'<span color="'..helpmod.cfg.net_download_color..
                     '"> '..down_label..' '..down_data..'</span> / <span color="'..
                     helpmod.cfg.net_upload_color..'">'..up_label..' '..up_data..'</span>'
       end

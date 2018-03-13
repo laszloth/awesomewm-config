@@ -24,6 +24,7 @@ hcfg.crit_color              = '#FF0000'
 
 hcfg.net_download_color      = '#41F468'
 hcfg.net_upload_color        = '#4179F4'
+hcfg.net_tunnel_color        = '#D31010'
 
 hcfg.cpu_temp_low_color      = '#7FAE5A'
 hcfg.cpu_temp_medium_color   = hcfg.warn_color
