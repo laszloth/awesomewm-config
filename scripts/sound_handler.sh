@@ -10,7 +10,7 @@ Usage: $(basename $0) [option]
  Options:
   -i, --info: print every info collected
   -r, --raw: print info in raw, short format
-  -s, --set-volume: set volume on sink
+  -s, --set-volume: set volume on sink or on default
 
   -I, --index: print index of default sink
   -n, --name: print name of default sink
@@ -44,7 +44,16 @@ function print_info {
 }
 
 function set_volume {
-    pactl set-sink-volume $1 $2%
+    [ -z "$1" ] && echo "no params given" >&2 && exit 1
+    if [ -z "$2" ]; then
+        volume=$1
+        get_info
+        sink=$DEF_SINK
+    else
+        sink=$1
+        volume=$2
+    fi
+    pactl set-sink-volume $sink $volume%
 }
 
 case $1 in
