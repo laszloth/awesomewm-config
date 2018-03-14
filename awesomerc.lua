@@ -564,7 +564,7 @@ awful.screen.connect_for_each_screen(function(s)
             separator)
 
     local ctc = wibox.container.background(mycputempwidget)
-    --ctc.visible = false
+    if num_screen == 1 then ctc.visible = false end
     cputemps[s.index] = ctc
     rightl:add(ctc)
     rightl:add(mynetwidget) rightl:add(separator)
