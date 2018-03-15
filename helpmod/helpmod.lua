@@ -4,10 +4,12 @@ local helpmod = {}
 helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
 
--- {{{ Private
-local prev_batt_level = 100
+helpmod.sound_info = {}
 
-local function _get_sound_info(script_output)
+-- {{{ Private
+local _prev_batt_lvl = 100
+
+local function _parse_sound_info(script_output)
     local sound_info = {}
     local rawdata = helpmod.str_to_table(script_output, "%s")
     sound_info["sink"] = rawdata[1]
@@ -18,33 +20,8 @@ local function _get_sound_info(script_output)
     sound_info["bus_type"] = rawdata[6]
     return sound_info
 end
--- }}}
 
-helpmod.sound_info = {}
-
-function helpmod.fresh_mpstate_box(boxes, imgs)
-    awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
-        if exit_code ~= 0 then
-            for i = 1, #boxes do
-                --debug_print("MP_stderr="..stderr)
-                boxes[i].visible = false
-            end
-            return
-        end
-
-        local state = string.gsub(stdout, "\n", "")
-        if state == "Playing" then
-            boxes[1].image = imgs[1]
-        else
-            boxes[1].image = imgs[2]
-        end
-        for i = 1, #boxes do
-            boxes[i].visible = true
-        end
-    end)
-end
-
-function helpmod.fresh_volume_box(box, run_cmd)
+local function _fresh_volume_box(box, run_cmd)
     local cmd = run_cmd or helpmod.cmd.g_soundinfo
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
@@ -54,7 +31,8 @@ function helpmod.fresh_volume_box(box, run_cmd)
             return
         end
 
-        local sinfo = _get_sound_info(stdout)
+        helpmod.sound_info = _parse_sound_info(stdout)
+        local sinfo = helpmod.sound_info
         local isusb = (sinfo.bus_type == "usb")
         local vol = sinfo.volume
 
@@ -79,6 +57,61 @@ function helpmod.fresh_volume_box(box, run_cmd)
             end
         else
             box.markup = '<span foreground="'..helpmod.cfg.usb_card_color..'">'..pref..vol..'</span>'
+        end
+    end)
+end
+
+local function _modify_volume(box, new_volume)
+    local cmd = helpmod.fill_args(helpmod.cmd.sg_volume, { new_volume })
+    _fresh_volume_box(box, cmd)
+end
+
+local function _modify_volume_rel(box, increase)
+    local vol = ""
+    if increase then vol = "+" else vol = "-" end
+    if helpmod.sound_info.bus_type == "usb" then
+        vol = vol .. tostring(helpmod.cfg.usb_step)
+    else
+        vol = vol .. tostring(helpmod.cfg.vol_step)
+    end
+    _modify_volume(box, vol)
+end
+-- }}}
+
+function helpmod.lower_volume(box)
+    _modify_volume_rel(box, false)
+end
+
+function helpmod.raise_volume(box)
+    _modify_volume_rel(box, true)
+end
+
+function helpmod.toggle_mute(box)
+   _fresh_volume_box(box, helpmod.cmd.sg_togglemute)
+end
+
+function helpmod.fresh_volume_box(box)
+   _fresh_volume_box(box)
+end
+
+function helpmod.fresh_mpstate_box(boxes, imgs)
+    awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
+        if exit_code ~= 0 then
+            for i = 1, #boxes do
+                --debug_print("MP_stderr="..stderr)
+                boxes[i].visible = false
+            end
+            return
+        end
+
+        local state = string.gsub(stdout, "\n", "")
+        if state == "Playing" then
+            boxes[1].image = imgs[1]
+        else
+            boxes[1].image = imgs[2]
+        end
+        for i = 1, #boxes do
+            boxes[i].visible = true
         end
     end)
 end
@@ -119,8 +152,8 @@ function helpmod.fresh_battery_box(box, timer)
         if ac == 0 then
             if cap <= helpmod.cfg.battery_low then
                 box.markup = '<span foreground="'..helpmod.cfg.battery_low_color..'">B:'..cap..'</span>'
-                if cap < prev_batt_level and math.fmod(cap, helpmod.cfg.battery_low_notif_gap) == 0 then
-                    prev_batt_level = cap
+                if cap < _prev_batt_lvl and math.fmod(cap, helpmod.cfg.battery_low_notif_gap) == 0 then
+                    _prev_batt_lvl = cap
                     warn_print("low battery: "..cap.."%")
                 end
             else
@@ -218,7 +251,7 @@ function helpmod.init_sound_info()
     local h = assert(io.popen(helpmod.cmd.g_soundinfo))
     local ret = h:read("*a")
     h:close()
-    helpmod.sound_info = _get_sound_info(ret)
+    helpmod.sound_info = _parse_sound_info(ret)
     helpmod.print_table_perm(helpmod.sound_info, "sinfo")
     return
 end

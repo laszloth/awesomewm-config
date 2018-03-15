@@ -305,7 +305,7 @@ myvoltimer:connect_signal("timeout", function()
     helpmod.fresh_volume_box(myvolwidget)
 end)
 myvolwidget:connect_signal("button::release", function()
-    helpmod.fresh_volume_box(myvolwidget, hcmd.sg_togglemute)
+    helpmod.toggle_mute(myvolwidget)
 end)
 
 myvoltimer:start()
@@ -688,11 +688,11 @@ globalkeys = gears.table.join(
     awful.key({ "Control", "Mod1" }, "Delete", function()
         awful.util.spawn(hcmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_lowervol) end),
+        helpmod.lower_volume(myvolwidget) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_raisevol) end),
+        helpmod.raise_volume(myvolwidget) end),
     awful.key({ }, "XF86AudioMute", function()
-        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_togglemute) end),
+        helpmod.toggle_mute(myvolwidget) end),
     awful.key({ }, "XF86AudioNext", function()
         awful.util.spawn(hcmd.s_next)
         end),

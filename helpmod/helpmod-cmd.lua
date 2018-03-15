@@ -19,6 +19,7 @@ local _terminate  = '"'
 
 local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh --raw]]
 local _setvolume  = [[~/.config/awesome/scripts/sound_handler.sh --set-volume ARG1]]
+local _setgetvol  = [[~/.config/awesome/scripts/sound_handler.sh --set-get-volume ARG1]]
 local _togglemute = [[~/.config/awesome/scripts/sound_handler.sh --toggle-mute]]
 
 local _getbackl   = [[xbacklight -get]]
@@ -47,7 +48,7 @@ hcmd.s_prev       = _sh .. _prev .. _terminate
 hcmd.s_toggletp   = _sh .. _toggletp .. _terminate
 
 -- set-get commands for syncronization and speed
-hcmd.sg_setvolume  = _bash .. _setvolume .. _and .. _soundinfo .. _terminate
+hcmd.sg_volume     = _bash .. _setgetvol .. _terminate
 hcmd.sg_togglemute = _sh .. _togglemute .. _and .. _soundinfo .. _terminate
 hcmd.sg_brightdown = _sh .. _decbackl .. _and .. _getbackl .. _terminate
 hcmd.sg_brightup   = _sh .. _incbackl .. _and .. _getbackl .. _terminate

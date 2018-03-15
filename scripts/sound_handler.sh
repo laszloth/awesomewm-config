@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#set -x
+
 LOCKFILE="/tmp/aw_sound_handler.lock"
 exec 200>$LOCKFILE
 flock --wait 1 200 || exit 1
@@ -11,6 +13,7 @@ Usage: $(basename $0) [option]
   -i, --info: print every info collected
   -r, --raw: print info in raw, short format
   -s, --set-volume: set volume on sink or on default
+  -S, --set-get-volume: same as -s, but print new values
   -t, --toggle-mute: toggle mute on sink or on default
 
   -I, --index: print index of default sink
@@ -44,6 +47,13 @@ function print_info {
     [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
 }
 
+function print_raw_info {
+    echo -n $DEF_SINK $DEF_SINK_INDEX $VOLUME $((1-MUTED)) $((1-JACK)) $BUS
+}
+
+# $1: sink name or index, can be emitted
+# $2: new volume or new relative volume w/ operand
+# $SHOW_RESULT: call print_raw_info w/ updated volume
 function set_volume {
     [ -z "$1" ] && echo "no params given" >&2 && exit 1
     if [ -z "$2" ]; then
@@ -54,7 +64,15 @@ function set_volume {
         sink=$1
         volume=$2
     fi
+    volume=${volume//%}
     pactl set-sink-volume $sink $volume%
+
+    if [ -n "$SHOW_RESULT" ]; then
+        op=$(expr "$volume" : '\([+-]*\)')
+        [ -z "$op" ] && VOLUME=$volume || VOLUME=$((VOLUME${volume}))
+        [ $VOLUME -lt 0 ] && VOLUME=0
+        print_raw_info
+    fi
 }
 
 function toggle_mute {
@@ -74,9 +92,14 @@ case $1 in
     ;;
     -r|--raw)
         get_info
-        echo -n $DEF_SINK $DEF_SINK_INDEX $VOLUME $((1-MUTED)) $((1-JACK)) $BUS
+        print_raw_info
     ;;
     -s|--set-volume)
+        shift
+        set_volume $@
+    ;;
+    -S|--set-get-volume)
+        SHOW_RESULT=1
         shift
         set_volume $@
     ;;
