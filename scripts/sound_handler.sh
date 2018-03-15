@@ -74,7 +74,7 @@ case $1 in
     ;;
     -r|--raw)
         get_info
-        echo -n $DEF_SINK_INDEX $((1-MUTED)) $VOLUME $BUS $((1-JACK))
+        echo -n $DEF_SINK $DEF_SINK_INDEX $VOLUME $((1-MUTED)) $((1-JACK)) $BUS
     ;;
     -s|--set-volume)
         shift

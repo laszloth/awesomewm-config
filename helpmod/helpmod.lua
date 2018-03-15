@@ -10,14 +10,17 @@ local prev_batt_level = 100
 local function _get_sound_info(script_output)
     local sound_info = {}
     local rawdata = helpmod.str_to_table(script_output, "%s")
-    sound_info["sink_index"] = tonumber(rawdata[1])
-    sound_info["is_muted"] = (tonumber(rawdata[2]) == 1)
+    sound_info["sink"] = rawdata[1]
+    sound_info["sink_index"] = tonumber(rawdata[2])
     sound_info["volume"] = tonumber(rawdata[3])
-    sound_info["bus_type"] = rawdata[4]
+    sound_info["is_muted"] = (tonumber(rawdata[4]) == 1)
     sound_info["jack_plugged"] = (tonumber(rawdata[5]) == 1)
+    sound_info["bus_type"] = rawdata[6]
     return sound_info
 end
 -- }}}
+
+helpmod.sound_info = {}
 
 function helpmod.fresh_mpstate_box(boxes, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
@@ -208,6 +211,16 @@ function helpmod.get_net_devices()
     local ret = h:read("*a")
     h:close()
     return helpmod.str_to_table(ret, "%s", "lo")
+end
+
+-- called once at startup/in callback, popen is fine for now
+function helpmod.init_sound_info()
+    local h = assert(io.popen(helpmod.cmd.g_soundinfo))
+    local ret = h:read("*a")
+    h:close()
+    helpmod.sound_info = _get_sound_info(ret)
+    helpmod.print_table_perm(helpmod.sound_info, "sinfo")
+    return
 end
 
 function helpmod.fill_args(raw_cmd, args)
