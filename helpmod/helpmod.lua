@@ -4,6 +4,7 @@ local helpmod = {}
 helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
 
+-- {{{ Private
 local prev_batt_level = 100
 
 local function _get_sound_info(script_output)
@@ -16,6 +17,7 @@ local function _get_sound_info(script_output)
     sound_info["jack_plugged"] = (tonumber(rawdata[5]) == 1)
     return sound_info
 end
+-- }}}
 
 function helpmod.fresh_mpstate_box(boxes, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
@@ -206,6 +208,15 @@ function helpmod.get_net_devices()
     local ret = h:read("*a")
     h:close()
     return helpmod.str_to_table(ret, "%s", "lo")
+end
+
+function helpmod.fill_args(raw_cmd, args)
+    local cmd
+    if type(args) ~= "table" then return end
+    for i = 1, #args do
+       cmd = string.gsub(raw_cmd, "ARG"..i, args[i])
+    end
+    return cmd
 end
 
 function helpmod.str_to_table(string, delimiter, exclude)

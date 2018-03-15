@@ -708,12 +708,14 @@ globalkeys = gears.table.join(
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if on_laptop then
-            helpmod.fresh_backlight_box(myblwidget, true, hcmd.sg_brightdown)
+            local cmd = helpmod.fill_args(hcmd.sg_brightdown, { hcfg.bl_step })
+            helpmod.fresh_backlight_box(myblwidget, true, cmd)
             mybltimer:again()
         end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         if on_laptop then
-            helpmod.fresh_backlight_box(myblwidget, true, hcmd.sg_brightup)
+            local cmd = helpmod.fill_args(hcmd.sg_brightup, { hcfg.bl_step })
+            helpmod.fresh_backlight_box(myblwidget, true, cmd)
             mybltimer:again()
         end end),
 

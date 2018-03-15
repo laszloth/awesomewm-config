@@ -38,6 +38,11 @@ hcfg.usb_card_color          = '#BA4100'
 hcfg.battery_low_color       = hcfg.crit_color
 hcfg.battery_charge_color    = '#7FAE5A'
 
+-- additional conf.
+hcfg.bl_step  = 7 --percent
+hcfg.vol_step = 2 --percent
+hcfg.usb_step = 25 --percent
+
 -- timeouts
 hcfg.backlight_timeout       = 2.5
 hcfg.volume_timeout          = 120
