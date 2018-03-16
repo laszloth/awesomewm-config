@@ -28,7 +28,7 @@ end
 
 local function _parse_sound_info(raw_output)
     local sound_info = {}
-    local rawdata = helpmod.str_to_table(raw_output, "%s")
+    local rawdata = helpmod.str_to_table(raw_output, "' '")
     sound_info["sink"] = rawdata[1]
     sound_info["sink_index"] = tonumber(rawdata[2])
     sound_info["volume"] = tonumber(rawdata[3])

@@ -6,10 +6,10 @@ based on awesome's awesomerc.lua and zenburn theme
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] keycode to keysym
-- [ ] use sink name instead of index
-- [ ] make audio info passing more robust
 
 ## done
+- [x] make audio info passing more robust
+- [x] use sink name instead of index
 - [x] remove widget argument from fresh functions
 - [x] remove second argument from fresh functions
 - [x] usb sound card: set initial volume

@@ -48,7 +48,7 @@ function print_info {
 }
 
 function print_raw_info {
-    echo $DEF_SINK $DEF_SINK_INDEX $VOLUME $((1-MUTED)) $((1-JACK)) $BUS
+    echo "'${DEF_SINK}' '${DEF_SINK_INDEX}' '${VOLUME}' '$((1-MUTED))' '$((1-JACK))' '${BUS}'"
 }
 
 # $1: sink name or index, can be emitted
