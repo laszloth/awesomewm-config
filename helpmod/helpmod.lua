@@ -93,7 +93,7 @@ local function _modify_volume_rel(box, increase)
     _modify_volume(box, vol)
 end
 
-local function _fresh_mpstate_box(box, imgs)
+local function _fresh_mpstate_box(boxes, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             for i = 1, #boxes do
@@ -179,7 +179,7 @@ function helpmod.fresh_volume_box(box)
 end
 
 function helpmod.fresh_mpstate_box(boxes, imgs)
-    _fresh_mpstate_box(box, imgs)
+    _fresh_mpstate_box(boxes, imgs)
 end
 
 function helpmod.brightness_down(box)
