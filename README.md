@@ -7,12 +7,11 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] keycode to keysym
 - [ ] use sink name instead of index
-- [ ] add new module for helper functions only
-- [ ] remove widget argument from fresh functions
-- [ ] remove second argument from fresh functions
 - [ ] make audio info passing more robust
 
 ## done
+- [x] remove widget argument from fresh functions
+- [x] remove second argument from fresh functions
 - [x] usb sound card: set initial volume
 - [x] rebase theme
 - [x] rebase rc.lua with awesomerc.lua
@@ -36,6 +35,7 @@ based on awesome's awesomerc.lua and zenburn theme
 ## maybe
 - [ ] hide base net if if there is a tunnel
 - [ ] then show base net if on click
+- [ ] add new module for helper functions only
 
 ## deleted
 - [ ] remove relative volume handling [reason: much slower and complicated due to callbacks]

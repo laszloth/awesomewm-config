@@ -5,12 +5,25 @@ helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
 
 helpmod.sound_info = {}
+helpmod.widgets = {}
 
 -- {{{ Private
+local hcmd = helpmod.cmd
+local hcfg = helpmod.cfg
+
 local _prev_batt_lvl = 100
 
 local function _remove_newline(s)
     return string.gsub(s, "\n", "")
+end
+
+local function _fill_args(raw_cmd, args)
+    local cmd
+    if type(args) ~= "table" then return end
+    for i = 1, #args do
+       cmd = string.gsub(raw_cmd, "ARG"..i, args[i])
+    end
+    return cmd
 end
 
 local function _parse_sound_info(raw_output)
@@ -26,13 +39,14 @@ local function _parse_sound_info(raw_output)
 end
 
 local function _init_usb()
-    local usb_cmd = helpmod.fill_args(helpmod.cmd.s_volume, { 100 })
+    local usb_cmd = _fill_args(hcmd.s_volume, { 100 })
     helpmod.sound_info.volume = 100
     awful.util.spawn(usb_cmd)
 end
 
-local function _fresh_volume_box(box, run_cmd)
-    local cmd = run_cmd or helpmod.cmd.g_soundinfo
+local function _fresh_volume_box(run_cmd)
+    local box = helpmod.widgets.volume.box
+    local cmd = run_cmd or hcmd.g_soundinfo
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
@@ -52,66 +66,51 @@ local function _fresh_volume_box(box, run_cmd)
             _init_usb()
         end
 
-        local pref = helpmod.cfg.label_speaker
+        local pref = hcfg.label_speaker
         if isusb then
-            pref = helpmod.cfg.label_usb
+            pref = hcfg.label_usb
         elseif sinfo.jack_plugged then
-            pref = helpmod.cfg.label_jack
+            pref = hcfg.label_jack
         end
 
         if sinfo.is_muted then
-            pref = helpmod.cfg.label_muted
-            box.markup = '<span foreground="'..helpmod.cfg.volume_mute_color..'">'..pref..vol..'</span>'
+            pref = hcfg.label_muted
+            box.markup = '<span foreground="'..hcfg.volume_mute_color..'">'..pref..vol..'</span>'
         -- no different level colors for usb card as 100% is the normal volume
         elseif not isusb then
-            if vol >= helpmod.cfg.volume_high then
-                box.markup = '<span foreground="'..helpmod.cfg.volume_high_color..'">'..pref..vol..'</span>'
-            elseif vol >= helpmod.cfg.volume_mid then
-                box.markup = '<span foreground="'..helpmod.cfg.volume_mid_color..'">'..pref..vol..'</span>'
+            if vol >= hcfg.volume_high then
+                box.markup = '<span foreground="'..hcfg.volume_high_color..'">'..pref..vol..'</span>'
+            elseif vol >= hcfg.volume_mid then
+                box.markup = '<span foreground="'..hcfg.volume_mid_color..'">'..pref..vol..'</span>'
             else
                 box.markup = pref..vol
             end
         else
-            box.markup = '<span foreground="'..helpmod.cfg.usb_card_color..'">'..pref..vol..'</span>'
+            box.markup = '<span foreground="'..hcfg.usb_card_color..'">'..pref..vol..'</span>'
         end
     end)
 end
 
-local function _modify_volume(box, new_volume)
-    local cmd = helpmod.fill_args(helpmod.cmd.sg_volume, { new_volume })
-    _fresh_volume_box(box, cmd)
+local function _modify_volume(new_volume)
+    local cmd = _fill_args(hcmd.sg_volume, { new_volume })
+    _fresh_volume_box(cmd)
 end
 
-local function _modify_volume_rel(box, increase)
+local function _modify_volume_rel(increase)
     local vol = ""
     if increase then vol = "+" else vol = "-" end
     if helpmod.sound_info.bus_type == "usb" then
-        vol = vol .. tostring(helpmod.cfg.usb_step)
+        vol = vol .. tostring(hcfg.usb_step)
     else
-        vol = vol .. tostring(helpmod.cfg.vol_step)
+        vol = vol .. tostring(hcfg.vol_step)
     end
-    _modify_volume(box, vol)
-end
--- }}}
-
-function helpmod.lower_volume(box)
-    _modify_volume_rel(box, false)
+    _modify_volume(vol)
 end
 
-function helpmod.raise_volume(box)
-    _modify_volume_rel(box, true)
-end
-
-function helpmod.toggle_mute(box)
-   _fresh_volume_box(box, helpmod.cmd.sg_togglemute)
-end
-
-function helpmod.fresh_volume_box(box)
-   _fresh_volume_box(box)
-end
-
-function helpmod.fresh_mpstate_box(boxes, imgs)
-    awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
+local function _fresh_mpstate_box()
+    local boxes = helpmod.widgets.mpstate.boxes
+    local imgs = helpmod.widgets.mpstate.images
+    awful.spawn.easy_async(hcmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             for i = 1, #boxes do
                 --debug_print("MP_stderr="..stderr)
@@ -132,11 +131,9 @@ function helpmod.fresh_mpstate_box(boxes, imgs)
     end)
 end
 
-function helpmod.fresh_backlight_box(box, run, run_cmd)
-    local cmd = helpmod.cmd.g_backlight
-    if run then
-        cmd = run_cmd
-    end
+local function _fresh_backlight_box(run_cmd)
+    local box = helpmod.widgets.backlight.box
+    local cmd = run_cmd or hcmd.g_backlight
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local pref = 'backlight: '
@@ -146,13 +143,15 @@ function helpmod.fresh_backlight_box(box, run, run_cmd)
             return
         end
         box.visible = true
-        box.markup = helpmod.cfg.separ_txt..pref..
-            '<span foreground="'..helpmod.cfg.warn_color..'">'..math.floor(tonumber(stdout))..'</span>'
+        box.markup = hcfg.separ_txt..pref..
+            '<span foreground="'..hcfg.warn_color..'">'..math.floor(tonumber(stdout))..'</span>'
     end)
 end
 
-function helpmod.fresh_battery_box(box, timer)
-    awful.spawn.easy_async(helpmod.cmd.g_battery, function(stdout, stderr, reason, exit_code)
+local function _fresh_battery_box()
+    local box = helpmod.widgets.battery.box
+    local timer = helpmod.widgets.battery.timer
+    awful.spawn.easy_async(hcmd.g_battery, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
             --debug_print("BB_stderr="..stderr)
@@ -162,13 +161,13 @@ function helpmod.fresh_battery_box(box, timer)
         end
 
         local cap = tonumber(stdout)
-        local h = assert(io.popen(helpmod.cmd.g_aconline))
+        local h = assert(io.popen(hcmd.g_aconline))
         local ac = h:read("*n")
         h:close()
         if ac == 0 then
-            if cap <= helpmod.cfg.battery_low then
-                box.markup = '<span foreground="'..helpmod.cfg.battery_low_color..'">B:'..cap..'</span>'
-                if cap < _prev_batt_lvl and math.fmod(cap, helpmod.cfg.battery_low_notif_gap) == 0 then
+            if cap <= hcfg.battery_low then
+                box.markup = '<span foreground="'..hcfg.battery_low_color..'">B:'..cap..'</span>'
+                if cap < _prev_batt_lvl and math.fmod(cap, hcfg.battery_low_notif_gap) == 0 then
                     _prev_batt_lvl = cap
                     warn_print("low battery: "..cap.."%")
                 end
@@ -176,9 +175,48 @@ function helpmod.fresh_battery_box(box, timer)
                 box.markup = "B:"..cap
             end
         else
-            box.markup = '<span foreground="'..helpmod.cfg.battery_charge_color..'">B:'..cap..'</span>'
+            box.markup = '<span foreground="'..hcfg.battery_charge_color..'">B:'..cap..'</span>'
         end
     end)
+end
+-- }}}
+
+function helpmod.lower_volume()
+    _modify_volume_rel(false)
+end
+
+function helpmod.raise_volume()
+    _modify_volume_rel(true)
+end
+
+function helpmod.toggle_mute()
+    _fresh_volume_box(hcmd.sg_togglemute)
+end
+
+function helpmod.fresh_volume_box()
+    _fresh_volume_box()
+end
+
+function helpmod.fresh_mpstate_box()
+    _fresh_mpstate_box()
+end
+
+function helpmod.brightness_down()
+    local cmd = _fill_args(hcmd.sg_brightdown, { hcfg.bl_step })
+    _fresh_backlight_box(cmd)
+end
+
+function helpmod.brightness_up()
+    local cmd = _fill_args(hcmd.sg_brightup, { hcfg.bl_step })
+    _fresh_backlight_box(cmd)
+end
+
+function helpmod.fresh_backlight_box()
+    _fresh_backlight_box()
+end
+
+function helpmod.fresh_battery_box()
+    _fresh_battery_box()
 end
 
 function helpmod.get_network_stats(widget, args, netdevs)
@@ -194,12 +232,12 @@ function helpmod.get_network_stats(widget, args, netdevs)
             local up_val = args['{'..nwdev..' up_kb}']
             local down_val = args['{'..nwdev..' down_kb}']
 
-            if tonumber(up_val) >= helpmod.cfg.kilo_limit then
+            if tonumber(up_val) >= hcfg.kilo_limit then
                 up_unit = "M"
                 up_val = args['{'..nwdev..' up_mb}']
             end
 
-            if tonumber(down_val) >= helpmod.cfg.kilo_limit then
+            if tonumber(down_val) >= hcfg.kilo_limit then
                 down_unit = "M"
                 down_val = args['{'..nwdev..' down_mb}']
             end
@@ -208,13 +246,13 @@ function helpmod.get_network_stats(widget, args, netdevs)
             local down_data = down_val..' '..down_unit
 
             if string.match(nwdev, "tun") then
-                nwdev = '<span color="'..helpmod.cfg.net_tunnel_color..'">'..nwdev..':</span>'
+                nwdev = '<span color="'..hcfg.net_tunnel_color..'">'..nwdev..':</span>'
             else
                 nwdev = nwdev .. ':'
             end
-            text = text..' - '..nwdev..'<span color="'..helpmod.cfg.net_download_color..
+            text = text..' - '..nwdev..'<span color="'..hcfg.net_download_color..
                     '"> '..down_label..' '..down_data..'</span> / <span color="'..
-                    helpmod.cfg.net_upload_color..'">'..up_label..' '..up_data..'</span>'
+                    hcfg.net_upload_color..'">'..up_label..' '..up_data..'</span>'
       end
     end
 
@@ -228,19 +266,19 @@ end
 
 function helpmod.get_coretemp_text(temp, n)
     local label = 'core ' ..(n-2).. ': '
-    if temp <= helpmod.cfg.cpu_temp_mid then
-        label = label..'<span color="'..helpmod.cfg.cpu_temp_low_color..'">'
-    elseif temp <= helpmod.cfg.cpu_temp_high  then
-        label = label..'<span color="'..helpmod.cfg.cpu_temp_medium_color..'">'
+    if temp <= hcfg.cpu_temp_mid then
+        label = label..'<span color="'..hcfg.cpu_temp_low_color..'">'
+    elseif temp <= hcfg.cpu_temp_high  then
+        label = label..'<span color="'..hcfg.cpu_temp_medium_color..'">'
     else
-        label = label..'<span color="'..helpmod.cfg.cpu_temp_high_color..'">'
+        label = label..'<span color="'..hcfg.cpu_temp_high_color..'">'
     end
-    return label..temp..'°C</span>'..helpmod.cfg.separ_txt
+    return label..temp..'°C</span>'..hcfg.separ_txt
 end
 
 -- called once at startup, popen is fine for now
 function helpmod.is_on_laptop()
-    local h = assert(io.popen(helpmod.cmd.g_onlaptop))
+    local h = assert(io.popen(hcmd.g_onlaptop))
     local ret = h:read("*n")
     h:close()
     return ret == 0
@@ -248,7 +286,7 @@ end
 
 -- called once at startup, popen is fine for now
 function helpmod.get_cpu_core_count()
-    local h = assert(io.popen(helpmod.cmd.g_corecnt))
+    local h = assert(io.popen(hcmd.g_corecnt))
     local num = h:read("*n")
     h:close()
     return num
@@ -256,7 +294,7 @@ end
 
 -- called once at startup, popen is fine for now
 function helpmod.get_net_devices()
-    local h = assert(io.popen(helpmod.cmd.g_netdevs))
+    local h = assert(io.popen(hcmd.g_netdevs))
     local ret = h:read("*a")
     h:close()
     return helpmod.str_to_table(ret, "%s", "lo")
@@ -264,7 +302,7 @@ end
 
 -- called once at startup/in callback, popen is fine for now
 function helpmod.init_sound()
-    local h = assert(io.popen(helpmod.cmd.g_soundinfo))
+    local h = assert(io.popen(hcmd.g_soundinfo))
     local ret = h:read("*a")
     h:close()
     helpmod.sound_info = _parse_sound_info(ret)
@@ -273,15 +311,6 @@ function helpmod.init_sound()
         _init_usb()
     end
     return
-end
-
-function helpmod.fill_args(raw_cmd, args)
-    local cmd
-    if type(args) ~= "table" then return end
-    for i = 1, #args do
-       cmd = string.gsub(raw_cmd, "ARG"..i, args[i])
-    end
-    return cmd
 end
 
 function helpmod.str_to_table(string, delimiter, exclude)
