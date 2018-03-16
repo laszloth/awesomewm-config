@@ -41,6 +41,7 @@ hcmd.g_battery   = _sh .. _battery .. _terminate
 hcmd.g_mpstatus  = _sh .. _mpstatus .. _terminate
 
 -- set commands w/ shell
+hcmd.s_volume     = _bash .. _setvolume .. _terminate
 hcmd.s_playtoggle = _sh .. _play .. _terminate
 hcmd.s_pause      = _sh .. _pause .. _terminate
 hcmd.s_next       = _sh .. _next .. _terminate

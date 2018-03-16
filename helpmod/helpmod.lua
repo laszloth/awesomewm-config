@@ -25,6 +25,13 @@ local function _parse_sound_info(raw_output)
     return sound_info
 end
 
+local function _init_usb()
+    local usb_cmd = helpmod.fill_args(helpmod.cmd.s_volume, { 100 })
+    helpmod.sound_info.volume = 100
+    awful.util.spawn(usb_cmd)
+    debug_print_perm("init usb called")
+end
+
 local function _fresh_volume_box(box, run_cmd)
     local cmd = run_cmd or helpmod.cmd.g_soundinfo
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
@@ -35,10 +42,16 @@ local function _fresh_volume_box(box, run_cmd)
             return
         end
 
+        local prev_bus = helpmod.sound_info.bus_type
         helpmod.sound_info = _parse_sound_info(stdout)
         local sinfo = helpmod.sound_info
         local isusb = (sinfo.bus_type == "usb")
         local vol = sinfo.volume
+
+        -- check for bus type change to usb and do setup
+        if isusb and prev_bus ~= "usb" then
+            _init_usb()
+        end
 
         local pref = helpmod.cfg.label_speaker
         if isusb then
@@ -251,12 +264,15 @@ function helpmod.get_net_devices()
 end
 
 -- called once at startup/in callback, popen is fine for now
-function helpmod.init_sound_info()
+function helpmod.init_sound()
     local h = assert(io.popen(helpmod.cmd.g_soundinfo))
     local ret = h:read("*a")
     h:close()
     helpmod.sound_info = _parse_sound_info(ret)
     helpmod.print_table_perm(helpmod.sound_info, "sinfo")
+    if helpmod.sound_info.bus_type == "usb" then
+        _init_usb()
+    end
     return
 end
 

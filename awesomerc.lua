@@ -219,8 +219,8 @@ end
 
 -- Default screen settings for Firefox and others
 update_screen_count()
--- Initialize sound info table
-helpmod.init_sound_info()
+-- Initialize sound
+helpmod.init_sound()
 
 -- {{{ Menu
 -- @DOC_MENU@

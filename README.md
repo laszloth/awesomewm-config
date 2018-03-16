@@ -5,8 +5,6 @@ based on awesome's awesomerc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
-- [ ] remove relative volume handling
-- [ ] usb sound card: set initial volume
 - [ ] keycode to keysym
 - [ ] use sink name instead of index
 - [ ] add new module for helper functions only
@@ -15,6 +13,7 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] make audio info passing more robust
 
 ## done
+- [x] usb sound card: set initial volume
 - [x] rebase theme
 - [x] rebase rc.lua with awesomerc.lua
 - [x] add event based net if refresh
@@ -37,3 +36,6 @@ based on awesome's awesomerc.lua and zenburn theme
 ## maybe
 - [ ] hide base net if if there is a tunnel
 - [ ] then show base net if on click
+
+## deleted
+- [ ] remove relative volume handling [reason: much slower and complicated due to callbacks]
