@@ -7,7 +7,6 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] keycode to keysym
 - [ ] use sink name instead of index
-- [ ] add new module for helper functions only
 - [ ] make audio info passing more robust
 
 ## done
@@ -36,6 +35,7 @@ based on awesome's awesomerc.lua and zenburn theme
 ## maybe
 - [ ] hide base net if if there is a tunnel
 - [ ] then show base net if on click
+- [ ] add new module for helper functions only
 
 ## deleted
 - [ ] remove relative volume handling [reason: much slower and complicated due to callbacks]
