@@ -92,25 +92,8 @@ local function _modify_volume_rel(box, increase)
     end
     _modify_volume(box, vol)
 end
--- }}}
 
-function helpmod.lower_volume(box)
-    _modify_volume_rel(box, false)
-end
-
-function helpmod.raise_volume(box)
-    _modify_volume_rel(box, true)
-end
-
-function helpmod.toggle_mute(box)
-   _fresh_volume_box(box, helpmod.cmd.sg_togglemute)
-end
-
-function helpmod.fresh_volume_box(box)
-   _fresh_volume_box(box)
-end
-
-function helpmod.fresh_mpstate_box(boxes, imgs)
+local function _fresh_mpstate_box(box, imgs)
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             for i = 1, #boxes do
@@ -132,7 +115,7 @@ function helpmod.fresh_mpstate_box(boxes, imgs)
     end)
 end
 
-function helpmod.fresh_backlight_box(box, run, run_cmd)
+local function _fresh_backlight_box(box, run, run_cmd)
     local cmd = helpmod.cmd.g_backlight
     if run then
         cmd = run_cmd
@@ -151,7 +134,7 @@ function helpmod.fresh_backlight_box(box, run, run_cmd)
     end)
 end
 
-function helpmod.fresh_battery_box(box, timer)
+local function _fresh_battery_box(box, timer)
     awful.spawn.easy_async(helpmod.cmd.g_battery, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
@@ -179,6 +162,35 @@ function helpmod.fresh_battery_box(box, timer)
             box.markup = '<span foreground="'..helpmod.cfg.battery_charge_color..'">B:'..cap..'</span>'
         end
     end)
+end
+-- }}}
+
+function helpmod.lower_volume(box)
+    _modify_volume_rel(box, false)
+end
+
+function helpmod.raise_volume(box)
+    _modify_volume_rel(box, true)
+end
+
+function helpmod.toggle_mute(box)
+    _fresh_volume_box(box, helpmod.cmd.sg_togglemute)
+end
+
+function helpmod.fresh_volume_box(box)
+    _fresh_volume_box(box)
+end
+
+function helpmod.fresh_mpstate_box(boxes, imgs)
+    _fresh_mpstate_box(box, imgs)
+end
+
+function helpmod.fresh_backlight_box(box, run, run_cmd)
+    _fresh_backlight_box(box, run, run_cmd)
+end
+
+function helpmod.fresh_battery_box(box, timer)
+    _fresh_battery_box(box, timer)
 end
 
 function helpmod.get_network_stats(widget, args, netdevs)
