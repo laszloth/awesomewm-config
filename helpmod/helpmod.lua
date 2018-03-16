@@ -4,31 +4,35 @@ local helpmod = {}
 helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
 
-local prev_batt_level = 100
+helpmod.sound_info = {}
 
-function helpmod.fresh_mpstate_box(boxes, imgs)
-    awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
-        if exit_code ~= 0 then
-            for i = 1, #boxes do
-                --debug_print("MP_stderr="..stderr)
-                boxes[i].visible = false
-            end
-            return
-        end
+-- {{{ Private
+local _prev_batt_lvl = 100
 
-        local state = string.gsub(stdout, "\n", "")
-        if state == "Playing" then
-            boxes[1].image = imgs[1]
-        else
-            boxes[1].image = imgs[2]
-        end
-        for i = 1, #boxes do
-            boxes[i].visible = true
-        end
-    end)
+local function _remove_newline(s)
+    return string.gsub(s, "\n", "")
 end
 
-function helpmod.fresh_volume_box(box, run_cmd)
+local function _parse_sound_info(raw_output)
+    local sound_info = {}
+    local rawdata = helpmod.str_to_table(raw_output, "%s")
+    sound_info["sink"] = rawdata[1]
+    sound_info["sink_index"] = tonumber(rawdata[2])
+    sound_info["volume"] = tonumber(rawdata[3])
+    sound_info["is_muted"] = (tonumber(rawdata[4]) == 1)
+    sound_info["jack_plugged"] = (tonumber(rawdata[5]) == 1)
+    sound_info["bus_type"] = rawdata[6]
+    return sound_info
+end
+
+local function _init_usb()
+    local usb_cmd = helpmod.fill_args(helpmod.cmd.s_volume, { 100 })
+    helpmod.sound_info.volume = 100
+    awful.util.spawn(usb_cmd)
+    debug_print_perm("init usb called")
+end
+
+local function _fresh_volume_box(box, run_cmd)
     local cmd = run_cmd or helpmod.cmd.g_soundinfo
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
@@ -38,23 +42,25 @@ function helpmod.fresh_volume_box(box, run_cmd)
             return
         end
 
-        local rawdata = helpmod.str_to_array(stdout, "%s")
-        -- currently unused
-        -- local sink_index = tonumber(rawdata[1])
-        local muted = tonumber(rawdata[2]) == 1
-        local vol = tonumber(rawdata[3])
-        local bus = rawdata[4]
-        local jack = tonumber(rawdata[5]) == 1
-        local isusb = bus == "usb"
+        local prev_bus = helpmod.sound_info.bus_type
+        helpmod.sound_info = _parse_sound_info(stdout)
+        local sinfo = helpmod.sound_info
+        local isusb = (sinfo.bus_type == "usb")
+        local vol = sinfo.volume
+
+        -- check for bus type change to usb and do setup
+        if isusb and prev_bus ~= "usb" then
+            _init_usb()
+        end
 
         local pref = helpmod.cfg.label_speaker
         if isusb then
             pref = helpmod.cfg.label_usb
-        elseif jack then
+        elseif sinfo.jack_plugged then
             pref = helpmod.cfg.label_jack
         end
 
-        if muted then
+        if sinfo.is_muted then
             pref = helpmod.cfg.label_muted
             box.markup = '<span foreground="'..helpmod.cfg.volume_mute_color..'">'..pref..vol..'</span>'
         -- no different level colors for usb card as 100% is the normal volume
@@ -68,6 +74,61 @@ function helpmod.fresh_volume_box(box, run_cmd)
             end
         else
             box.markup = '<span foreground="'..helpmod.cfg.usb_card_color..'">'..pref..vol..'</span>'
+        end
+    end)
+end
+
+local function _modify_volume(box, new_volume)
+    local cmd = helpmod.fill_args(helpmod.cmd.sg_volume, { new_volume })
+    _fresh_volume_box(box, cmd)
+end
+
+local function _modify_volume_rel(box, increase)
+    local vol = ""
+    if increase then vol = "+" else vol = "-" end
+    if helpmod.sound_info.bus_type == "usb" then
+        vol = vol .. tostring(helpmod.cfg.usb_step)
+    else
+        vol = vol .. tostring(helpmod.cfg.vol_step)
+    end
+    _modify_volume(box, vol)
+end
+-- }}}
+
+function helpmod.lower_volume(box)
+    _modify_volume_rel(box, false)
+end
+
+function helpmod.raise_volume(box)
+    _modify_volume_rel(box, true)
+end
+
+function helpmod.toggle_mute(box)
+   _fresh_volume_box(box, helpmod.cmd.sg_togglemute)
+end
+
+function helpmod.fresh_volume_box(box)
+   _fresh_volume_box(box)
+end
+
+function helpmod.fresh_mpstate_box(boxes, imgs)
+    awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
+        if exit_code ~= 0 then
+            for i = 1, #boxes do
+                --debug_print("MP_stderr="..stderr)
+                boxes[i].visible = false
+            end
+            return
+        end
+
+        local state = _remove_newline(stdout)
+        if state == "Playing" then
+            boxes[1].image = imgs[1]
+        else
+            boxes[1].image = imgs[2]
+        end
+        for i = 1, #boxes do
+            boxes[i].visible = true
         end
     end)
 end
@@ -108,8 +169,8 @@ function helpmod.fresh_battery_box(box, timer)
         if ac == 0 then
             if cap <= helpmod.cfg.battery_low then
                 box.markup = '<span foreground="'..helpmod.cfg.battery_low_color..'">B:'..cap..'</span>'
-                if cap < prev_batt_level and math.fmod(cap, helpmod.cfg.battery_low_notif_gap) == 0 then
-                    prev_batt_level = cap
+                if cap < _prev_batt_lvl and math.fmod(cap, helpmod.cfg.battery_low_notif_gap) == 0 then
+                    _prev_batt_lvl = cap
                     warn_print("low battery: "..cap.."%")
                 end
             else
@@ -194,7 +255,37 @@ function helpmod.get_cpu_core_count()
     return num
 end
 
-function helpmod.str_to_array(string, delimiter, exclude)
+-- called once at startup, popen is fine for now
+function helpmod.get_net_devices()
+    local h = assert(io.popen(helpmod.cmd.g_netdevs))
+    local ret = h:read("*a")
+    h:close()
+    return helpmod.str_to_table(ret, "%s", "lo")
+end
+
+-- called once at startup/in callback, popen is fine for now
+function helpmod.init_sound()
+    local h = assert(io.popen(helpmod.cmd.g_soundinfo))
+    local ret = h:read("*a")
+    h:close()
+    helpmod.sound_info = _parse_sound_info(ret)
+    helpmod.print_table_perm(helpmod.sound_info, "sinfo")
+    if helpmod.sound_info.bus_type == "usb" then
+        _init_usb()
+    end
+    return
+end
+
+function helpmod.fill_args(raw_cmd, args)
+    local cmd
+    if type(args) ~= "table" then return end
+    for i = 1, #args do
+       cmd = string.gsub(raw_cmd, "ARG"..i, args[i])
+    end
+    return cmd
+end
+
+function helpmod.str_to_table(string, delimiter, exclude)
     local arr = {}
     for m in string.gmatch(string, "[^"..delimiter.."]+") do
         if m ~= exclude then table.insert(arr, m) end
@@ -202,12 +293,34 @@ function helpmod.str_to_array(string, delimiter, exclude)
     return arr
 end
 
--- called once at startup, popen is fine for now
-function helpmod.get_net_devices()
-    local h = assert(io.popen(helpmod.cmd.g_netdevs))
-    local ret = h:read("*a")
-    h:close()
-    return helpmod.str_to_array(ret, "%s", "lo")
+function helpmod.table_to_str(t, depth)
+    depth = depth or 0
+
+    if type(t) ~= "table" then
+        return tostring(t)
+    end
+
+    local dpref = " "
+    for i = 1, depth do
+        dpref = dpref.." "
+    end
+
+    local str = "{ "
+    for key, value in pairs(t) do
+        str = str.."\n"..dpref.."["..tostring(key).."] = "..
+                helpmod.table_to_str(value, depth+1)..", "
+    end
+    return str.."}"
+end
+
+function helpmod.print_table(t, name)
+    name = name or "table"
+    debug_print(name..' '..helpmod.table_to_str(t))
+end
+
+function helpmod.print_table_perm(t, name)
+    name = name or "table"
+    debug_print_perm(name..' '..helpmod.table_to_str(t))
 end
 
 return helpmod

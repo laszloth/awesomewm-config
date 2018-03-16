@@ -12,40 +12,46 @@ hcmd.g_corecnt  = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 hcmd.g_netdevs  = [[ls /sys/class/net/]]
 
 -- raw commands
-local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh raw]]
-local _togglemute = [[pactl set-sink-mute 0 toggle >/dev/null 2>&1]]
-local _backlight  = [[xbacklight -get]]
+local _bash       = [[bash -c "]]
+local _sh         = [[sh -c "]]
+local _and        = ' ; '
+local _terminate  = '"'
+
+local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh --raw]]
+local _setvolume  = [[~/.config/awesome/scripts/sound_handler.sh --set-volume ARG1]]
+local _setgetvol  = [[~/.config/awesome/scripts/sound_handler.sh --set-get-volume ARG1]]
+local _togglemute = [[~/.config/awesome/scripts/sound_handler.sh --toggle-mute]]
+
+local _getbackl   = [[xbacklight -get]]
+local _decbackl   = [[xbacklight -dec ARG1 >/dev/null 2>&1]]
+local _incbackl   = [[xbacklight -inc ARG1 >/dev/null 2>&1]]
 local _battery    = [[cat /sys/class/power_supply/BAT0/capacity]]
+local _toggletp   = [[~/.config/awesome/scripts/dell_touch.sh >/dev/null 2>&1]]
+
 local _play       = [[~/.config/awesome/scripts/XF86Play.sh >/dev/null 2>&1]]
 local _pause      = [[~/.config/awesome/scripts/spotify_dbus.sh c Pause >/dev/null 2>&1]]
 local _next       = [[~/.config/awesome/scripts/spotify_dbus.sh c Next >/dev/null 2>&1]]
 local _prev       = [[~/.config/awesome/scripts/spotify_dbus.sh c Previous >/dev/null 2>&1]]
 local _mpstatus   = [[~/.config/awesome/scripts/spotify_dbus.sh q PlaybackStatus]]
-local _toggletp   = [[~/.config/awesome/scripts/dell_touch.sh >/dev/null 2>&1]]
-
--- additional conf.
-local bl_step  = 7 --percent
-local vol_step = 2 --percent
-local usb_step = 25 --percent
 
 -- get commands w/ shell
-hcmd.g_soundinfo = {"bash", "-c", _soundinfo}
-hcmd.g_backlight = {"sh", "-c", _backlight}
-hcmd.g_battery   = {"sh", "-c", _battery}
-hcmd.g_mpstatus  = {"sh", "-c", _mpstatus}
+hcmd.g_soundinfo = _bash .. _soundinfo .. _terminate
+hcmd.g_backlight = _sh .. _getbackl .. _terminate
+hcmd.g_battery   = _sh .. _battery .. _terminate
+hcmd.g_mpstatus  = _sh .. _mpstatus .. _terminate
 
 -- set commands w/ shell
-hcmd.s_playtoggle = {"sh", "-c", _play}
-hcmd.s_pause      = {"sh", "-c", _pause}
-hcmd.s_next       = {"sh", "-c", _next}
-hcmd.s_prev       = {"sh", "-c", _prev}
-hcmd.s_toggletp   = {"sh", "-c", _toggletp}
+hcmd.s_volume     = _bash .. _setvolume .. _terminate
+hcmd.s_playtoggle = _sh .. _play .. _terminate
+hcmd.s_pause      = _sh .. _pause .. _terminate
+hcmd.s_next       = _sh .. _next .. _terminate
+hcmd.s_prev       = _sh .. _prev .. _terminate
+hcmd.s_toggletp   = _sh .. _toggletp .. _terminate
 
--- set-get commands for syncronization
-hcmd.sg_lowervol   = {"bash", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol - "..vol_step.." "..usb_step}
-hcmd.sg_raisevol   = {"bash", "-c", "~/.config/awesome/scripts/sound_handler.sh setvol + "..vol_step.." "..usb_step}
-hcmd.sg_togglemute = {"sh", "-c", _togglemute..';'.._soundinfo}
-hcmd.sg_brightdown = {"sh", "-c", "xbacklight -dec "..bl_step.." >/dev/null 2>&1;".._backlight}
-hcmd.sg_brightup   = {"sh", "-c", "xbacklight -inc "..bl_step.." >/dev/null 2>&1;".._backlight}
+-- set-get commands for syncronization and speed
+hcmd.sg_volume     = _bash .. _setgetvol .. _terminate
+hcmd.sg_togglemute = _sh .. _togglemute .. _and .. _soundinfo .. _terminate
+hcmd.sg_brightdown = _sh .. _decbackl .. _and .. _getbackl .. _terminate
+hcmd.sg_brightup   = _sh .. _incbackl .. _and .. _getbackl .. _terminate
 
 return hcmd

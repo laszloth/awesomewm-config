@@ -1,16 +1,33 @@
 #!/bin/bash
 
+#set -x
+
 LOCKFILE="/tmp/aw_sound_handler.lock"
 exec 200>$LOCKFILE
 flock --wait 1 200 || exit 1
 echo $$ 1>&200
 
+USAGE="\
+Usage: $(basename $0) [option]
+ Options:
+  -i, --info: print every info collected
+  -r, --raw: print info in raw, short format
+  -s, --set-volume: set volume on sink or on default
+  -S, --set-get-volume: same as -s, but print new values
+  -t, --toggle-mute: toggle mute on sink or on default
+
+  -I, --index: print index of default sink
+  -n, --name: print name of default sink
+  -m, --muted: print mute info
+  -v, --volume: print volume info
+  -b, --bus: print bus info
+  -j, --jack: print jack plug info
+  -h, --help: print this help
+"
+
 function get_info {
     DEF_SINK=$(pactl info | awk -F": " '/^Default Sink: /{print $2}')
-    if [ -z "$DEF_SINK" ]; then
-        >&2 echo "pactl error"
-        exit 1
-    fi
+    [ -z "$DEF_SINK" ] && echo "pactl error" >&2 && exit 1
     DEF_SINK_INDEX=$(pactl list sinks short | grep "$DEF_SINK" | awk '{print $1}')
     SINK_DATA=$(pactl list sinks | awk "/Sink #$DEF_SINK_INDEX/,/Ports:/" | sed 's/^\s*//g')
     MUTED=$(echo "$SINK_DATA" | grep -c "Mute: no")
@@ -23,91 +40,102 @@ function print_info {
     echo "DEF_SINK=$DEF_SINK"
     echo "DEF_SINK_INDEX=$DEF_SINK_INDEX"
     echo -n "MUTED="
-        if [ $MUTED -eq 0 ]; then
-            echo "true"
-        else
-            echo "false"
-        fi
+    [ $MUTED -eq 0 ] && echo "true" || echo "false"
     echo "VOLUME=$VOLUME%"
     echo "BUS=$BUS"
     echo -n "JACK="
-        if [ $JACK -eq 0 ]; then
-            echo "plugged"
-        else
-            echo "unplugged"
-        fi
+    [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
 }
 
-# $1: - or +
-# $2: base step
-# $3: usb step
-function vol_handler {
-    STEP=$2
-    # set step according to bus type
-    if [ "$BUS" = "usb" ]; then
-        STEP=$3
+function print_raw_info {
+    echo $DEF_SINK $DEF_SINK_INDEX $VOLUME $((1-MUTED)) $((1-JACK)) $BUS
+}
+
+# $1: sink name or index, can be emitted
+# $2: new volume or new relative volume w/ operand
+# $SHOW_RESULT: call print_raw_info w/ updated volume
+function set_volume {
+    [ -z "$1" ] && echo "no params given" >&2 && exit 1
+    if [ -z "$2" ]; then
+        volume=$1
+        get_info
+        sink=$DEF_SINK
+    else
+        sink=$1
+        volume=$2
     fi
+    volume=${volume//%}
+    pactl set-sink-volume $sink $volume%
 
-    # pactl stops at 0
-    NEWVOL=$((VOLUME${1}STEP))
-    if [ $NEWVOL -lt 0 ]; then
-        NEWVOL=0
+    if [ -n "$SHOW_RESULT" ]; then
+        op=$(expr "$volume" : '\([+-]*\)')
+        [ -z "$op" ] && VOLUME=$volume || VOLUME=$((VOLUME${volume}))
+        [ $VOLUME -lt 0 ] && VOLUME=0
+        print_raw_info
     fi
+}
 
-    pactl set-sink-volume $DEF_SINK_INDEX ${1}${STEP}%
-
-    # "send" results
-    echo -n $DEF_SINK_INDEX $((1-MUTED)) $NEWVOL $BUS $((1-JACK))
+function toggle_mute {
+    if [ -z "$1" ]; then
+        get_info
+        sink=$DEF_SINK
+    else
+        sink=$1
+    fi
+    pactl set-sink-mute $sink toggle
 }
 
 case $1 in
-    # used by awesome
-    raw)
-        get_info
-        echo -n $DEF_SINK_INDEX $((1-MUTED)) $VOLUME $BUS $((1-JACK))
-    ;;
-    setvol)
-        get_info
-        vol_handler $2 $3 $4
-    ;;
-    info)
+    -i|--info)
         get_info
         print_info
     ;;
-    index)
+    -r|--raw)
         get_info
-        echo $DEF_SINK_INDEX
+        print_raw_info
     ;;
-    name)
+    -s|--set-volume)
+        shift
+        set_volume $@
+    ;;
+    -S|--set-get-volume)
+        SHOW_RESULT=1
+        shift
+        set_volume $@
+    ;;
+    -t|--toggle-mute)
+        shift
+        toggle_mute $@
+    ;;
+    -I|--index)
         get_info
-        echo $DEF_SINK
+        echo "$DEF_SINK_INDEX"
     ;;
-    muted)
+    -n|--name)
         get_info
-        if [ $MUTED -eq 0 ]; then
-            echo "true"
-        else
-            echo "false"
-        fi
+        echo "$DEF_SINK"
     ;;
-    vol)
+    -m|--muted)
+        get_info
+        [ $MUTED -eq 0 ] && echo "true" || echo "false"
+    ;;
+    -v|--volume)
         get_info
         echo "$VOLUME%"
     ;;
-    bus)
+    -b|--bus)
         get_info
-        echo $BUS
+        echo "$BUS"
     ;;
-    jack)
+    -j|--jack)
         get_info
-        if [ $JACK -eq 0 ]; then
-            echo "plugged"
-        else
-            echo "unplugged"
-        fi
+        [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
+    ;;
+    -h|--help)
+        echo "$USAGE"
     ;;
     *)
-        echo "Usage: $(basename $0) {raw|setvol|info|index|name|muted|vol|bus|jack}"
+        echo "$USAGE" >&2
         exit 1
     ;;
 esac

@@ -171,36 +171,6 @@ local function update_screen_count()
     --debug_print("num_screen="..num_screen.."\ndef_screen="..def_screen)
 end
 
-local function table_to_str(t, depth)
-    depth = depth or 0
-
-    if type(t) ~= "table" then
-        return tostring(t)
-    end
-
-    local dpref = " "
-    for i = 1, depth do
-        dpref = dpref.." "
-    end
-
-    local str = "{ "
-    for key, value in pairs(t) do
-        str = str.."\n"..dpref.."["..tostring(key).."] = "..
-                table_to_str(value, depth+1)..", "
-    end
-    return str.."}"
-end
-
-local function print_table(t, name)
-    name = name or "table"
-    debug_print(name..' '..table_to_str(t))
-end
-
-local function print_table_perm(t, name)
-    name = name or "table"
-    debug_print_perm(name..' '..table_to_str(t))
-end
-
 local function rename_current_tag()
     awful.prompt.run {
         prompt       = ' Tag name: ',
@@ -249,6 +219,8 @@ end
 
 -- Default screen settings for Firefox and others
 update_screen_count()
+-- Initialize sound
+helpmod.init_sound()
 
 -- {{{ Menu
 -- @DOC_MENU@
@@ -333,7 +305,7 @@ myvoltimer:connect_signal("timeout", function()
     helpmod.fresh_volume_box(myvolwidget)
 end)
 myvolwidget:connect_signal("button::release", function()
-    helpmod.fresh_volume_box(myvolwidget, hcmd.sg_togglemute)
+    helpmod.toggle_mute(myvolwidget)
 end)
 
 myvoltimer:start()
@@ -408,7 +380,7 @@ function ext_event_handler(event, data)
         mpspace.visible = false
     elseif event == "net" then
         net_devs = helpmod.get_net_devices()
-        --print_table(net_devs, "netdevs")
+        --helpmod.print_table(net_devs, "netdevs")
     else
         event = event or "nil"
         debug_print('Wrong event string: "'..event..'"')
@@ -716,11 +688,11 @@ globalkeys = gears.table.join(
     awful.key({ "Control", "Mod1" }, "Delete", function()
         awful.util.spawn(hcmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_lowervol) end),
+        helpmod.lower_volume(myvolwidget) end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_raisevol) end),
+        helpmod.raise_volume(myvolwidget) end),
     awful.key({ }, "XF86AudioMute", function()
-        helpmod.fresh_volume_box(myvolwidget, hcmd.sg_togglemute) end),
+        helpmod.toggle_mute(myvolwidget) end),
     awful.key({ }, "XF86AudioNext", function()
         awful.util.spawn(hcmd.s_next)
         end),
@@ -738,12 +710,14 @@ globalkeys = gears.table.join(
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if on_laptop then
-            helpmod.fresh_backlight_box(myblwidget, true, hcmd.sg_brightdown)
+            local cmd = helpmod.fill_args(hcmd.sg_brightdown, { hcfg.bl_step })
+            helpmod.fresh_backlight_box(myblwidget, true, cmd)
             mybltimer:again()
         end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         if on_laptop then
-            helpmod.fresh_backlight_box(myblwidget, true, hcmd.sg_brightup)
+            local cmd = helpmod.fill_args(hcmd.sg_brightup, { hcfg.bl_step })
+            helpmod.fresh_backlight_box(myblwidget, true, cmd)
             mybltimer:again()
         end end),
 
@@ -954,7 +928,7 @@ client.connect_signal("manage", function (c)
     -- i.e. put it at the end of others instead of setting it master.
     -- if not awesome.startup then awful.client.setslave(c) end
 
---    debug_print_perm(string.format("name=%q\nhints=%s", c.name, table_to_str(shints)))
+--    debug_print_perm(string.format("name=%q\nhints=%s", c.name, helpmod.table_to_str(shints)))
 
     -- workaround for no_offscreen totally overriding under_mouse or centered
     if --awesome.startup and
