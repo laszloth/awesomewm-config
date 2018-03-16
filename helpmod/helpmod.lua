@@ -5,6 +5,7 @@ helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
 
 helpmod.sound_info = {}
+helpmod.widgets = {}
 
 -- {{{ Private
 local _prev_batt_lvl = 100
@@ -31,7 +32,8 @@ local function _init_usb()
     awful.util.spawn(usb_cmd)
 end
 
-local function _fresh_volume_box(box, run_cmd)
+local function _fresh_volume_box(run_cmd)
+    local box = helpmod.widgets.volume.box
     local cmd = run_cmd or helpmod.cmd.g_soundinfo
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
@@ -77,12 +79,12 @@ local function _fresh_volume_box(box, run_cmd)
     end)
 end
 
-local function _modify_volume(box, new_volume)
+local function _modify_volume(new_volume)
     local cmd = helpmod.fill_args(helpmod.cmd.sg_volume, { new_volume })
-    _fresh_volume_box(box, cmd)
+    _fresh_volume_box(cmd)
 end
 
-local function _modify_volume_rel(box, increase)
+local function _modify_volume_rel(increase)
     local vol = ""
     if increase then vol = "+" else vol = "-" end
     if helpmod.sound_info.bus_type == "usb" then
@@ -90,10 +92,12 @@ local function _modify_volume_rel(box, increase)
     else
         vol = vol .. tostring(helpmod.cfg.vol_step)
     end
-    _modify_volume(box, vol)
+    _modify_volume(vol)
 end
 
-local function _fresh_mpstate_box(boxes, imgs)
+local function _fresh_mpstate_box()
+    local boxes = helpmod.widgets.mpstate.boxes
+    local imgs = helpmod.widgets.mpstate.images
     awful.spawn.easy_async(helpmod.cmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             for i = 1, #boxes do
@@ -115,7 +119,8 @@ local function _fresh_mpstate_box(boxes, imgs)
     end)
 end
 
-local function _fresh_backlight_box(box, run_cmd)
+local function _fresh_backlight_box(run_cmd)
+    local box = helpmod.widgets.backlight.box
     local cmd = run_cmd or helpmod.cmd.g_backlight
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
@@ -131,7 +136,9 @@ local function _fresh_backlight_box(box, run_cmd)
     end)
 end
 
-local function _fresh_battery_box(box, timer)
+local function _fresh_battery_box()
+    local box = helpmod.widgets.battery.box
+    local timer = helpmod.widgets.battery.timer
     awful.spawn.easy_async(helpmod.cmd.g_battery, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
@@ -162,42 +169,42 @@ local function _fresh_battery_box(box, timer)
 end
 -- }}}
 
-function helpmod.lower_volume(box)
-    _modify_volume_rel(box, false)
+function helpmod.lower_volume()
+    _modify_volume_rel(false)
 end
 
-function helpmod.raise_volume(box)
-    _modify_volume_rel(box, true)
+function helpmod.raise_volume()
+    _modify_volume_rel(true)
 end
 
-function helpmod.toggle_mute(box)
-    _fresh_volume_box(box, helpmod.cmd.sg_togglemute)
+function helpmod.toggle_mute()
+    _fresh_volume_box(helpmod.cmd.sg_togglemute)
 end
 
-function helpmod.fresh_volume_box(box)
-    _fresh_volume_box(box)
+function helpmod.fresh_volume_box()
+    _fresh_volume_box()
 end
 
-function helpmod.fresh_mpstate_box(boxes, imgs)
-    _fresh_mpstate_box(boxes, imgs)
+function helpmod.fresh_mpstate_box()
+    _fresh_mpstate_box()
 end
 
-function helpmod.brightness_down(box)
+function helpmod.brightness_down()
     local cmd = helpmod.fill_args(helpmod.cmd.sg_brightdown, { helpmod.cfg.bl_step })
-    _fresh_backlight_box(box, cmd)
+    _fresh_backlight_box(cmd)
 end
 
-function helpmod.brightness_up(box)
+function helpmod.brightness_up()
     local cmd = helpmod.fill_args(helpmod.cmd.sg_brightup, { helpmod.cfg.bl_step })
-    _fresh_backlight_box(box, cmd)
+    _fresh_backlight_box(cmd)
 end
 
-function helpmod.fresh_backlight_box(box)
-    _fresh_backlight_box(box)
+function helpmod.fresh_backlight_box()
+    _fresh_backlight_box()
 end
 
-function helpmod.fresh_battery_box(box, timer)
-    _fresh_battery_box(box, timer)
+function helpmod.fresh_battery_box()
+    _fresh_battery_box()
 end
 
 function helpmod.get_network_stats(widget, args, netdevs)

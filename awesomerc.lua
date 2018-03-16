@@ -263,7 +263,8 @@ myplacedmpstate:connect_signal("button::release", function()
     awful.util.spawn(hcmd.s_playtoggle)
 end)
 
-helpmod.fresh_mpstate_box({ mympstate, mpspace }, { beautiful.playing, beautiful.paused })
+helpmod.widgets["mpstate"] = { boxes = { mympstate, mpspace }, images = { beautiful.playing, beautiful.paused }}
+helpmod.fresh_mpstate_box()
 
 -- Create systray and its separator
 local mystseparator = wibox.widget.textbox()
@@ -286,7 +287,8 @@ local myblwidget = nil
 local mybltimer = nil
 if on_laptop then
     myblwidget = wibox.widget.textbox()
-    helpmod.fresh_backlight_box(myblwidget)
+    helpmod.widgets["backlight"] = { box = myblwidget }
+    helpmod.fresh_backlight_box()
 
     -- timer to hide backlight textbox
     mybltimer = gears.timer { timeout = hcfg.backlight_timeout, }
@@ -302,14 +304,15 @@ local myvolwidget = wibox.widget.textbox()
 local myvoltimer = gears.timer { timeout = hcfg.volume_timeout, }
 myvoltimer:connect_signal("timeout", function()
     --debug_print_perm("myvoltimer expired")
-    helpmod.fresh_volume_box(myvolwidget)
+    helpmod.fresh_volume_box()
 end)
 myvolwidget:connect_signal("button::release", function()
-    helpmod.toggle_mute(myvolwidget)
+    helpmod.toggle_mute()
 end)
 
 myvoltimer:start()
-helpmod.fresh_volume_box(myvolwidget)
+helpmod.widgets["volume"] = { box = myvolwidget }
+helpmod.fresh_volume_box()
 
 -- Create battery widget
 local mybatwidget = nil
@@ -319,11 +322,12 @@ if on_laptop then
     mybattimer = gears.timer { timeout = hcfg.battery_timeout, }
     mybattimer:connect_signal("timeout", function()
         --debug_print_perm("mybattimer expired")
-        helpmod.fresh_battery_box(mybatwidget, mybattimer)
+        helpmod.fresh_battery_box()
     end)
 
+    helpmod.widgets["battery"] = { box = mybatwidget, timer = mybattimer}
+    helpmod.fresh_battery_box()
     mybattimer:start()
-    helpmod.fresh_battery_box(mybatwidget, mybattimer)
 end
 
 -- Create net widget
@@ -363,9 +367,9 @@ function ext_event_handler(event, data)
     --debug_print("DBUS EVENT: "..event)
     if event == "acpi_jack" then
         awful.util.spawn(hcmd.s_pause)
-        helpmod.fresh_volume_box(myvolwidget)
+        helpmod.fresh_volume_box()
     elseif event == "acpi_ac" and on_laptop then
-        helpmod.fresh_battery_box(mybatwidget, mybattimer)
+        helpmod.fresh_battery_box()
     elseif event == "mp_stat" and data then
         --debug_print("status:"..data)
         if data == "Playing" then
@@ -688,11 +692,11 @@ globalkeys = gears.table.join(
     awful.key({ "Control", "Mod1" }, "Delete", function()
         awful.util.spawn(hcmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
-        helpmod.lower_volume(myvolwidget) end),
+        helpmod.lower_volume() end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
-        helpmod.raise_volume(myvolwidget) end),
+        helpmod.raise_volume() end),
     awful.key({ }, "XF86AudioMute", function()
-        helpmod.toggle_mute(myvolwidget) end),
+        helpmod.toggle_mute() end),
     awful.key({ }, "XF86AudioNext", function()
         awful.util.spawn(hcmd.s_next)
         end),
@@ -710,12 +714,12 @@ globalkeys = gears.table.join(
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if on_laptop then
-            helpmod.brightness_down(myblwidget)
+            helpmod.brightness_down()
             mybltimer:again()
         end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         if on_laptop then
-            helpmod.brightness_up(myblwidget)
+            helpmod.brightness_up()
             mybltimer:again()
         end end),
 
