@@ -9,9 +9,13 @@ helpmod.sound_info = {}
 -- {{{ Private
 local _prev_batt_lvl = 100
 
-local function _parse_sound_info(script_output)
+local function _remove_newline(s)
+    return string.gsub(s, "\n", "")
+end
+
+local function _parse_sound_info(raw_output)
     local sound_info = {}
-    local rawdata = helpmod.str_to_table(script_output, "%s")
+    local rawdata = helpmod.str_to_table(raw_output, "%s")
     sound_info["sink"] = rawdata[1]
     sound_info["sink_index"] = tonumber(rawdata[2])
     sound_info["volume"] = tonumber(rawdata[3])
@@ -104,7 +108,7 @@ function helpmod.fresh_mpstate_box(boxes, imgs)
             return
         end
 
-        local state = string.gsub(stdout, "\n", "")
+        local state = _remove_newline(stdout)
         if state == "Playing" then
             boxes[1].image = imgs[1]
         else
