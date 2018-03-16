@@ -115,11 +115,8 @@ local function _fresh_mpstate_box(box, imgs)
     end)
 end
 
-local function _fresh_backlight_box(box, run, run_cmd)
-    local cmd = helpmod.cmd.g_backlight
-    if run then
-        cmd = run_cmd
-    end
+local function _fresh_backlight_box(box, run_cmd)
+    local cmd = run_cmd or helpmod.cmd.g_backlight
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local pref = 'backlight: '
