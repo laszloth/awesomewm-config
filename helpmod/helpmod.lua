@@ -29,7 +29,6 @@ local function _init_usb()
     local usb_cmd = helpmod.fill_args(helpmod.cmd.s_volume, { 100 })
     helpmod.sound_info.volume = 100
     awful.util.spawn(usb_cmd)
-    debug_print_perm("init usb called")
 end
 
 local function _fresh_volume_box(box, run_cmd)
@@ -269,7 +268,7 @@ function helpmod.init_sound()
     local ret = h:read("*a")
     h:close()
     helpmod.sound_info = _parse_sound_info(ret)
-    helpmod.print_table_perm(helpmod.sound_info, "sinfo")
+    --helpmod.print_table_perm(helpmod.sound_info, "sinfo")
     if helpmod.sound_info.bus_type == "usb" then
         _init_usb()
     end
