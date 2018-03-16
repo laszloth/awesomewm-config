@@ -286,7 +286,7 @@ local myblwidget = nil
 local mybltimer = nil
 if on_laptop then
     myblwidget = wibox.widget.textbox()
-    helpmod.fresh_backlight_box(myblwidget, false)
+    helpmod.fresh_backlight_box(myblwidget)
 
     -- timer to hide backlight textbox
     mybltimer = gears.timer { timeout = hcfg.backlight_timeout, }
@@ -710,14 +710,12 @@ globalkeys = gears.table.join(
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if on_laptop then
-            local cmd = helpmod.fill_args(hcmd.sg_brightdown, { hcfg.bl_step })
-            helpmod.fresh_backlight_box(myblwidget, true, cmd)
+            helpmod.brightness_down(myblwidget)
             mybltimer:again()
         end end),
     awful.key({ }, "XF86MonBrightnessUp", function()
         if on_laptop then
-            local cmd = helpmod.fill_args(hcmd.sg_brightup, { hcfg.bl_step })
-            helpmod.fresh_backlight_box(myblwidget, true, cmd)
+            helpmod.brightness_up(myblwidget)
             mybltimer:again()
         end end),
 

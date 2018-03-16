@@ -182,8 +182,18 @@ function helpmod.fresh_mpstate_box(boxes, imgs)
     _fresh_mpstate_box(box, imgs)
 end
 
-function helpmod.fresh_backlight_box(box, run, run_cmd)
-    _fresh_backlight_box(box, run, run_cmd)
+function helpmod.brightness_down(box)
+    local cmd = helpmod.fill_args(helpmod.cmd.sg_brightdown, { helpmod.cfg.bl_step })
+    _fresh_backlight_box(box, cmd)
+end
+
+function helpmod.brightness_up(box)
+    local cmd = helpmod.fill_args(helpmod.cmd.sg_brightup, { helpmod.cfg.bl_step })
+    _fresh_backlight_box(box, cmd)
+end
+
+function helpmod.fresh_backlight_box(box)
+    _fresh_backlight_box(box)
 end
 
 function helpmod.fresh_battery_box(box, timer)
