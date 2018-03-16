@@ -14,6 +14,15 @@ local function _remove_newline(s)
     return string.gsub(s, "\n", "")
 end
 
+local function _fill_args(raw_cmd, args)
+    local cmd
+    if type(args) ~= "table" then return end
+    for i = 1, #args do
+       cmd = string.gsub(raw_cmd, "ARG"..i, args[i])
+    end
+    return cmd
+end
+
 local function _parse_sound_info(raw_output)
     local sound_info = {}
     local rawdata = helpmod.str_to_table(raw_output, "%s")
@@ -27,7 +36,7 @@ local function _parse_sound_info(raw_output)
 end
 
 local function _init_usb()
-    local usb_cmd = helpmod.fill_args(helpmod.cmd.s_volume, { 100 })
+    local usb_cmd = _fill_args(helpmod.cmd.s_volume, { 100 })
     helpmod.sound_info.volume = 100
     awful.util.spawn(usb_cmd)
 end
@@ -80,7 +89,7 @@ local function _fresh_volume_box(run_cmd)
 end
 
 local function _modify_volume(new_volume)
-    local cmd = helpmod.fill_args(helpmod.cmd.sg_volume, { new_volume })
+    local cmd = _fill_args(helpmod.cmd.sg_volume, { new_volume })
     _fresh_volume_box(cmd)
 end
 
@@ -190,12 +199,12 @@ function helpmod.fresh_mpstate_box()
 end
 
 function helpmod.brightness_down()
-    local cmd = helpmod.fill_args(helpmod.cmd.sg_brightdown, { helpmod.cfg.bl_step })
+    local cmd = _fill_args(helpmod.cmd.sg_brightdown, { helpmod.cfg.bl_step })
     _fresh_backlight_box(cmd)
 end
 
 function helpmod.brightness_up()
-    local cmd = helpmod.fill_args(helpmod.cmd.sg_brightup, { helpmod.cfg.bl_step })
+    local cmd = _fill_args(helpmod.cmd.sg_brightup, { helpmod.cfg.bl_step })
     _fresh_backlight_box(cmd)
 end
 
@@ -299,15 +308,6 @@ function helpmod.init_sound()
         _init_usb()
     end
     return
-end
-
-function helpmod.fill_args(raw_cmd, args)
-    local cmd
-    if type(args) ~= "table" then return end
-    for i = 1, #args do
-       cmd = string.gsub(raw_cmd, "ARG"..i, args[i])
-    end
-    return cmd
 end
 
 function helpmod.str_to_table(string, delimiter, exclude)
