@@ -237,36 +237,41 @@ function helpmod.get_network_stats(widget, args, netdevs)
     local down_unit = "K"
     local down_label = "Rx"
     local up_label = "Tx"
+    local dec_places = hcfg.nw_decimal_places
     local kilo = 1024
     local text = ""
 
     for i = 1, #netdevs do
         local nwdev = netdevs[i]
         if args["{"..nwdev.." carrier}"] == 1 then
-            local up_val = args['{'..nwdev..' up_kb}']
-            local down_val = args['{'..nwdev..' down_kb}']
+            local down_val = tonumber(args['{'..nwdev..' down_b}']) / kilo
+            local up_val = tonumber(args['{'..nwdev..' up_b}']) / kilo
+            local down_str = ""
+            local up_str = ""
 
-            if tonumber(up_val) >= kilo then
-                up_unit = "M"
-                up_val = args['{'..nwdev..' up_mb}']
-            end
 
-            if tonumber(down_val) >= kilo then
+            if down_val >= kilo then
                 down_unit = "M"
-                down_val = args['{'..nwdev..' down_mb}']
+                down_val = down_val / kilo
+            end
+            if up_val >= kilo then
+                up_unit = "M"
+                up_val = up_val / kilo
             end
 
-            local up_data = up_val..' '..up_unit
-            local down_data = down_val..' '..down_unit
+            down_val = helpmod.round(down_val, dec_places)
+            up_val = helpmod.round(up_val, dec_places)
+            down_str = helpmod.add_decimal_padding(down_val, dec_places) .. ' ' .. down_unit
+            up_str = helpmod.add_decimal_padding(up_val, dec_places) .. ' ' .. up_unit
 
             if string.match(nwdev, "tun") then
-                nwdev = '<span color="'..hcfg.net_tunnel_color..'">'..nwdev..':</span>'
+                nwdev = '<span color="' .. hcfg.net_tunnel_color .. '">' .. nwdev .. ':</span>'
             else
                 nwdev = nwdev .. ':'
             end
             text = text..' - '..nwdev..'<span color="'..hcfg.net_download_color..
-                    '"> '..down_label..' '..down_data..'</span> / <span color="'..
-                    hcfg.net_upload_color..'">'..up_label..' '..up_data..'</span>'
+                    '"> '..down_label..' '..down_str..'</span> / <span color="'..
+                    hcfg.net_upload_color..'">'..up_label..' '..up_str..'</span>'
       end
     end
 
@@ -371,6 +376,17 @@ end
 function helpmod.print_table_perm(t, name)
     name = name or "table"
     debug_print_perm(name..' '..helpmod.table_to_str(t))
+end
+
+function helpmod.round(number, decimal_places)
+    decimal_places = decimal_places or 0
+    local multiplier =  10 ^ (decimal_places)
+    return math.floor(number * multiplier + 0.5) / multiplier
+end
+
+function helpmod.add_decimal_padding(number, pad_count)
+    pad_count = pad_count or 0
+    return string.format("%." .. pad_count .. "f", tostring(number))
 end
 
 return helpmod

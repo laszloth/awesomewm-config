@@ -6,6 +6,7 @@ based on awesome's awesomerc.lua and zenburn theme
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] keycode to keysym
+- [ ] rxmas local vars
 
 ## done
 - [x] make audio info passing more robust
