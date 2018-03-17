@@ -1,8 +1,6 @@
 local hcfg = {}
 
 -- thresholds
-hcfg.kilo_limit              = 1024
-
 hcfg.cpu_temp_high           = 85
 hcfg.cpu_temp_mid            = 55
 

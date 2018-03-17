@@ -1,13 +1,12 @@
-local awful = require("awful")
-
 local helpmod = {}
+
 helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
-
 helpmod.sound_info = {}
 helpmod.widgets = {}
 
 -- {{{ Private
+local awful = require("awful")
 local hcmd = helpmod.cmd
 local hcfg = helpmod.cfg
 
@@ -19,22 +18,26 @@ end
 
 local function _fill_args(raw_cmd, args)
     local cmd
+
     if type(args) ~= "table" then return end
     for i = 1, #args do
        cmd = string.gsub(raw_cmd, "ARG"..i, args[i])
     end
+
     return cmd
 end
 
 local function _parse_sound_info(raw_output)
     local sound_info = {}
     local rawdata = helpmod.str_to_table(raw_output, "' '")
+
     sound_info["sink"] = rawdata[1]
     sound_info["sink_index"] = tonumber(rawdata[2])
     sound_info["volume"] = tonumber(rawdata[3])
     sound_info["is_muted"] = (tonumber(rawdata[4]) == 1)
     sound_info["jack_plugged"] = (tonumber(rawdata[5]) == 1)
     sound_info["bus_type"] = rawdata[6]
+
     return sound_info
 end
 
@@ -44,13 +47,14 @@ local function _init_usb()
     awful.util.spawn(usb_cmd)
 end
 
-local function _fresh_volume_box(run_cmd)
+local function _fresh_volume_box(cmd)
     local box = helpmod.widgets.volume.box
-    local cmd = run_cmd or hcmd.g_soundinfo
+    if not box then return end
+    cmd = cmd or hcmd.g_soundinfo
+
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
-            --debug_print("VB_stderr="..stderr)
             box.markup = "<error>"
             return
         end
@@ -98,22 +102,27 @@ end
 
 local function _modify_volume_rel(increase)
     local vol = ""
+
     if increase then vol = "+" else vol = "-" end
+
     if helpmod.sound_info.bus_type == "usb" then
         vol = vol .. tostring(hcfg.usb_step)
     else
         vol = vol .. tostring(hcfg.vol_step)
     end
+
     _modify_volume(vol)
 end
 
 local function _fresh_mpstate_box()
     local boxes = helpmod.widgets.mpstate.boxes
     local imgs = helpmod.widgets.mpstate.images
-    awful.spawn.easy_async(hcmd.g_mpstatus, function(stdout, stderr, reason, exit_code)
+    if not ( boxes or imgs ) then return end
+    local cmd = hcmd.g_mpstatus
+
+    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         if exit_code ~= 0 then
             for i = 1, #boxes do
-                --debug_print("MP_stderr="..stderr)
                 boxes[i].visible = false
             end
             return
@@ -131,14 +140,15 @@ local function _fresh_mpstate_box()
     end)
 end
 
-local function _fresh_backlight_box(run_cmd)
+local function _fresh_backlight_box(cmd)
     local box = helpmod.widgets.backlight.box
-    local cmd = run_cmd or hcmd.g_backlight
+    if not box then return end
+    cmd = cmd or hcmd.g_backlight
+
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local pref = 'backlight: '
         if exit_code ~= 0 then
-            --debug_print("BL_stderr="..stderr)
             box.markup = "<error>"
             return
         end
@@ -151,7 +161,10 @@ end
 local function _fresh_battery_box()
     local box = helpmod.widgets.battery.box
     local timer = helpmod.widgets.battery.timer
-    awful.spawn.easy_async(hcmd.g_battery, function(stdout, stderr, reason, exit_code)
+    if not ( box or timer ) then return end
+    local cmd = hcmd.g_battery
+
+    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
             --debug_print("BB_stderr="..stderr)
@@ -224,6 +237,7 @@ function helpmod.get_network_stats(widget, args, netdevs)
     local down_unit = "K"
     local down_label = "Rx"
     local up_label = "Tx"
+    local kilo = 1024
     local text = ""
 
     for i = 1, #netdevs do
@@ -232,12 +246,12 @@ function helpmod.get_network_stats(widget, args, netdevs)
             local up_val = args['{'..nwdev..' up_kb}']
             local down_val = args['{'..nwdev..' down_kb}']
 
-            if tonumber(up_val) >= hcfg.kilo_limit then
+            if tonumber(up_val) >= kilo then
                 up_unit = "M"
                 up_val = args['{'..nwdev..' up_mb}']
             end
 
-            if tonumber(down_val) >= hcfg.kilo_limit then
+            if tonumber(down_val) >= kilo then
                 down_unit = "M"
                 down_val = args['{'..nwdev..' down_mb}']
             end
@@ -266,6 +280,7 @@ end
 
 function helpmod.get_coretemp_text(temp, n)
     local label = 'core ' ..(n-2).. ': '
+
     if temp <= hcfg.cpu_temp_mid then
         label = label..'<span color="'..hcfg.cpu_temp_low_color..'">'
     elseif temp <= hcfg.cpu_temp_high  then
@@ -273,6 +288,7 @@ function helpmod.get_coretemp_text(temp, n)
     else
         label = label..'<span color="'..hcfg.cpu_temp_high_color..'">'
     end
+
     return label..temp..'°C</span>'..hcfg.separ_txt
 end
 
@@ -304,20 +320,26 @@ end
 function helpmod.init_sound()
     local h = assert(io.popen(hcmd.g_soundinfo))
     local ret = h:read("*a")
+
     h:close()
+
     helpmod.sound_info = _parse_sound_info(ret)
     --helpmod.print_table_perm(helpmod.sound_info, "sinfo")
     if helpmod.sound_info.bus_type == "usb" then
         _init_usb()
     end
+
     return
 end
 
 function helpmod.str_to_table(string, delimiter, exclude)
+    delimiter = delimiter or ' '
     local arr = {}
+
     for m in string.gmatch(string, "[^"..delimiter.."]+") do
         if m ~= exclude then table.insert(arr, m) end
     end
+
     return arr
 end
 
