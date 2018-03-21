@@ -42,8 +42,9 @@ local function _parse_sound_info(raw_output)
 end
 
 local function _init_usb()
-    local usb_cmd = _fill_args(hcmd.s_volume, { 100 })
-    helpmod.sound_info.volume = 100
+    local default_volume = hcfg.usb_init_val
+    local usb_cmd = _fill_args(hcmd.s_volume, { default_volume })
+    helpmod.sound_info.volume = default_volume
     awful.util.spawn(usb_cmd)
 end
 

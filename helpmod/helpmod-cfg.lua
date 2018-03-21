@@ -10,6 +10,9 @@ hcfg.volume_mid              = 40
 hcfg.battery_low             = 20
 hcfg.battery_low_notif_gap   = 5
 
+-- initial values
+hcfg.usb_init_val            = 20
+
 -- labels
 hcfg.label_speaker           = 'SPKR:'
 hcfg.label_jack              = 'JACK:'
@@ -40,7 +43,8 @@ hcfg.battery_charge_color    = '#7FAE5A'
 hcfg.nw_decimal_places       = 2
 hcfg.bl_step                 = 7 --percent
 hcfg.vol_step                = 2 --percent
-hcfg.usb_step                = 25 --percent
+hcfg.usb_step                = hcfg.vol_step
+hcfg.amp_step                = 25 --percent
 
 -- timeouts
 hcfg.backlight_timeout       = 2.5
