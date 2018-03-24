@@ -869,7 +869,7 @@ awful.rules.rules = {
     -- @DOC_DIALOG_RULE@
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
-      }, properties = { titlebars_enabled = false }
+      }, properties = { titlebars_enabled = hcfg.titlebars_enabled }
     },
 
     -- Set Conky to be on a hidden tag without centering
@@ -894,9 +894,10 @@ awful.rules.rules = {
       properties = { screen = 1, tag = "head",
                      floating = true,
                      placement = awful.placement.bottom_right } },
-    -- Set Spotify to always map to 'kreat' tag on def_screen
+
+    -- Set Spotify to always map to 'kreat' tag on last screen
     { rule = { class = "Spotify" },
-      properties = { screen = def_screen, tag = "kreat" } },
+      properties = { screen = num_screen, tag = "kreat" } },
 
 }
 -- }}}
