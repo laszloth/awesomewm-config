@@ -10,6 +10,7 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] handle different usb soundcards
 
 ## done
+- [x] add new module for helper functions only
 - [x] make audio info passing more robust
 - [x] use sink name instead of index
 - [x] remove widget argument from fresh functions
@@ -37,7 +38,6 @@ based on awesome's awesomerc.lua and zenburn theme
 ## maybe
 - [ ] hide base net if if there is a tunnel
 - [ ] then show base net if on click
-- [ ] add new module for helper functions only
 
 ## deleted
 - [ ] remove relative volume handling [reason: much slower and complicated due to callbacks]

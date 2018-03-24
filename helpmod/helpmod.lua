@@ -2,6 +2,8 @@ local helpmod = {}
 
 helpmod.cmd = require("helpmod.helpmod-cmd")
 helpmod.cfg = require("helpmod.helpmod-cfg")
+helpmod.fnc = require("helpmod.helpmod-fnc")
+
 helpmod.sound_info = {}
 helpmod.widgets = {}
 
@@ -9,6 +11,7 @@ helpmod.widgets = {}
 local awful = require("awful")
 local hcmd = helpmod.cmd
 local hcfg = helpmod.cfg
+local hfnc = helpmod.fnc
 
 local _prev_batt_lvl = 100
 
@@ -29,7 +32,7 @@ end
 
 local function _parse_sound_info(raw_output)
     local sound_info = {}
-    local rawdata = helpmod.str_to_table(raw_output, "' '")
+    local rawdata = hfnc.str_to_table(raw_output, "' '")
 
     sound_info["sink"] = rawdata[1]
     sound_info["sink_index"] = tonumber(rawdata[2])
@@ -260,10 +263,10 @@ function helpmod.get_network_stats(widget, args, netdevs)
                 up_val = up_val / kilo
             end
 
-            down_val = helpmod.round(down_val, dec_places)
-            up_val = helpmod.round(up_val, dec_places)
-            down_str = helpmod.add_decimal_padding(down_val, dec_places) .. ' ' .. down_unit
-            up_str = helpmod.add_decimal_padding(up_val, dec_places) .. ' ' .. up_unit
+            down_val = hfnc.round(down_val, dec_places)
+            up_val = hfnc.round(up_val, dec_places)
+            down_str = hfnc.add_decimal_padding(down_val, dec_places) .. ' ' .. down_unit
+            up_str = hfnc.add_decimal_padding(up_val, dec_places) .. ' ' .. up_unit
 
             if string.match(nwdev, "tun") then
                 nwdev = '<span color="' .. hcfg.net_tunnel_color .. '">' .. nwdev .. ':</span>'
@@ -319,7 +322,7 @@ function helpmod.get_net_devices()
     local h = assert(io.popen(hcmd.g_netdevs))
     local ret = h:read("*a")
     h:close()
-    return helpmod.str_to_table(ret, "%s", "lo")
+    return hfnc.str_to_table(ret, "%s", "lo")
 end
 
 -- called once at startup/in callback, popen is fine for now
@@ -330,64 +333,12 @@ function helpmod.init_sound()
     h:close()
 
     helpmod.sound_info = _parse_sound_info(ret)
-    --helpmod.print_table_perm(helpmod.sound_info, "sinfo")
+    --hfnc.print_table_perm(helpmod.sound_info, "sinfo")
     if helpmod.sound_info.bus_type == "usb" then
         _init_usb()
     end
 
     return
-end
-
-function helpmod.str_to_table(string, delimiter, exclude)
-    delimiter = delimiter or ' '
-    local arr = {}
-
-    for m in string.gmatch(string, "[^"..delimiter.."]+") do
-        if m ~= exclude then table.insert(arr, m) end
-    end
-
-    return arr
-end
-
-function helpmod.table_to_str(t, depth)
-    depth = depth or 0
-
-    if type(t) ~= "table" then
-        return tostring(t)
-    end
-
-    local dpref = " "
-    for i = 1, depth do
-        dpref = dpref.." "
-    end
-
-    local str = "{ "
-    for key, value in pairs(t) do
-        str = str.."\n"..dpref.."["..tostring(key).."] = "..
-                helpmod.table_to_str(value, depth+1)..", "
-    end
-    return str.."}"
-end
-
-function helpmod.print_table(t, name)
-    name = name or "table"
-    debug_print(name..' '..helpmod.table_to_str(t))
-end
-
-function helpmod.print_table_perm(t, name)
-    name = name or "table"
-    debug_print_perm(name..' '..helpmod.table_to_str(t))
-end
-
-function helpmod.round(number, decimal_places)
-    decimal_places = decimal_places or 0
-    local multiplier =  10 ^ (decimal_places)
-    return math.floor(number * multiplier + 0.5) / multiplier
-end
-
-function helpmod.add_decimal_padding(number, pad_count)
-    pad_count = pad_count or 0
-    return string.format("%." .. pad_count .. "f", tostring(number))
 end
 
 return helpmod

@@ -26,6 +26,7 @@ local capi = { awesome = awesome }
 local helpmod = require("helpmod.helpmod")
 local hcfg = helpmod.cfg
 local hcmd = helpmod.cmd
+local hfnc = helpmod.fnc
 
 -- Override awesome.quit when we're using GNOME
 _awesome_quit = awesome.quit
@@ -384,7 +385,7 @@ function ext_event_handler(event, data)
         mpspace.visible = false
     elseif event == "net" then
         net_devs = helpmod.get_net_devices()
-        --helpmod.print_table(net_devs, "netdevs")
+        --hfnc.print_table(net_devs, "netdevs")
     else
         event = event or "nil"
         debug_print('Wrong event string: "'..event..'"')
@@ -930,7 +931,7 @@ client.connect_signal("manage", function (c)
     -- i.e. put it at the end of others instead of setting it master.
     -- if not awesome.startup then awful.client.setslave(c) end
 
---    debug_print_perm(string.format("name=%q\nhints=%s", c.name, helpmod.table_to_str(shints)))
+--    debug_print_perm(string.format("name=%q\nhints=%s", c.name, hfnc.table_to_str(shints)))
 
     -- workaround for no_offscreen totally overriding under_mouse or centered
     if --awesome.startup and
