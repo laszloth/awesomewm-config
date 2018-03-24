@@ -80,6 +80,14 @@ terminal    = hcmd.terminal
 editor      = os.getenv("EDITOR") or hcmd.editor
 editor_cmd  = terminal .. " -e " .. editor
 
+-- Various variables
+local num_screen = 1
+local def_screen = 1
+local cpu_cores = helpmod.get_cpu_core_count()
+local on_laptop = helpmod.is_on_laptop()
+local net_devs = helpmod.get_net_devices()
+local cput_widgets = {}
+
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
@@ -87,7 +95,6 @@ editor_cmd  = terminal .. " -e " .. editor
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = "Mod4"
 
--- {{{ Tags configuration
 -- @DOC_LAYOUT@
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
@@ -125,20 +132,6 @@ local tags_cfg = {
 }
 -- }}}
 
--- Widget variables
-local num_screen = 1
-local def_screen = 1
-local num_cores = helpmod.get_cpu_core_count()
-local on_laptop = helpmod.is_on_laptop()
-local net_devs = helpmod.get_net_devices()
-
-local netdevtimer = gears.timer { timeout = 120, }
-netdevtimer:connect_signal("timeout", function()
-    net_devs = helpmod.get_net_devices()
-end)
-netdevtimer:start()
--- }}}
-
 -- {{{ Helper functions
 function debug_print(msg)
     naughty.notify({ preset = naughty.config.presets.critical,
@@ -169,7 +162,6 @@ end
 local function update_screen_count()
     num_screen = screen.count()
     def_screen = math.floor(num_screen / 3) + 1
-    --debug_print("num_screen="..num_screen.."\ndef_screen="..def_screen)
 end
 
 local function rename_current_tag()
@@ -302,16 +294,10 @@ end
 
 -- Create volume widget
 local myvolwidget = wibox.widget.textbox()
-local myvoltimer = gears.timer { timeout = hcfg.volume_timeout, }
-myvoltimer:connect_signal("timeout", function()
-    --debug_print_perm("myvoltimer expired")
-    helpmod.fresh_volume_box()
-end)
 myvolwidget:connect_signal("button::release", function()
     helpmod.toggle_mute()
 end)
 
-myvoltimer:start()
 helpmod.widgets["volume"] = { box = myvolwidget }
 helpmod.fresh_volume_box()
 
@@ -340,13 +326,12 @@ end, 1)
 -- Create CPU widgets
 
 -- CPU: thermal
-local cputemps = {}
 local mycputempwidget = wibox.layout.fixed.horizontal()
-for i = 2, 1 + num_cores do
+for i = 2, 1 + cpu_cores do
     local c = wibox.widget.textbox()
     c:connect_signal("button::release", function()
         local s = mouse.screen.index
-        cputemps[s].visible = not cputemps[s].visible
+        cput_widgets[s].visible = not cput_widgets[s].visible
     end)
     vicious.register(c, vicious.widgets.thermal,
         function(widget, args) return helpmod.get_coretemp_text(args[1], i) end,
@@ -361,9 +346,10 @@ vicious.register(myusagewidget, vicious.widgets.cpu, function(widget, args)
     return string.format("%02d", args[1]).."%" end, 1)
 myusagewidget:connect_signal("button::release", function()
     local s = mouse.screen.index
-    cputemps[s].visible = not cputemps[s].visible
+    cput_widgets[s].visible = not cput_widgets[s].visible
 end)
 
+-- external events via "awesome-client"
 function ext_event_handler(event, data)
     --debug_print("DBUS EVENT: "..event)
     if event == "acpi_jack" then
@@ -456,13 +442,13 @@ screen.connect_signal("property::geometry", set_wallpaper)
 
 -- @DOC_FOR_EACH_SCREEN@
 awful.screen.connect_for_each_screen(function(s)
-    local first_screen = false
+    local first_screen = (s.index == 1)
 
     -- Wallpaper
     set_wallpaper(s)
 
-    if s.index == 1 then
-        first_screen = true
+    -- connect to signals
+    if first_screen then
         s:connect_signal("removed", function()
             debug_print_perm("a screen has been removed")
             update_screen_count()
@@ -542,22 +528,15 @@ awful.screen.connect_for_each_screen(function(s)
 
     local ctc = wibox.container.background(mycputempwidget)
     if num_screen == 1 then ctc.visible = false end
-    cputemps[s.index] = ctc
+    cput_widgets[s.index] = ctc
     rightl:add(ctc)
-    rightl:add(mynetwidget) rightl:add(separator)
 
-    if first_screen then
-        rightl:add(mysystray) rightl:add(mystseparator)
-        rightl:add(myplacedmpstate) rightl:add(mpspace)
-        rightl:add(myvolwidget)
-        if on_laptop then
-            -- separator included
-            rightl:add(myblwidget)
-        end
-    else
-        rightl:add(myplacedmpstate) rightl:add(mpspace)
-        rightl:add(myvolwidget)
-    end
+    rightl:add(mynetwidget) rightl:add(separator)
+    if first_screen then rightl:add(mysystray) rightl:add(mystseparator) end
+    rightl:add(myplacedmpstate) rightl:add(mpspace)
+    rightl:add(myvolwidget)
+    -- separator included
+    if first_screen and on_laptop then rightl:add(myblwidget) end
 
     rightl:add(separator)
     if on_laptop then rightl:add(mybatwidget) rightl:add(separator) end
