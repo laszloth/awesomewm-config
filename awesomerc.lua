@@ -899,6 +899,11 @@ awful.rules.rules = {
     { rule = { class = "Spotify" },
       properties = { screen = num_screen, tag = "kreat" } },
 
+    -- Set qjackctl to always be floating
+    { rule = { class = "qjackctl" },
+      properties = { floating = true,
+                     placement = awful.placement.bottom_right } },
+
 }
 -- }}}
 
