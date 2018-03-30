@@ -15,7 +15,7 @@ local hfnc = helpmod.fnc
 
 local _prev_batt_lvl = 100
 
-local function _remove_newline(s)
+local function _remove_newlines(s)
     return string.gsub(s, "\n", "")
 end
 
@@ -32,7 +32,8 @@ end
 
 local function _parse_sound_info(raw_output)
     local sound_info = {}
-    local rawdata = hfnc.str_to_table(raw_output, "' '")
+    local rawdata = hfnc.str_to_table(raw_output, ";")
+    local specs = hfnc.str_to_table(rawdata[7], " ")
 
     sound_info["sink"] = rawdata[1]
     sound_info["sink_index"] = tonumber(rawdata[2])
@@ -40,6 +41,9 @@ local function _parse_sound_info(raw_output)
     sound_info["is_muted"] = (tonumber(rawdata[4]) == 1)
     sound_info["jack_plugged"] = (tonumber(rawdata[5]) == 1)
     sound_info["bus_type"] = rawdata[6]
+    sound_info["sample_specs"] = { bit_depth = specs[1],
+                                   channels = specs[2],
+                                   sample_rate = specs[3] }
 
     return sound_info
 end
@@ -64,7 +68,7 @@ local function _fresh_volume_box(cmd)
         end
 
         local prev_bus = helpmod.sound_info.bus_type
-        helpmod.sound_info = _parse_sound_info(stdout)
+        helpmod.sound_info = _parse_sound_info(_remove_newlines(stdout))
         local sinfo = helpmod.sound_info
         local isusb = (sinfo.bus_type == "usb")
         local vol = sinfo.volume
@@ -132,7 +136,7 @@ local function _fresh_mpstate_box()
             return
         end
 
-        local state = _remove_newline(stdout)
+        local state = _remove_newlines(stdout)
         if state == "Playing" then
             boxes[1].image = imgs[1]
         else
@@ -332,7 +336,7 @@ function helpmod.init_sound()
 
     h:close()
 
-    helpmod.sound_info = _parse_sound_info(ret)
+    helpmod.sound_info = _parse_sound_info(_remove_newlines(ret))
     --hfnc.print_table_perm(helpmod.sound_info, "sinfo")
     if helpmod.sound_info.bus_type == "usb" then
         _init_usb()

@@ -24,16 +24,17 @@ Usage: $(basename $0) [option]
   -j, --jack: print jack plug info
   -h, --help: print this help
 "
-
 function get_info {
-    DEF_SINK=$(pactl info | awk -F": " '/^Default Sink: /{print $2}')
+    DEF_SINK=$(pactl info | sed -n 's#^Default Sink: \(.*\)#\1#p')
     [ -z "$DEF_SINK" ] && echo "pactl error" >&2 && exit 1
     DEF_SINK_INDEX=$(pactl list sinks short | grep "$DEF_SINK" | awk '{print $1}')
     SINK_DATA=$(pactl list sinks | awk "/Sink #$DEF_SINK_INDEX/,/Ports:/" | sed 's/^\s*//g')
-    MUTED=$(echo "$SINK_DATA" | grep -c "Mute: no")
-    VOLUME=$(echo "$SINK_DATA" | grep "^Volume" | awk '{print $5}' | tr -d '%')
+    MUTED=$(echo "$SINK_DATA" | grep -c "^Mute: no")
+    VOLUME=$(echo "$SINK_DATA" | grep "^Volume:" | awk '{print $5}' | tr -d '%')
     BUS=$(echo "$SINK_DATA" | sed -n 's#device.bus = "\(.*\)"#\1#p')
-    JACK=$(cat /proc/asound/card1/codec#0 | grep "Pin-ctls:" | head -3 | tail -1 | grep -c OUT)
+    SAMPLE_SPECS=$(echo "$SINK_DATA" | sed -n 's#^Sample Specification: \(.*\)$#\1#p')
+    SYSFS=$(echo "$SINK_DATA" | sed -n 's#sysfs.path = "\(.*\)"#/sys\1#p')
+    JACK=$(cat '/proc/asound/card1/codec#0' | grep "Pin-ctls:" | head -3 | tail -1 | grep -c OUT)
 }
 
 function print_info {
@@ -45,10 +46,12 @@ function print_info {
     echo "BUS=$BUS"
     echo -n "JACK="
     [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
+    echo "SAMPLE_SPECS=$SAMPLE_SPECS"
+    echo "SYSFS=$SYSFS"
 }
 
 function print_raw_info {
-    echo "'${DEF_SINK}' '${DEF_SINK_INDEX}' '${VOLUME}' '$((1-MUTED))' '$((1-JACK))' '${BUS}'"
+    echo "${DEF_SINK};${DEF_SINK_INDEX};${VOLUME};$((1-MUTED));$((1-JACK));${BUS};${SAMPLE_SPECS}"
 }
 
 # $1: sink name or index, can be emitted
