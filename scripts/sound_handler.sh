@@ -38,16 +38,16 @@ function get_info {
 }
 
 function print_info {
-    echo "DEF_SINK_INDEX=$DEF_SINK_INDEX"
-    echo "DEF_SINK=$DEF_SINK"
-    echo -n "MUTED="
+    echo "DEF_SINK_INDEX = $DEF_SINK_INDEX"
+    echo "DEF_SINK = $DEF_SINK"
+    echo -n "MUTED = "
     [ $MUTED -eq 0 ] && echo "true" || echo "false"
-    echo "VOLUME=$VOLUME%"
-    echo "BUS=$BUS"
-    echo -n "JACK="
+    echo "VOLUME = $VOLUME%"
+    echo "BUS = $BUS"
+    echo -n "JACK = "
     [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
-    echo "SAMPLE_SPECS=$SAMPLE_SPECS"
-    echo "SYSFS=$SYSFS"
+    echo "SAMPLE_SPECS = $SAMPLE_SPECS"
+    echo "SYSFS = $SYSFS"
 }
 
 function print_raw_info {
