@@ -38,8 +38,8 @@ function get_info {
 }
 
 function print_info {
-    echo "DEF_SINK=$DEF_SINK"
     echo "DEF_SINK_INDEX=$DEF_SINK_INDEX"
+    echo "DEF_SINK=$DEF_SINK"
     echo -n "MUTED="
     [ $MUTED -eq 0 ] && echo "true" || echo "false"
     echo "VOLUME=$VOLUME%"
@@ -51,7 +51,7 @@ function print_info {
 }
 
 function print_raw_info {
-    echo "${DEF_SINK};${DEF_SINK_INDEX};${VOLUME};$((1-MUTED));$((1-JACK));${BUS};${SAMPLE_SPECS}"
+    echo "${DEF_SINK_INDEX};${DEF_SINK};${VOLUME};$((1-MUTED));$((1-JACK));${BUS};${SAMPLE_SPECS}"
 }
 
 # $1: sink name or index, can be emitted

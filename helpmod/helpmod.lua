@@ -35,8 +35,8 @@ local function _parse_sound_info(raw_output)
     local rawdata = hfnc.str_to_table(raw_output, ";")
     local specs = hfnc.str_to_table(rawdata[7], " ")
 
-    sound_info["sink"] = rawdata[1]
-    sound_info["sink_index"] = tonumber(rawdata[2])
+    sound_info["sink_index"] = tonumber(rawdata[1])
+    sound_info["sink"] = rawdata[2]
     sound_info["volume"] = tonumber(rawdata[3])
     sound_info["is_muted"] = (tonumber(rawdata[4]) == 1)
     sound_info["jack_plugged"] = (tonumber(rawdata[5]) == 1)
