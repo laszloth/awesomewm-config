@@ -13,6 +13,19 @@ local hcmd = helpmod.cmd
 local hcfg = helpmod.cfg
 local hfnc = helpmod.fnc
 
+local _sound_info_skel = {
+  { "sink_index",   "number" },
+  { "sink",         "string" },
+  { "volume",       "number" },
+  { "is_muted",     "boolean" },
+  { "jack_plugged", "boolean" },
+  { "bus_type",     "string" },
+  { "bit_depth",    "string" },
+  { "channels",     "number" },
+  { "sample_rate",  "number" },
+}
+
+local _req_sound_info_count = #_sound_info_skel
 local _prev_batt_lvl = 100
 
 local function _remove_newlines(s)
@@ -33,17 +46,22 @@ end
 local function _parse_sound_info(raw_output)
     local sound_info = {}
     local rawdata = hfnc.str_to_table(raw_output, ";")
-    local specs = hfnc.str_to_table(rawdata[7], " ")
 
-    sound_info["sink_index"] = tonumber(rawdata[1])
-    sound_info["sink"] = rawdata[2]
-    sound_info["volume"] = tonumber(rawdata[3])
-    sound_info["is_muted"] = (tonumber(rawdata[4]) == 1)
-    sound_info["jack_plugged"] = (tonumber(rawdata[5]) == 1)
-    sound_info["bus_type"] = rawdata[6]
-    sound_info["sample_specs"] = { bit_depth = specs[1],
-                                   channels = specs[2],
-                                   sample_rate = specs[3] }
+    for i = 1, _req_sound_info_count do
+        local rd = rawdata[i]
+        local elem = _sound_info_skel[i]
+        local elem_name = elem[1]
+        local elem_type = elem[2]
+
+        local value
+        if     elem_type == "number"  then value = tonumber(rd)
+        elseif elem_type == "string"  then value = rd
+        elseif elem_type == "boolean" then value = (tonumber(rd) == 1)
+        else return nil end
+
+        if value == nil then return nil end
+        sound_info[elem_name] = value
+    end
 
     return sound_info
 end
@@ -61,15 +79,17 @@ local function _fresh_volume_box(cmd)
     cmd = cmd or hcmd.g_soundinfo
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
-        --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+        --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
-            box.markup = "<error>"
+            box.markup = "no sound"
             return
         end
 
         local prev_bus = helpmod.sound_info.bus_type
-        helpmod.sound_info = _parse_sound_info(_remove_newlines(stdout))
-        local sinfo = helpmod.sound_info
+        local sinfo = _parse_sound_info(_remove_newlines(stdout))
+        if not sinfo then box.markup = "no sound" return end
+
+        helpmod.sound_info = sinfo
         local isusb = (sinfo.bus_type == "usb")
         local vol = sinfo.volume
 
@@ -154,7 +174,7 @@ local function _fresh_backlight_box(cmd)
     cmd = cmd or hcmd.g_backlight
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
-        --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+        --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local pref = 'backlight: '
         if exit_code ~= 0 then
             box.markup = "<error>"
@@ -173,7 +193,7 @@ local function _fresh_battery_box()
     local cmd = hcmd.g_battery
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
-        --debug_print_perm("cmd='"..cmd[#cmd].."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+        --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
             --debug_print("BB_stderr="..stderr)
             box.markup = "no battery"
@@ -336,12 +356,14 @@ function helpmod.init_sound()
 
     h:close()
 
-    helpmod.sound_info = _parse_sound_info(_remove_newlines(ret))
+    local sinfo = _parse_sound_info(_remove_newlines(ret))
+    if not sinfo then return end
     --hfnc.print_table_perm(helpmod.sound_info, "sinfo")
-    if helpmod.sound_info.bus_type == "usb" then
+    if sinfo.bus_type == "usb" then
         _init_usb()
     end
 
+    helpmod.sound_info = sinfo
     return
 end
 

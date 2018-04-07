@@ -24,15 +24,22 @@ Usage: $(basename $0) [option]
   -j, --jack: print jack plug info
   -h, --help: print this help
 "
+function log_err {
+    echo >&2 "sound_handler:" "$1"
+}
+
 function get_info {
     DEF_SINK=$(pactl info | sed -n 's#^Default Sink: \(.*\)#\1#p')
-    [ -z "$DEF_SINK" ] && echo "pactl error" >&2 && exit 1
+    [ -z "$DEF_SINK" ] && log_err "pactl error" && exit 1
     DEF_SINK_INDEX=$(pactl list sinks short | grep "$DEF_SINK" | awk '{print $1}')
     SINK_DATA=$(pactl list sinks | awk "/Sink #$DEF_SINK_INDEX/,/Ports:/" | sed 's/^\s*//g')
     MUTED=$(echo "$SINK_DATA" | grep -c "^Mute: no")
     VOLUME=$(echo "$SINK_DATA" | grep "^Volume:" | awk '{print $5}' | tr -d '%')
     BUS=$(echo "$SINK_DATA" | sed -n 's#device.bus = "\(.*\)"#\1#p')
     SAMPLE_SPECS=$(echo "$SINK_DATA" | sed -n 's#^Sample Specification: \(.*\)$#\1#p')
+    BIT_DEPTH=$(echo "$SAMPLE_SPECS" | cut -d' ' -f1)
+    CHANNELS=$(echo "$SAMPLE_SPECS" | cut -d' ' -f2 | tr -d 'ch')
+    SAMPLE_RATE=$(echo "$SAMPLE_SPECS" | cut -d' ' -f3 | tr -d 'Hz')
     SYSFS=$(echo "$SINK_DATA" | sed -n 's#sysfs.path = "\(.*\)"#/sys\1#p')
     JACK=$(cat '/proc/asound/card1/codec#0' | grep "Pin-ctls:" | head -3 | tail -1 | grep -c OUT)
 }
@@ -51,14 +58,14 @@ function print_info {
 }
 
 function print_raw_info {
-    echo "${DEF_SINK_INDEX};${DEF_SINK};${VOLUME};$((1-MUTED));$((1-JACK));${BUS};${SAMPLE_SPECS}"
+    echo "${DEF_SINK_INDEX};${DEF_SINK};${VOLUME};$((1-MUTED));$((1-JACK));${BUS};${BIT_DEPTH};${CHANNELS};${SAMPLE_RATE}"
 }
 
 # $1: sink name or index, can be emitted
 # $2: new volume or new relative volume w/ operand
 # $SHOW_RESULT: call print_raw_info w/ updated volume
 function set_volume {
-    [ -z "$1" ] && echo "no params given" >&2 && exit 1
+    [ -z "$1" ] && log_err "no params given" && exit 1
     if [ -z "$2" ]; then
         volume=$1
         get_info

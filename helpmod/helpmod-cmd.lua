@@ -12,10 +12,10 @@ hcmd.g_corecnt  = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 hcmd.g_netdevs  = [[ls /sys/class/net/]]
 
 -- raw commands
-local _bash       = [[bash -c "]]
-local _sh         = [[sh -c "]]
-local _and        = ' ; '
-local _terminate  = '"'
+local _bash       = [[bash -c ']]
+local _sh         = [[sh -c ']]
+local _and        = [[; ret=$?; [ $ret -ne 0 ] && exit $ret;]]
+local _terminate  = [[']]
 
 local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh --raw]]
 local _setvolume  = [[~/.config/awesome/scripts/sound_handler.sh --set-volume ARG1]]

@@ -1,14 +1,16 @@
 local hfnc = {}
 
-function hfnc.str_to_table(string, delimiter, exclude)
+function hfnc.str_to_table(str, delimiter, exclude)
+    if not str then return nil end
     delimiter = delimiter or ' '
-    local arr = {}
 
-    for m in string.gmatch(string, "[^"..delimiter.."]+") do
-        if m ~= exclude then table.insert(arr, m) end
+    local rt = {}
+
+    for m in string.gmatch(str, "[^"..delimiter.."]+") do
+        if m ~= exclude then table.insert(rt, m) end
     end
 
-    return arr
+    return rt
 end
 
 function hfnc.table_to_str(t, depth)
