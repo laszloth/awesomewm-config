@@ -7,9 +7,10 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] keycode to keysym
 - [ ] rxmas local vars
-- [ ] handle different usb soundcards
+- [ ] change usb checks & functions to non-pci ones
 
 ## done
+- [x] handle different usb soundcards [regarding initial volume]
 - [x] add new module for helper functions only
 - [x] make audio info passing more robust
 - [x] use sink name instead of index
@@ -40,4 +41,4 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] then show base net if on click
 
 ## deleted
-- [ ] remove relative volume handling [reason: much slower and complicated due to callbacks]
+- [x] remove relative volume handling [much slower and complicated due to callbacks]

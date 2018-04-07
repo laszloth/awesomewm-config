@@ -34,7 +34,7 @@ hcfg.cpu_temp_high_color     = hcfg.crit_color
 hcfg.volume_high_color       = hcfg.crit_color
 hcfg.volume_mid_color        = hcfg.warn_color
 hcfg.volume_mute_color       = '#5C5C5C'
-hcfg.usb_card_color          = '#BA4100'
+hcfg.ext_card_color          = '#BA4100'
 
 hcfg.battery_low_color       = hcfg.crit_color
 hcfg.battery_charge_color    = '#7FAE5A'
@@ -46,8 +46,7 @@ hcfg.nw_decimal_places       = 2
 
 hcfg.bl_step                 = 7 --percent
 hcfg.vol_step                = 2 --percent
-hcfg.usb_step                = hcfg.vol_step
-hcfg.amp_step                = 25 --percent
+hcfg.ext_step                = 25 --percent
 
 -- timeouts
 hcfg.backlight_timeout       = 2.5

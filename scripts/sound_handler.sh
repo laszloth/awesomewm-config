@@ -18,10 +18,12 @@ Usage: $(basename $0) [option]
 
   -I, --index: print index of default sink
   -n, --name: print name of default sink
-  -m, --muted: print mute info
+  -m, --muted: print mute info (bool)
   -v, --volume: print volume info
   -b, --bus: print bus info
-  -j, --jack: print jack plug info
+  -j, --jack: print jack plug info (bool)
+  -d, --sample-spec: print sample specification
+  -V, --volume-control: print volume control info (bool)
   -h, --help: print this help
 "
 function log_err {
@@ -36,11 +38,12 @@ function get_info {
     MUTED=$(echo "$SINK_DATA" | grep -c "^Mute: no")
     VOLUME=$(echo "$SINK_DATA" | grep "^Volume:" | awk '{print $5}' | tr -d '%')
     BUS=$(echo "$SINK_DATA" | sed -n 's#device.bus = "\(.*\)"#\1#p')
-    SAMPLE_SPECS=$(echo "$SINK_DATA" | sed -n 's#^Sample Specification: \(.*\)$#\1#p')
-    BIT_DEPTH=$(echo "$SAMPLE_SPECS" | cut -d' ' -f1)
-    CHANNELS=$(echo "$SAMPLE_SPECS" | cut -d' ' -f2 | tr -d 'ch')
-    SAMPLE_RATE=$(echo "$SAMPLE_SPECS" | cut -d' ' -f3 | tr -d 'Hz')
+    SAMPLE_SPEC=$(echo "$SINK_DATA" | sed -n 's#^Sample Specification: \(.*\)$#\1#p')
+    BIT_DEPTH=$(echo "$SAMPLE_SPEC" | cut -d' ' -f1)
+    CHANNELS=$(echo "$SAMPLE_SPEC" | cut -d' ' -f2 | tr -d 'ch')
+    SAMPLE_RATE=$(echo "$SAMPLE_SPEC" | cut -d' ' -f3 | tr -d 'Hz')
     SYSFS=$(echo "$SINK_DATA" | sed -n 's#sysfs.path = "\(.*\)"#/sys\1#p')
+    HAS_VOL_CTRL=$(echo "$SINK_DATA" | grep "^Flags:" | grep -c HW_VOLUME_CTRL)
     JACK=$(cat '/proc/asound/card1/codec#0' | grep "Pin-ctls:" | head -3 | tail -1 | grep -c OUT)
 }
 
@@ -53,12 +56,14 @@ function print_info {
     echo "BUS = $BUS"
     echo -n "JACK = "
     [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
-    echo "SAMPLE_SPECS = $SAMPLE_SPECS"
+    echo "SAMPLE_SPEC = $SAMPLE_SPEC"
+    echo -n "HAS_VOL_CTRL = "
+    [ $HAS_VOL_CTRL -eq 1 ] && echo "true" || echo "false"
     echo "SYSFS = $SYSFS"
 }
 
 function print_raw_info {
-    echo "${DEF_SINK_INDEX};${DEF_SINK};${VOLUME};$((1-MUTED));$((1-JACK));${BUS};${BIT_DEPTH};${CHANNELS};${SAMPLE_RATE}"
+    echo "${DEF_SINK_INDEX};${DEF_SINK};${VOLUME};$((1-MUTED));$((1-JACK));${BUS};${BIT_DEPTH};${CHANNELS};${SAMPLE_RATE};${HAS_VOL_CTRL}"
 }
 
 # $1: sink name or index, can be emitted
@@ -140,6 +145,14 @@ case $1 in
     -j|--jack)
         get_info
         [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
+    ;;
+    -d|--sample-spec)
+        get_info
+        echo "$SAMPLE_SPEC"
+    ;;
+    -V|--volume-control)
+        get_info
+        [ $HAS_VOL_CTRL -eq 1 ] && echo "true" || echo "false"
     ;;
     -h|--help)
         echo "$USAGE"

@@ -14,15 +14,16 @@ local hcfg = helpmod.cfg
 local hfnc = helpmod.fnc
 
 local _sound_info_skel = {
-  { "sink_index",   "number" },
-  { "sink",         "string" },
-  { "volume",       "number" },
-  { "is_muted",     "boolean" },
-  { "jack_plugged", "boolean" },
-  { "bus_type",     "string" },
-  { "bit_depth",    "string" },
-  { "channels",     "number" },
-  { "sample_rate",  "number" },
+  { "sink_index",    "number"  },
+  { "sink",          "string"  },
+  { "volume",        "number"  },
+  { "is_muted",      "boolean" },
+  { "jack_plugged",  "boolean" },
+  { "bus_type",      "string"  },
+  { "bit_depth",     "string"  },
+  { "channels",      "number"  },
+  { "sample_rate",   "number"  },
+  { "has_vol_ctrl",  "boolean" },
 }
 
 local _req_sound_info_count = #_sound_info_skel
@@ -67,7 +68,13 @@ local function _parse_sound_info(raw_output)
 end
 
 local function _init_usb()
-    local default_volume = hcfg.usb_init_val
+    local default_volume
+    if helpmod.sound_info.has_vol_ctrl then
+        default_volume = hcfg.usb_init_val
+    else
+        default_volume = 100
+    end
+
     local usb_cmd = _fill_args(hcmd.s_volume, { default_volume })
     helpmod.sound_info.volume = default_volume
     awful.util.spawn(usb_cmd)
@@ -108,8 +115,8 @@ local function _fresh_volume_box(cmd)
         if sinfo.is_muted then
             pref = hcfg.label_muted
             box.markup = '<span foreground="'..hcfg.volume_mute_color..'">'..pref..vol..'</span>'
-        -- no different level colors for usb card as 100% is the normal volume
-        elseif not isusb then
+        -- soundcard has volume setting capability
+        elseif helpmod.sound_info.has_vol_ctrl then
             if vol >= hcfg.volume_high then
                 box.markup = '<span foreground="'..hcfg.volume_high_color..'">'..pref..vol..'</span>'
             elseif vol >= hcfg.volume_mid then
@@ -117,8 +124,9 @@ local function _fresh_volume_box(cmd)
             else
                 box.markup = pref..vol
             end
+        -- must be an external soundcard w/ an external volume setting, e.g. an amp
         else
-            box.markup = '<span foreground="'..hcfg.usb_card_color..'">'..pref..vol..'</span>'
+            box.markup = '<span foreground="'..hcfg.ext_card_color..'">'..pref..vol..'</span>'
         end
     end)
 end
@@ -133,10 +141,10 @@ local function _modify_volume_rel(increase)
 
     if increase then vol = "+" else vol = "-" end
 
-    if helpmod.sound_info.bus_type == "usb" then
-        vol = vol .. tostring(hcfg.usb_step)
-    else
+    if helpmod.sound_info.has_vol_ctrl then
         vol = vol .. tostring(hcfg.vol_step)
+    else
+        vol = vol .. tostring(hcfg.ext_step)
     end
 
     _modify_volume(vol)
@@ -223,10 +231,14 @@ end
 -- }}}
 
 function helpmod.lower_volume()
+    if helpmod.sound_info.volume <= 0 then return end
     _modify_volume_rel(false)
 end
 
 function helpmod.raise_volume()
+    -- protect from accidental +25% volumes w/ external soundcards
+    -- no extra checks for now, 100% should be enough for others, too
+    if helpmod.sound_info.volume >= 100 then return end
     _modify_volume_rel(true)
 end
 
