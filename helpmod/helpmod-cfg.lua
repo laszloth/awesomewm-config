@@ -14,10 +14,10 @@ hcfg.battery_low_notif_gap   = 5
 hcfg.usb_init_val            = 20
 
 -- labels
-hcfg.label_speaker           = 'SPKR:'
-hcfg.label_jack              = 'JACK:'
-hcfg.label_usb               = 'USB:'
-hcfg.label_muted             = 'MUTED:'
+hcfg.label_speaker           = 'SPEAKER'
+hcfg.label_jack              = 'JACK'
+hcfg.label_ext               = 'EXT'
+hcfg.label_muted             = 'MUTED'
 
 -- colors
 hcfg.warn_color              = '#FECA00'

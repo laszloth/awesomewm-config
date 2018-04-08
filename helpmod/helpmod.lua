@@ -67,7 +67,7 @@ local function _parse_sound_info(raw_output)
     return sound_info
 end
 
-local function _init_usb()
+local function _init_ext_sc()
     local default_volume
     if helpmod.sound_info.has_vol_ctrl then
         default_volume = hcfg.usb_init_val
@@ -75,9 +75,9 @@ local function _init_usb()
         default_volume = 100
     end
 
-    local usb_cmd = _fill_args(hcmd.s_volume, { default_volume })
+    local cmd = _fill_args(hcmd.s_volume, { default_volume })
     helpmod.sound_info.volume = default_volume
-    awful.util.spawn(usb_cmd)
+    awful.util.spawn(cmd)
 end
 
 local function _fresh_volume_box(cmd)
@@ -92,29 +92,31 @@ local function _fresh_volume_box(cmd)
             return
         end
 
-        local prev_bus = helpmod.sound_info.bus_type
         local sinfo = _parse_sound_info(_remove_newlines(stdout))
         if not sinfo then box.markup = "no sound" return end
+        local prev_bus = helpmod.sound_info.bus_type
 
         helpmod.sound_info = sinfo
-        local isusb = (sinfo.bus_type == "usb")
+        local bus = string.lower(sinfo.bus_type)
+        local isext = (bus ~= "pci")
         local vol = sinfo.volume
 
-        -- check for bus type change to usb and do setup
-        if isusb and prev_bus ~= "usb" then
-            _init_usb()
+        -- check for bus type change and do setup
+        if isext and bus ~= prev_bus then
+            _init_ext_sc()
         end
 
         local pref = hcfg.label_speaker
-        if isusb then
-            pref = hcfg.label_usb
+        if isext then
+            pref = hcfg.label_ext.."-"..string.sub(bus,1,1)
         elseif sinfo.jack_plugged then
             pref = hcfg.label_jack
         end
+        pref = pref .. ":"
 
         if sinfo.is_muted then
             pref = hcfg.label_muted
-            box.markup = '<span foreground="'..hcfg.volume_mute_color..'">'..pref..vol..'</span>'
+            box.markup = '<span foreground="'..hcfg.volume_mute_color..'">'..pref..'['..vol..']'..'</span>'
         -- soundcard has volume setting capability
         elseif helpmod.sound_info.has_vol_ctrl then
             if vol >= hcfg.volume_high then
@@ -370,9 +372,10 @@ function helpmod.init_sound()
 
     local sinfo = _parse_sound_info(_remove_newlines(ret))
     if not sinfo then return end
-    --hfnc.print_table_perm(helpmod.sound_info, "sinfo")
-    if sinfo.bus_type == "usb" then
-        _init_usb()
+
+    -- init external devices
+    if sinfo.bus_type ~= "pci" then
+        _init_ext_sc()
     end
 
     helpmod.sound_info = sinfo
