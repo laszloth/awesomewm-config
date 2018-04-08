@@ -26,3 +26,5 @@ run conky -q -c ~/.config/awesome/conky.cfg
 run $SCRIPTDIR/dbus_proxy.py
 
 exit $CMD_NOTF
+
+# vim: autoindent tabstop=2 shiftwidth=2 expandtab softtabstop=2 filetype=sh

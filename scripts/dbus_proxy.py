@@ -11,7 +11,6 @@ awesome_bus_name = "org.awesomewm.awful"
 awesome_object_path = "/"
 
 class SpotifyProxy(object):
-
     def __init__(self):
         bus_loop = DBusGMainLoop(set_as_default=True)
         self.session_bus = dbus.SessionBus(mainloop=bus_loop)
@@ -82,3 +81,5 @@ class SpotifyProxy(object):
 
 if __name__ == "__main__":
     SpotifyProxy()
+
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
