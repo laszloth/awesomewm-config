@@ -81,12 +81,12 @@ editor      = os.getenv("EDITOR") or hcmd.editor
 editor_cmd  = terminal .. " -e " .. editor
 
 -- Various variables
+local cpu_cores = helpmod.get_cpu_core_count()
+local net_devs = helpmod.get_net_devices()
+local on_laptop = helpmod.is_on_laptop()
+local cput_widgets = {}
 local num_screen = 1
 local def_screen = 1
-local cpu_cores = helpmod.get_cpu_core_count()
-local on_laptop = helpmod.is_on_laptop()
-local net_devs = helpmod.get_net_devices()
-local cput_widgets = {}
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -505,10 +505,6 @@ awful.screen.connect_for_each_screen(function(s)
     -- spaces and separator
     local space1 = wibox.widget.textbox()
     space1.text = hcfg.space_txt
-    --local space2 = wibox.widget.textbox()
-    --space2.text = hcfg.space_txt2
-    --local space3 = wibox.widget.textbox()
-    --space3.text = hcfg.space_txt3
     local separator = wibox.widget.textbox()
     separator.text = hcfg.separ_txt
 

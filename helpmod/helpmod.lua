@@ -45,16 +45,16 @@ local function _fill_args(raw_cmd, args)
 end
 
 local function _parse_sound_info(raw_output)
-    local sound_info = {}
     local rawdata = hfnc.str_to_table(raw_output, ";")
+    local sound_info = {}
 
     for i = 1, _req_sound_info_count do
-        local rd = rawdata[i]
         local elem = _sound_info_skel[i]
         local elem_name = elem[1]
         local elem_type = elem[2]
-
+        local rd = rawdata[i]
         local value
+
         if     elem_type == "number"  then value = tonumber(rd)
         elseif elem_type == "string"  then value = rd
         elseif elem_type == "boolean" then value = (tonumber(rd) == 1)
@@ -69,24 +69,34 @@ end
 
 local function _init_ext_sc()
     local default_volume
+    local cmd
+
     if helpmod.sound_info.has_vol_ctrl then
         default_volume = hcfg.usb_init_val
     else
         default_volume = 100
     end
 
-    local cmd = _fill_args(hcmd.s_volume, { default_volume })
+    cmd = _fill_args(hcmd.s_volume, { default_volume })
     helpmod.sound_info.volume = default_volume
     awful.util.spawn(cmd)
 end
 
 local function _fresh_volume_box(cmd)
     local box = helpmod.widgets.volume.box
-    if not box then return end
     cmd = cmd or hcmd.g_soundinfo
+
+    if not box then return end
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+        local prev_bus
+        local sinfo
+        local isext
+        local pref
+        local bus
+        local vol
+
         if exit_code ~= 0 then
             -- flock couldn't acquire lock, just drop
             if exit_code == 9 then return end
@@ -94,21 +104,21 @@ local function _fresh_volume_box(cmd)
             return
         end
 
-        local sinfo = _parse_sound_info(_remove_newlines(stdout))
+        sinfo = _parse_sound_info(_remove_newlines(stdout))
         if not sinfo then box.markup = "no sound" return end
-        local prev_bus = helpmod.sound_info.bus_type
 
+        prev_bus = helpmod.sound_info.bus_type
         helpmod.sound_info = sinfo
-        local bus = string.lower(sinfo.bus_type)
-        local isext = (bus ~= "pci")
-        local vol = sinfo.volume
+        pref = hcfg.label_speaker
+        bus = string.lower(sinfo.bus_type)
+        isext = (bus ~= "pci")
+        vol = sinfo.volume
 
         -- check for bus type change and do setup
         if isext and bus ~= prev_bus then
             _init_ext_sc()
         end
 
-        local pref = hcfg.label_speaker
         if isext then
             pref = hcfg.label_ext.."-"..string.sub(bus,1,1)
         elseif sinfo.jack_plugged then
@@ -144,7 +154,7 @@ local function _modify_volume(new_volume)
 end
 
 local function _modify_volume_rel(increase)
-    local vol = ""
+    local vol
 
     if increase then vol = "+" else vol = "-" end
 
@@ -158,12 +168,15 @@ local function _modify_volume_rel(increase)
 end
 
 local function _fresh_mpstate_box()
+    local images = helpmod.widgets.mpstate.images
     local boxes = helpmod.widgets.mpstate.boxes
-    local imgs = helpmod.widgets.mpstate.images
-    if not ( boxes or imgs ) then return end
     local cmd = hcmd.g_mpstatus
 
+    if not ( boxes or imgs ) then return end
+
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
+        local state
+
         if exit_code ~= 0 then
             for i = 1, #boxes do
                 boxes[i].visible = false
@@ -171,12 +184,13 @@ local function _fresh_mpstate_box()
             return
         end
 
-        local state = _remove_newlines(stdout)
+        state = _remove_newlines(stdout)
         if state == "Playing" then
-            boxes[1].image = imgs[1]
+            boxes[1].image = images[1]
         else
-            boxes[1].image = imgs[2]
+            boxes[1].image = images[2]
         end
+
         for i = 1, #boxes do
             boxes[i].visible = true
         end
@@ -185,12 +199,14 @@ end
 
 local function _fresh_backlight_box(cmd)
     local box = helpmod.widgets.backlight.box
-    if not box then return end
     cmd = cmd or hcmd.g_backlight
+
+    if not box then return end
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local pref = 'backlight: '
+
         if exit_code ~= 0 then
             box.markup = "<error>"
             return
@@ -202,13 +218,19 @@ local function _fresh_backlight_box(cmd)
 end
 
 local function _fresh_battery_box()
-    local box = helpmod.widgets.battery.box
     local timer = helpmod.widgets.battery.timer
-    if not ( box or timer ) then return end
+    local box = helpmod.widgets.battery.box
     local cmd = hcmd.g_battery
+
+    if not ( box or timer ) then return end
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+        local cap = tonumber(stdout)
+        local text = 'B:'..cap
+        local ac
+        local h
+
         if exit_code ~= 0 then
             --debug_print("BB_stderr="..stderr)
             box.markup = "no battery"
@@ -216,11 +238,10 @@ local function _fresh_battery_box()
             return
         end
 
-        local cap = tonumber(stdout)
-        local text = 'B:'..cap
-        local h = assert(io.popen(hcmd.g_aconline))
-        local ac = h:read("*n")
+        h = assert(io.popen(hcmd.g_aconline))
+        ac = h:read("*n")
         h:close()
+
         if ac == 0 then
             if cap <= hcfg.battery_low then
                 box.markup = hfnc.add_pango_fg(hcfg.battery_low_color, text)
@@ -281,20 +302,20 @@ function helpmod.fresh_battery_box()
 end
 
 function helpmod.get_network_stats(widget, args, netdevs)
-    local up_unit = "K"
-    local down_unit = "K"
-    local down_label = "Rx"
-    local up_label = "Tx"
     local dec_places = hcfg.nw_decimal_places
+    local down_label = "Rx"
+    local down_unit = "K"
+    local up_label = "Tx"
+    local up_unit = "K"
     local kilo = 1024
     local text = ""
 
     for i = 1, #netdevs do
         local nwdev = netdevs[i]
         if args["{"..nwdev.." carrier}"] == 1 then
-            local dev_label = nwdev..': '
             local down_val = tonumber(args['{'..nwdev..' down_b}']) / kilo
             local up_val = tonumber(args['{'..nwdev..' up_b}']) / kilo
+            local dev_label = nwdev..': '
             local down_str = ""
             local up_str = ""
 
@@ -376,10 +397,11 @@ end
 function helpmod.init_sound()
     local h = assert(io.popen(hcmd.g_soundinfo))
     local ret = h:read("*a")
+    local sinfo
 
     h:close()
 
-    local sinfo = _parse_sound_info(_remove_newlines(ret))
+    sinfo = _parse_sound_info(_remove_newlines(ret))
     if not sinfo then return end
 
     -- init external devices
