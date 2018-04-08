@@ -335,7 +335,7 @@ for i = 2, 1 + cpu_cores do
     end)
     vicious.register(c, vicious.widgets.thermal,
         function(widget, args) return helpmod.get_coretemp_text(args[1], i) end,
-        1, { 'coretemp.0/hwmon/hwmon1', 'core', 'temp'..i..'_input' })
+        1, { 'hwmon1', 'hwmon', 'temp'..i..'_input' })
 
     mycputempwidget:add(c)
 end
