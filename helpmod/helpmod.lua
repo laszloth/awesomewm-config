@@ -88,6 +88,8 @@ local function _fresh_volume_box(cmd)
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         if exit_code ~= 0 then
+            -- flock couldn't acquire lock, just drop
+            if exit_code == 9 then return end
             box.markup = "no sound"
             return
         end

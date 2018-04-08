@@ -4,11 +4,11 @@
 
 LOCKFILE="/tmp/aw_sound_handler.lock"
 exec 200>$LOCKFILE
-flock --wait 1 200 || exit 1
+flock --wait 0,1 -E 9 200 || exit $?
 echo $$ 1>&200
 
 USAGE="\
-Usage: $(basename $0) [option]
+Usage: $(basename $0) [option] [arg]
  Options:
   -i, --info: print every info collected
   -r, --raw: print info in raw, short format
@@ -25,6 +25,11 @@ Usage: $(basename $0) [option]
   -d, --sample-spec: print sample specification
   -V, --volume-control: print volume control info (bool)
   -h, --help: print this help
+
+ Exit error values:
+  1: missing/incorrect option or argument(s)
+  2: error in pactl/pacmd
+  9: flock couldn't acquire lock
 "
 function log_err {
     echo >&2 "sound_handler:" "$1"
@@ -32,7 +37,7 @@ function log_err {
 
 function get_info {
     DEF_SINK=$(pactl info | sed -n 's#^Default Sink: \(.*\)#\1#p')
-    [ -z "$DEF_SINK" ] && log_err "pactl error" && exit 1
+    [ -z "$DEF_SINK" ] && log_err "PulseAudio error" && exit 2
     DEF_SINK_INDEX=$(pactl list sinks short | grep "$DEF_SINK" | awk '{print $1}')
     SINK_DATA=$(pactl list sinks | awk "/Sink #$DEF_SINK_INDEX/,/Ports:/" | sed 's/^\s*//g')
     MUTED=$(echo "$SINK_DATA" | grep -c "^Mute: no")
@@ -70,7 +75,7 @@ function print_raw_info {
 # $2: new volume or new relative volume w/ operand
 # $SHOW_RESULT: call print_raw_info w/ updated volume
 function set_volume {
-    [ -z "$1" ] && log_err "no params given" && exit 1
+    [ -z "$1" ] && log_err "please provide absolute/relative volume setting" && exit 1
     if [ -z "$2" ]; then
         volume=$1
         get_info

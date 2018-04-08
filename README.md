@@ -7,9 +7,9 @@ based on awesome's awesomerc.lua and zenburn theme
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] keycode to keysym
 - [ ] rxmas local vars
-- [ ] few "no sound" labels generated on quick volume change
 
 ## done
+- [x] few "no sound" labels generated on quick volume change
 - [x] add formatting functions [foreground is used only curr.]
 - [x] change usb checks & functions to non-pci ones
 - [x] handle different usb soundcards [regarding initial volume]
