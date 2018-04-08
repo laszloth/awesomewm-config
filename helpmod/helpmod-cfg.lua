@@ -60,3 +60,5 @@ hcfg.space_txt3 = '   '
 hcfg.separ_txt  = ' | '
 
 return hcfg
+
+-- vim: autoindent tabstop=8 shiftwidth=4 expandtab softtabstop=4 filetype=lua

@@ -55,3 +55,5 @@ hcmd.sg_brightdown = _sh .. _decbackl .. _and .. _getbackl .. _terminate
 hcmd.sg_brightup   = _sh .. _incbackl .. _and .. _getbackl .. _terminate
 
 return hcmd
+
+-- vim: autoindent tabstop=8 shiftwidth=4 expandtab softtabstop=4 filetype=lua

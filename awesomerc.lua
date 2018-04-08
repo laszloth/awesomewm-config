@@ -985,3 +985,5 @@ client.connect_signal("unfocus", function(c)
                                    c.opacity = 0.96
                                  end)
 -- }}}
+
+-- vim: autoindent tabstop=8 shiftwidth=4 expandtab softtabstop=4 filetype=lua

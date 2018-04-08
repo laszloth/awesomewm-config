@@ -59,3 +59,5 @@ function hfnc.add_decimal_padding(number, pad_count)
 end
 
 return hfnc
+
+-- vim: autoindent tabstop=8 shiftwidth=4 expandtab softtabstop=4 filetype=lua

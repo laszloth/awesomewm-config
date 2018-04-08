@@ -130,4 +130,4 @@ theme.titlebar_maximized_button_normal_inactive = themes_path .. "theme/titlebar
 
 return theme
 
--- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
+-- vim: autoindent tabstop=8 shiftwidth=4 expandtab softtabstop=4 filetype=lua

@@ -414,3 +414,5 @@ function helpmod.init_sound()
 end
 
 return helpmod
+
+-- vim: autoindent tabstop=8 shiftwidth=4 expandtab softtabstop=4 filetype=lua
