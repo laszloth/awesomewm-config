@@ -1,5 +1,9 @@
 local hfnc = {}
 
+function hfnc.add_pango_fg(color, text)
+    return [[<span foreground="]]..color..[[">]]..text..[[</span>]]
+end
+
 function hfnc.str_to_table(str, delimiter, exclude)
     if not str then return nil end
     delimiter = delimiter or ' '

@@ -116,19 +116,19 @@ local function _fresh_volume_box(cmd)
 
         if sinfo.is_muted then
             pref = hcfg.label_muted
-            box.markup = '<span foreground="'..hcfg.volume_mute_color..'">'..pref..'['..vol..']'..'</span>'
+            box.markup = hfnc.add_pango_fg(hcfg.volume_mute_color, pref..'['..vol..']')
         -- soundcard has volume setting capability
         elseif helpmod.sound_info.has_vol_ctrl then
             if vol >= hcfg.volume_high then
-                box.markup = '<span foreground="'..hcfg.volume_high_color..'">'..pref..vol..'</span>'
+                box.markup = hfnc.add_pango_fg(hcfg.volume_high_color, pref..vol)
             elseif vol >= hcfg.volume_mid then
-                box.markup = '<span foreground="'..hcfg.volume_mid_color..'">'..pref..vol..'</span>'
+                box.markup = hfnc.add_pango_fg(hcfg.volume_mid_color, pref..vol)
             else
                 box.markup = pref..vol
             end
         -- must be an external soundcard w/ an external volume setting, e.g. an amp
         else
-            box.markup = '<span foreground="'..hcfg.ext_card_color..'">'..pref..vol..'</span>'
+            box.markup = hfnc.add_pango_fg(hcfg.ext_card_color, pref..vol)
         end
     end)
 end
@@ -192,7 +192,7 @@ local function _fresh_backlight_box(cmd)
         end
         box.visible = true
         box.markup = hcfg.separ_txt..pref..
-            '<span foreground="'..hcfg.warn_color..'">'..math.floor(tonumber(stdout))..'</span>'
+            hfnc.add_pango_fg(hcfg.warn_color, math.floor(tonumber(stdout)))
     end)
 end
 
@@ -217,16 +217,16 @@ local function _fresh_battery_box()
         h:close()
         if ac == 0 then
             if cap <= hcfg.battery_low then
-                box.markup = '<span foreground="'..hcfg.battery_low_color..'">B:'..cap..'</span>'
+                box.markup = hfnc.add_pango_fg(hcfg.battery_low_color, 'B:'..cap)
                 if cap < _prev_batt_lvl and math.fmod(cap, hcfg.battery_low_notif_gap) == 0 then
                     _prev_batt_lvl = cap
                     warn_print("low battery: "..cap.."%")
                 end
             else
-                box.markup = "B:"..cap
+                box.markup = 'B:'..cap
             end
         else
-            box.markup = '<span foreground="'..hcfg.battery_charge_color..'">B:'..cap..'</span>'
+            box.markup = hfnc.add_pango_fg(hcfg.battery_charge_color, 'B:'..cap)
         end
     end)
 end
@@ -307,13 +307,12 @@ function helpmod.get_network_stats(widget, args, netdevs)
             up_str = hfnc.add_decimal_padding(up_val, dec_places) .. ' ' .. up_unit
 
             if string.match(nwdev, "tun") then
-                nwdev = '<span color="' .. hcfg.net_tunnel_color .. '">' .. nwdev .. ':</span>'
+                nwdev = hfnc.add_pango_fg(hcfg.net_tunnel_color, nwdev..': ')
             else
-                nwdev = nwdev .. ':'
+                nwdev = nwdev..': '
             end
-            text = text..' - '..nwdev..'<span color="'..hcfg.net_download_color..
-                    '"> '..down_label..' '..down_str..'</span> / <span color="'..
-                    hcfg.net_upload_color..'">'..up_label..' '..up_str..'</span>'
+            text = text..' - '..nwdev..hfnc.add_pango_fg(hcfg.net_download_color, down_label..' '..down_str)
+                              ..' / '..hfnc.add_pango_fg(hcfg.net_upload_color, up_label..' '..up_str)
       end
     end
 
@@ -329,14 +328,14 @@ function helpmod.get_coretemp_text(temp, n)
     local label = 'core ' ..(n-2).. ': '
 
     if temp <= hcfg.cpu_temp_mid then
-        label = label..'<span color="'..hcfg.cpu_temp_low_color..'">'
+        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_low_color, temp..'°C')
     elseif temp <= hcfg.cpu_temp_high  then
-        label = label..'<span color="'..hcfg.cpu_temp_medium_color..'">'
+        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_medium_color, temp..'°C')
     else
-        label = label..'<span color="'..hcfg.cpu_temp_high_color..'">'
+        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_high_color, temp..'°C')
     end
 
-    return label..temp..'°C</span>'..hcfg.separ_txt
+    return label..hcfg.separ_txt
 end
 
 -- called once at startup, popen is fine for now
