@@ -5,7 +5,6 @@ based on awesome's awesomerc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
-- [ ] keycode to keysym
 
 ## done
 - [x] rxmas local vars
@@ -41,6 +40,7 @@ based on awesome's awesomerc.lua and zenburn theme
 ## maybe
 - [ ] hide base net if if there is a tunnel
 - [ ] then show base net if on click
+- [ ] keycode to keysym
 
 ## deleted
 - [x] remove relative volume handling [much slower and complicated due to callbacks]
