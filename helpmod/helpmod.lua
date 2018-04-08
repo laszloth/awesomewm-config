@@ -118,17 +118,20 @@ local function _fresh_volume_box(cmd)
             pref = hcfg.label_muted
             box.markup = hfnc.add_pango_fg(hcfg.volume_mute_color, pref..'['..vol..']')
         -- soundcard has volume setting capability
-        elseif helpmod.sound_info.has_vol_ctrl then
-            if vol >= hcfg.volume_high then
-                box.markup = hfnc.add_pango_fg(hcfg.volume_high_color, pref..vol)
-            elseif vol >= hcfg.volume_mid then
-                box.markup = hfnc.add_pango_fg(hcfg.volume_mid_color, pref..vol)
-            else
-                box.markup = pref..vol
-            end
-        -- must be an external soundcard w/ an external volume setting, e.g. an amp
         else
-            box.markup = hfnc.add_pango_fg(hcfg.ext_card_color, pref..vol)
+            local text = pref..vol
+            if helpmod.sound_info.has_vol_ctrl then
+                if vol >= hcfg.volume_high then
+                    box.markup = hfnc.add_pango_fg(hcfg.volume_high_color, text)
+                elseif vol >= hcfg.volume_mid then
+                    box.markup = hfnc.add_pango_fg(hcfg.volume_mid_color, text)
+                else
+                    box.markup = text
+                end
+            -- must be an external soundcard w/ an external volume setting, e.g. an amp
+            else
+                box.markup = hfnc.add_pango_fg(hcfg.ext_card_color, text)
+            end
         end
     end)
 end
@@ -212,21 +215,22 @@ local function _fresh_battery_box()
         end
 
         local cap = tonumber(stdout)
+        local text = 'B:'..cap
         local h = assert(io.popen(hcmd.g_aconline))
         local ac = h:read("*n")
         h:close()
         if ac == 0 then
             if cap <= hcfg.battery_low then
-                box.markup = hfnc.add_pango_fg(hcfg.battery_low_color, 'B:'..cap)
+                box.markup = hfnc.add_pango_fg(hcfg.battery_low_color, text)
                 if cap < _prev_batt_lvl and math.fmod(cap, hcfg.battery_low_notif_gap) == 0 then
                     _prev_batt_lvl = cap
                     warn_print("low battery: "..cap.."%")
                 end
             else
-                box.markup = 'B:'..cap
+                box.markup = text
             end
         else
-            box.markup = hfnc.add_pango_fg(hcfg.battery_charge_color, 'B:'..cap)
+            box.markup = hfnc.add_pango_fg(hcfg.battery_charge_color, text)
         end
     end)
 end
@@ -286,6 +290,7 @@ function helpmod.get_network_stats(widget, args, netdevs)
     for i = 1, #netdevs do
         local nwdev = netdevs[i]
         if args["{"..nwdev.." carrier}"] == 1 then
+            local dev_label = nwdev..': '
             local down_val = tonumber(args['{'..nwdev..' down_b}']) / kilo
             local up_val = tonumber(args['{'..nwdev..' up_b}']) / kilo
             local down_str = ""
@@ -306,13 +311,14 @@ function helpmod.get_network_stats(widget, args, netdevs)
             down_str = hfnc.add_decimal_padding(down_val, dec_places) .. ' ' .. down_unit
             up_str = hfnc.add_decimal_padding(up_val, dec_places) .. ' ' .. up_unit
 
+            -- add color to tunnels
             if string.match(nwdev, "tun") then
-                nwdev = hfnc.add_pango_fg(hcfg.net_tunnel_color, nwdev..': ')
-            else
-                nwdev = nwdev..': '
+                dev_label = hfnc.add_pango_fg(hcfg.net_tunnel_color, dev_label)
             end
-            text = text..' - '..nwdev..hfnc.add_pango_fg(hcfg.net_download_color, down_label..' '..down_str)
-                              ..' / '..hfnc.add_pango_fg(hcfg.net_upload_color, up_label..' '..up_str)
+            text = text..' - '..dev_label
+                        ..hfnc.add_pango_fg(hcfg.net_download_color, down_label..' '..down_str)
+                        ..' / '
+                        ..hfnc.add_pango_fg(hcfg.net_upload_color, up_label..' '..up_str)
       end
     end
 
@@ -326,15 +332,17 @@ end
 
 function helpmod.get_coretemp_text(temp, n)
     local label = 'core ' ..(n-2).. ': '
+    local text = temp..'°C'
 
     if temp <= hcfg.cpu_temp_mid then
-        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_low_color, temp..'°C')
+        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_low_color, text)
     elseif temp <= hcfg.cpu_temp_high  then
-        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_medium_color, temp..'°C')
+        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_medium_color, text)
     else
-        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_high_color, temp..'°C')
+        label = label..hfnc.add_pango_fg(hcfg.cpu_temp_high_color, text)
     end
 
+    -- should include separator
     return label..hcfg.separ_txt
 end
 
