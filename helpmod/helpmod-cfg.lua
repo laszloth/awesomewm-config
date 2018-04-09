@@ -11,7 +11,7 @@ hcfg.battery_low             = 20
 hcfg.battery_low_notif_gap   = 5
 
 -- initial values
-hcfg.usb_init_val            = 20
+hcfg.ext_sc_init_val         = 20
 
 -- labels
 hcfg.label_speaker           = 'SPEAKER'
@@ -34,7 +34,7 @@ hcfg.cpu_temp_high_color     = hcfg.crit_color
 hcfg.volume_high_color       = hcfg.crit_color
 hcfg.volume_mid_color        = hcfg.warn_color
 hcfg.volume_mute_color       = '#5C5C5C'
-hcfg.ext_card_color          = '#BA4100'
+hcfg.volume_ext_color        = '#BA4100'
 
 hcfg.battery_low_color       = hcfg.crit_color
 hcfg.battery_charge_color    = '#7FAE5A'

@@ -67,12 +67,15 @@ local function _parse_sound_info(raw_output)
     return sound_info
 end
 
+-- initialize external soundcard
 local function _init_ext_sc()
     local default_volume
     local cmd
 
     if helpmod.sound_info.has_vol_ctrl then
-        default_volume = hcfg.usb_init_val
+        default_volume = hcfg.ext_sc_init_val
+
+    -- must be an external soundcard w/ an external volume setting, e.g. an amp
     else
         default_volume = 100
     end
@@ -90,10 +93,10 @@ local function _fresh_volume_box(cmd)
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+        local is_ext_sc
         local prev_bus
         local sinfo
-        local isext
-        local pref
+        local text
         local bus
         local vol
 
@@ -109,41 +112,45 @@ local function _fresh_volume_box(cmd)
 
         prev_bus = helpmod.sound_info.bus_type
         helpmod.sound_info = sinfo
-        pref = hcfg.label_speaker
+
         bus = string.lower(sinfo.bus_type)
-        isext = (bus ~= "pci")
+        is_ext_sc = (bus ~= "pci")
         vol = sinfo.volume
 
         -- check for bus type change and do setup
-        if isext and bus ~= prev_bus then
+        if is_ext_sc and bus ~= prev_bus then
             _init_ext_sc()
         end
 
-        if isext then
-            pref = hcfg.label_ext.."-"..string.sub(bus,1,1)
-        elseif sinfo.jack_plugged then
-            pref = hcfg.label_jack
-        end
-        pref = pref .. ":"
-
+        -- muted state is common and special
         if sinfo.is_muted then
-            pref = hcfg.label_muted
-            box.markup = hfnc.add_pango_fg(hcfg.volume_mute_color, pref..'['..vol..']')
-        -- soundcard has volume setting capability
+            box.markup = hfnc.add_pango_fg(hcfg.volume_mute_color, hcfg.label_muted..'['..vol..']')
+            return
+        end
+
+        -- set base label
+        if is_ext_sc then
+            text = hcfg.label_ext.."-"..string.sub(bus,1,3)
+        elseif sinfo.jack_plugged then
+            text = hcfg.label_jack
         else
-            local text = pref..vol
-            if helpmod.sound_info.has_vol_ctrl then
-                if vol >= hcfg.volume_high then
-                    box.markup = hfnc.add_pango_fg(hcfg.volume_high_color, text)
-                elseif vol >= hcfg.volume_mid then
-                    box.markup = hfnc.add_pango_fg(hcfg.volume_mid_color, text)
-                else
-                    box.markup = text
-                end
-            -- must be an external soundcard w/ an external volume setting, e.g. an amp
+            text = hcfg.label_speaker
+        end
+        -- final text w/out colors
+        text = text .. ":" .. vol
+
+        -- soundcard has volume setting capability, so colorize
+        if helpmod.sound_info.has_vol_ctrl then
+            if vol >= hcfg.volume_high then
+                box.markup = hfnc.add_pango_fg(hcfg.volume_high_color, text)
+            elseif vol >= hcfg.volume_mid then
+                box.markup = hfnc.add_pango_fg(hcfg.volume_mid_color, text)
             else
-                box.markup = hfnc.add_pango_fg(hcfg.ext_card_color, text)
+                box.markup = text
             end
+        -- must be an external soundcard w/ an external volume setting, e.g. an amp
+        else
+            box.markup = hfnc.add_pango_fg(hcfg.volume_ext_color, text)
         end
     end)
 end
@@ -205,14 +212,14 @@ local function _fresh_backlight_box(cmd)
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
-        local pref = 'backlight: '
+        local label = 'backlight: '
 
         if exit_code ~= 0 then
             box.markup = "<error>"
             return
         end
         box.visible = true
-        box.markup = hcfg.separ_txt..pref..
+        box.markup = hcfg.separ_txt..label..
             hfnc.add_pango_fg(hcfg.warn_color, math.floor(tonumber(stdout)))
     end)
 end
@@ -403,13 +410,13 @@ function helpmod.init_sound()
 
     sinfo = _parse_sound_info(_remove_newlines(ret))
     if not sinfo then return end
+    helpmod.sound_info = sinfo
 
     -- init external devices
     if sinfo.bus_type ~= "pci" then
         _init_ext_sc()
     end
 
-    helpmod.sound_info = sinfo
     return
 end
 
