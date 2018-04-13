@@ -109,12 +109,14 @@ local function _fresh_volume_box(cmd)
 
         sinfo = _parse_sound_info(_remove_newlines(stdout))
         if not sinfo then box.markup = "no sound" return end
+        -- force uppercase bus type
+        sinfo.bus_type = string.upper(sinfo.bus_type)
 
         prev_bus = helpmod.sound_info.bus_type
         helpmod.sound_info = sinfo
 
-        bus = string.lower(sinfo.bus_type)
-        is_ext_sc = (bus ~= "pci")
+        bus = sinfo.bus_type
+        is_ext_sc = (bus ~= "PCI")
         vol = sinfo.volume
 
         -- check for bus type change and do setup
@@ -427,10 +429,13 @@ function helpmod.init_sound()
 
     sinfo = _parse_sound_info(_remove_newlines(ret))
     if not sinfo then return end
+    -- force uppercase bus type
+    sinfo.bus_type = string.upper(sinfo.bus_type)
+
     helpmod.sound_info = sinfo
 
     -- init external devices
-    if sinfo.bus_type ~= "pci" then
+    if sinfo.bus_type ~= "PCI" then
         _init_ext_sc()
     end
 
