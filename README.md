@@ -1,7 +1,7 @@
 # awesomewm-config
 configuration for awesome window manager
 
-based on awesome's awesomerc.lua and zenburn theme
+based on awesomewm's awesomerc.lua and zenburn theme
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround

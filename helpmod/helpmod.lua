@@ -27,7 +27,7 @@ local _sound_info_skel = {
 }
 
 local _req_sound_info_count = #_sound_info_skel
-local _prev_batt_lvl = 100
+local _prev_states = { mp = nil, bat = 100 }
 
 local function _remove_newlines(s)
     return string.gsub(s, "\n", "")
@@ -174,33 +174,40 @@ local function _modify_volume_rel(increase)
     _modify_volume(vol)
 end
 
+local function __fresh_mpstate_box(state, boxes, images)
+    if state ~= _prev_states.mp then
+        if state == "Playing" then
+            boxes[1].image = images["pause"]
+        else
+            boxes[1].image = images["play"]
+        end
+        _prev_states.mp = state
+    end
+
+    for i = 1, #boxes do
+        if not boxes[i].visible then boxes[i].visible = true end
+    end
+end
+
 local function _fresh_mpstate_box()
     local images = helpmod.widgets.mpstate.images
     local boxes = helpmod.widgets.mpstate.boxes
     local cmd = hcmd.g_mpstatus
 
-    if not ( boxes or imgs ) then return end
+    if not (boxes and images) then return end
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         local state
 
         if exit_code ~= 0 then
             for i = 1, #boxes do
-                boxes[i].visible = false
+                if boxes[i].visible then boxes[i].visible = false end
             end
             return
         end
 
         state = _remove_newlines(stdout)
-        if state == "Playing" then
-            boxes[1].image = images[1]
-        else
-            boxes[1].image = images[2]
-        end
-
-        for i = 1, #boxes do
-            boxes[i].visible = true
-        end
+        __fresh_mpstate_box(state, boxes, images)
     end)
 end
 
@@ -218,7 +225,9 @@ local function _fresh_backlight_box(cmd)
             box.markup = "<error>"
             return
         end
-        box.visible = true
+
+        if not box.visible then box.visible = true end
+
         box.markup = hcfg.separ_txt..label..
             hfnc.add_pango_fg(hcfg.warn_color, math.floor(tonumber(stdout)))
     end)
@@ -229,7 +238,7 @@ local function _fresh_battery_box()
     local box = helpmod.widgets.battery.box
     local cmd = hcmd.g_battery
 
-    if not ( box or timer ) then return end
+    if not (box and timer) then return end
 
     awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
@@ -252,8 +261,8 @@ local function _fresh_battery_box()
         if ac == 0 then
             if cap <= hcfg.battery_low then
                 box.markup = hfnc.add_pango_fg(hcfg.battery_low_color, text)
-                if cap < _prev_batt_lvl and math.fmod(cap, hcfg.battery_low_notif_gap) == 0 then
-                    _prev_batt_lvl = cap
+                if cap < _prev_states.bat and math.fmod(cap, hcfg.battery_low_notif_gap) == 0 then
+                    _prev_states.bat = cap
                     warn_print("low battery: "..cap.."%")
                 end
             else
@@ -286,8 +295,16 @@ function helpmod.fresh_volume_box()
     _fresh_volume_box()
 end
 
-function helpmod.fresh_mpstate_box()
-    _fresh_mpstate_box()
+function helpmod.fresh_mpstate_box(data)
+    if data then
+        local images = helpmod.widgets.mpstate.images
+        local boxes = helpmod.widgets.mpstate.boxes
+        if not (boxes and images) then return end
+
+        __fresh_mpstate_box(data, boxes, images)
+    else
+        _fresh_mpstate_box()
+    end
 end
 
 function helpmod.brightness_down()

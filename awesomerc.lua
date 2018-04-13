@@ -256,7 +256,7 @@ myplacedmpstate:connect_signal("button::release", function()
     awful.util.spawn(hcmd.s_playtoggle)
 end)
 
-helpmod.widgets["mpstate"] = { boxes = { mympstate, mpspace }, images = { beautiful.playing, beautiful.paused }}
+helpmod.widgets["mpstate"] = { boxes = { mympstate, mpspace }, images = { play = beautiful.play, pause = beautiful.pause } }
 helpmod.fresh_mpstate_box()
 
 -- Create systray and its separator
@@ -351,30 +351,21 @@ end)
 
 -- external events via "awesome-client"
 function ext_event_handler(event, data)
-    --debug_print("DBUS EVENT: "..event)
     if event == "acpi_jack" then
         awful.util.spawn(hcmd.s_pause)
         helpmod.fresh_volume_box()
     elseif event == "acpi_ac" and on_laptop then
         helpmod.fresh_battery_box()
-    elseif event == "mp_stat" and data then
-        --debug_print("status:"..data)
-        if data == "Playing" then
-            mympstate.image = beautiful.playing
-        else
-            mympstate.image = beautiful.paused
-        end
-        mympstate.visible = true
-        mpspace.visible = true
+    elseif event == "mp_stat" then
+        helpmod.fresh_mpstate_box(data)
     elseif event == "mp_quit" then
         mympstate.visible = false
         mpspace.visible = false
     elseif event == "net" then
         net_devs = helpmod.get_net_devices()
-        --hfnc.print_table(net_devs, "netdevs")
     else
         event = event or "nil"
-        debug_print('Wrong event string: "'..event..'"')
+        debug_print_perm('Wrong event string: "'..event..'"')
     end
 end
 
@@ -532,7 +523,7 @@ awful.screen.connect_for_each_screen(function(s)
     rightl:add(myplacedmpstate) rightl:add(mpspace)
     rightl:add(myvolwidget)
     -- separator included
-    if first_screen and on_laptop then rightl:add(myblwidget) end
+    if on_laptop and first_screen then rightl:add(myblwidget) end
 
     rightl:add(separator)
     if on_laptop then rightl:add(mybatwidget) rightl:add(separator) end

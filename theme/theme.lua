@@ -47,11 +47,6 @@ theme.prompt_fg = "#FF0000"
 -- }}}
 
 -- {{{ Widgets
-theme.playing = themes_path .. "theme/icons/play.png"
-theme.paused = themes_path .. "theme/icons/pause.png"
--- }}}
-
--- {{{ Widgets
 theme.notification_icon_size = 140
 -- }}}
 
@@ -76,8 +71,10 @@ theme.taglist_squares_unsel = themes_path .. "theme/taglist/squarez.png"
 -- }}}
 
 -- {{{ Misc
-theme.awesome_icon          = themes_path .. "theme/awesome-icon.png"
-theme.menu_submenu_icon     = themes_path .. "theme/submenu.png"
+theme.awesome_icon      = themes_path .. "theme/awesome-icon.png"
+theme.menu_submenu_icon = themes_path .. "theme/submenu.png"
+theme.play              = themes_path .. "theme/icons/play.png"
+theme.pause             = themes_path .. "theme/icons/pause.png"
 -- }}}
 
 -- {{{ Layout
