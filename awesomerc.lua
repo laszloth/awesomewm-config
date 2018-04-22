@@ -119,9 +119,9 @@ awful.layout.layouts = {
 local tags_cfg = {
     names = { "null", "head", "main", "www", "term", "enigm", "myst", "kreat", "riddler" },
     layouts = {
-           awful.layout.layouts[3], -- null
+           awful.layout.layouts[2], -- null
            awful.layout.layouts[3], -- head
-           awful.layout.layouts[3], -- main
+           awful.layout.layouts[2], -- main
            awful.layout.layouts[3], -- www
            awful.layout.layouts[2], -- term
            awful.layout.layouts[2], -- enigm
