@@ -334,7 +334,7 @@ for i = 2, 1 + cpu_cores do
         cput_widgets[s].visible = not cput_widgets[s].visible
     end)
     vicious.register(c, vicious.widgets.thermal,
-        function(widget, args) return helpmod.get_coretemp_text(args[1], i) end,
+        function(widget, args) return helpmod.get_coretemp_text(args[1], i - 2) end,
         1, { 'hwmon1', 'hwmon', 'temp'..i..'_input' })
 
     mycputempwidget:add(c)
@@ -514,7 +514,6 @@ awful.screen.connect_for_each_screen(function(s)
             separator)
 
     local ctc = wibox.container.background(mycputempwidget)
-    if num_screen == 1 then ctc.visible = false end
     cput_widgets[s.index] = ctc
     rightl:add(ctc)
 

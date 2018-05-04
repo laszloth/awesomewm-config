@@ -380,7 +380,7 @@ function helpmod.get_network_stats(widget, args, netdevs)
 end
 
 function helpmod.get_coretemp_text(temp, n)
-    local label = 'core ' ..(n-2).. ': '
+    local label = 'core ' .. n .. ': '
     local text = temp..'°C'
 
     if temp <= hcfg.cpu_temp_mid then
