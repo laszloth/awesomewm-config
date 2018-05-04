@@ -678,6 +678,11 @@ globalkeys = gears.table.join(
         if on_laptop then
             awful.util.spawn(hcmd.s_toggletp)
         end end),
+    -- in case of no dedicated button present
+    awful.key({ modkey }, "F5",  function()
+        if on_laptop then
+            awful.util.spawn(hcmd.s_toggletp)
+        end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if on_laptop then
             helpmod.brightness_down()

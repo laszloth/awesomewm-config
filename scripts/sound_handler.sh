@@ -4,7 +4,7 @@
 
 LOCKFILE="/tmp/aw_sound_handler.lock"
 exec 200>$LOCKFILE
-flock --wait 0,1 -E 9 200 || exit $?
+flock --wait 0.1 -E 9 200 || exit $?
 echo $$ 1>&200
 
 USAGE="\
@@ -51,7 +51,7 @@ function get_info {
   SAMPLE_RATE=$(echo "$SAMPLE_SPEC" | cut -d' ' -f3 | tr -d 'Hz')
   SYSFS=$(echo "$SINK_DATA" | sed -n 's#sysfs.path = "\(.*\)"#/sys\1#p')
   HAS_VOL_CTRL=$(echo "$SINK_DATA" | grep "^Flags:" | grep -c HW_VOLUME_CTRL)
-  JACK=$(cat '/proc/asound/card1/codec#0' | grep "Pin-ctls:" | head -3 | tail -1 | grep -c OUT)
+  JACK=$(cat '/proc/asound/card0/codec#0' | grep "Pin-ctls:" | head -3 | tail -1 | grep -c OUT)
 }
 
 function print_info {
