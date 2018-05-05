@@ -886,6 +886,10 @@ awful.rules.rules = {
                      floating = true,
                      placement = awful.placement.bottom_right } },
 
+    -- Set gnome-calculator to always be floating
+    { rule = { class = "Gnome-calculator" },
+      properties = { floating = true } },
+
     -- Set Spotify to always map to 'kreat' tag on last screen
     { rule = { class = "Spotify" },
       properties = { screen = num_screen, tag = "kreat" } },
