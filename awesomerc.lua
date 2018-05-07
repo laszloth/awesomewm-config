@@ -351,6 +351,7 @@ end)
 
 -- external events via "awesome-client"
 function ext_event_handler(event, data)
+    --debug_print("Received event: "..event)
     if event == "acpi_jack" then
         awful.util.spawn(hcmd.s_pause)
         helpmod.fresh_volume_box()
