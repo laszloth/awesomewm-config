@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import dbus
 import gobject
@@ -27,7 +27,7 @@ class SpotifyProxy(object):
 
         try:
             self.connectToSpotify()
-        except DBusException, e:
+        except DBusException as e:
             #err = e.get_dbus_message()
             #print "failed to connect to Spotify: {0}".format(err)
             self.sendEvent("mp_quit", None)
@@ -49,7 +49,7 @@ class SpotifyProxy(object):
                 self.awesome_remote_if.Eval('ext_event_handler("{0}", "{1}")'.format(event, data))
             else:
                 self.awesome_remote_if.Eval('ext_event_handler("{0}", nil)'.format(event))
-        except DBusException, e:
+        except DBusException as e:
             # awesome was restarted, reinitalize and send again
             #err = e.get_dbus_message()
             #print "failed to connect to Awesome: {0}".format(err)
