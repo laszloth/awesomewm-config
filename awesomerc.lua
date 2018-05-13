@@ -895,6 +895,11 @@ awful.rules.rules = {
     { rule = { class = "Spotify" },
       properties = { screen = num_screen, tag = "kreat" } },
 
+    -- Set konsole to start unmaximized at the center
+    { rule = { class = "konsole" },
+      properties = { maximized = false,
+                     placement = awful.placement.centered } },
+
     -- Set qjackctl to always be floating
     { rule = { class = "qjackctl" },
       properties = { floating = true,
