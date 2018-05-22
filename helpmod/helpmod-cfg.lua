@@ -4,8 +4,8 @@ local hcfg = {}
 hcfg.cpu_temp_high           = 85
 hcfg.cpu_temp_mid            = 55
 
-hcfg.volume_high             = 65
-hcfg.volume_mid              = 40
+hcfg.volume_high             = 75
+hcfg.volume_mid              = 50
 
 hcfg.battery_low             = 20
 hcfg.battery_low_notif_gap   = 5

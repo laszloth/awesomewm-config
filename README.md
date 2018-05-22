@@ -6,6 +6,7 @@ based on awesomewm's awesomerc.lua and zenburn theme
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
 - [ ] remove workaround for konsole always being maximized
+- [ ] add separate volume thresholds for different targets
 
 ## done
 - [x] rxmas local vars
