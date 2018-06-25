@@ -28,6 +28,13 @@ local hcfg = helpmod.cfg
 local hcmd = helpmod.cmd
 local hfnc = helpmod.fnc
 
+-- button helpers
+local left_mb     = 1
+local middle_mb   = 2
+local right_mb    = 3
+local scroll_up   = 4
+local scroll_down = 5
+
 -- Override awesome.quit when we're using GNOME
 _awesome_quit = awesome.quit
 awesome.quit = function()
@@ -251,10 +258,13 @@ mpspace.text = hcfg.space_txt
 local mympstate = wibox.widget.imagebox(beautiful.paused, true)
 mympstate.forced_width = 14
 mympstate.opacity = 0.8
+
 local myplacedmpstate = wibox.container.place(mympstate)
-myplacedmpstate:connect_signal("button::release", function()
-    awful.util.spawn(hcmd.s_playtoggle)
-end)
+myplacedmpstate:buttons(gears.table.join(
+                     awful.button({ }, left_mb, function () awful.util.spawn(hcmd.s_playtoggle) end),
+--                     awful.button({ }, right_mb, function () awful.util.spawn(hcmd.s_playtoggle) end),
+                     awful.button({ }, scroll_up, function () awful.util.spawn(hcmd.s_next) end),
+                     awful.button({ }, scroll_down, function () awful.util.spawn(hcmd.s_prev) end)))
 
 helpmod.widgets["mpstate"] = { boxes = { mympstate, mpspace }, images = { play = beautiful.play, pause = beautiful.pause } }
 helpmod.fresh_mpstate_box()
@@ -294,9 +304,11 @@ end
 
 -- Create volume widget
 local myvolwidget = wibox.widget.textbox()
-myvolwidget:connect_signal("button::release", function()
-    helpmod.toggle_mute()
-end)
+myvolwidget:buttons(gears.table.join(
+                     awful.button({ }, left_mb, function () helpmod.toggle_mute() end),
+                     awful.button({ }, right_mb, function () helpmod.toggle_mute() end),
+                     awful.button({ }, scroll_up, function () helpmod.raise_volume() end),
+                     awful.button({ }, scroll_down, function () helpmod.lower_volume() end)))
 
 helpmod.widgets["volume"] = { box = myvolwidget }
 helpmod.fresh_volume_box()

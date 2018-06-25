@@ -9,6 +9,7 @@ based on awesomewm's awesomerc.lua and zenburn theme
 - [ ] add separate volume thresholds for different targets
 
 ## done
+- [x] define multiple mouse button actions [volume & playstate]
 - [x] rxmas local vars
 - [x] few "no sound" labels generated on quick volume change
 - [x] add formatting functions [foreground is used only curr.]
