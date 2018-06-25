@@ -306,7 +306,7 @@ end
 local myvolwidget = wibox.widget.textbox()
 myvolwidget:buttons(gears.table.join(
                      awful.button({ }, left_mb, function () helpmod.toggle_mute() end),
-                     awful.button({ }, right_mb, function () helpmod.toggle_mute() end),
+                     awful.button({ }, right_mb, function () helpmod.toggle_slight_volume() end),
                      awful.button({ }, scroll_up, function () helpmod.raise_volume() end),
                      awful.button({ }, scroll_down, function () helpmod.lower_volume() end)))
 

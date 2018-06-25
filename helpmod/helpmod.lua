@@ -27,7 +27,7 @@ local _sound_info_skel = {
 }
 
 local _req_sound_info_count = #_sound_info_skel
-local _prev_states = { mp = nil, bat = 100 }
+local _prev_states = { mp = nil, bat = 100, vol = 0 }
 
 local function _remove_newlines(s)
     return string.gsub(s, "\n", "")
@@ -291,6 +291,19 @@ end
 
 function helpmod.toggle_mute()
     _fresh_volume_box(hcmd.sg_togglemute)
+end
+
+function helpmod.toggle_slight_volume()
+    local slightvol = 5
+    local prevvol = _prev_states.vol
+
+    -- do not switch to a prev. value if it's been set to 5 since then
+    _prev_states.vol = helpmod.sound_info.volume
+    if helpmod.sound_info.volume == slightvol then
+        _modify_volume(prevvol)
+    else
+        _modify_volume(slightvol)
+    end
 end
 
 function helpmod.fresh_volume_box()
