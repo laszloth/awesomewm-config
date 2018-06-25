@@ -294,7 +294,7 @@ function helpmod.toggle_mute()
 end
 
 function helpmod.toggle_slight_volume()
-    local slightvol = 5
+    local slightvol = hcfg.volume_slight
     local prevvol = _prev_states.vol
 
     -- do not switch to a prev. value if it's been set to 5 since then
