@@ -19,6 +19,7 @@ local colors = {
     main    = "#003366",
     test    = "#cc9393",
     lightgrey = "#dcdccc",
+    lightblue = "#1883f3",
 }
 
 -- {{{ Main
@@ -45,9 +46,9 @@ theme.bg_systray = colors.base
 
 -- {{{ Borders
 theme.useless_gap   = dpi(0)
-theme.border_width  = dpi(0)
-theme.border_normal = colors.white
-theme.border_focus  = colors.white
+theme.border_width  = dpi(1)
+theme.border_normal = colors.base
+theme.border_focus  = colors.lightblue
 theme.border_marked = colors.test
 -- }}}
 
