@@ -917,6 +917,10 @@ awful.rules.rules = {
       properties = { floating = true,
                      placement = awful.placement.bottom_right } },
 
+    -- Set VirtualBox's manager to always be floating
+    { rule = { class = "VirtualBox Manager" },
+      properties = { floating = true,
+                     placement = awful.placement.centered} },
 }
 -- }}}
 
