@@ -5,6 +5,22 @@
 
 local themes_path = require("gears.filesystem").get_configuration_dir()
 local dpi = require("beautiful.xresources").apply_dpi
+local colors = {
+    red     = "#ff0000",
+    green   = "#00ff00",
+    blue    = "#0000ff",
+    black   = "#000000",
+    grey25  = "#3f3f3f",
+    grey50  = "#7f7f7f",
+    grey75  = "#bfbfbf",
+    white   = "#ffffff",
+
+    base    = "#212121",
+    main    = "#003366",
+    test    = "#cc9393",
+    lightgrey = "#dcdccc",
+    lightblue = "#1883f3",
+}
 
 -- {{{ Main
 local theme = {}
@@ -15,35 +31,35 @@ theme.wallpaper = themes_path .. "awesome-wallpaper"
 theme.font      = "sans 8"
 -- }}}
 
--- {{{ Base colors
-theme.fg_normal  = "#DCDCCC"
-theme.fg_focus   = "#DCDCCC"
-theme.fg_urgent  = "#CC9393"
+-- {{{ Basic colors
+theme.fg_normal  = colors.lightgrey
+theme.fg_focus   = colors.lightgrey
+theme.fg_urgent  = colors.test
 
-theme.bg_normal  = "#212121"
-theme.bg_focus   = "#003366"
-theme.bg_urgent  = "#3F3F3F"
+theme.bg_normal  = colors.base
+theme.bg_focus   = colors.main
+theme.bg_urgent  = colors.grey25
 
-theme.bg_systray = "#212121"
+theme.bg_systray = colors.base
+
 -- }}}
 
 -- {{{ Borders
-theme.border_width  = 0
 theme.useless_gap   = dpi(0)
---theme.border_width  = dpi(2)
-theme.border_normal = "#FFFFFF"
-theme.border_focus  = "#FECA00"
-theme.border_marked = "#CC9393"
+theme.border_width  = dpi(1)
+theme.border_normal = colors.base
+theme.border_focus  = colors.lightblue
+theme.border_marked = colors.test
 -- }}}
 
 -- {{{ Titlebars
-theme.titlebar_bg_focus  = "#3F3F3F"
-theme.titlebar_bg_normal = "#3F3F3F"
+theme.titlebar_bg_focus  = colors.grey25
+theme.titlebar_bg_normal = colors.grey25
 -- }}}
 
 -- {{{ Prompts
-theme.prompt_bg = "#000000"
-theme.prompt_fg = "#FF0000"
+theme.prompt_bg = colors.black
+theme.prompt_fg = colors.red
 -- }}}
 
 -- {{{ Widgets
@@ -51,7 +67,7 @@ theme.notification_icon_size = 140
 -- }}}
 
 -- {{{ Mouse finder
-theme.mouse_finder_color = "#CC9393"
+theme.mouse_finder_color = colors.test
 -- mouse_finder_[timeout|animate_timeout|radius|factor]
 -- }}}
 
