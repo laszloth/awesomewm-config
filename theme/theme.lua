@@ -50,6 +50,8 @@ theme.border_width  = dpi(1)
 theme.border_normal = colors.base
 theme.border_focus  = colors.lightblue
 theme.border_marked = colors.test
+theme.fullscreen_hide_border = true
+theme.maximized_hide_border = true
 -- }}}
 
 -- {{{ Titlebars
