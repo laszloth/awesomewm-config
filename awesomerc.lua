@@ -903,9 +903,10 @@ awful.rules.rules = {
     { rule = { class = "Gnome-calculator" },
       properties = { floating = true } },
 
-    -- Set Spotify to always map to 'kreat' tag on last screen
+    -- Set Spotify to always map to 'kreat' tag on last screen, maximized
     { rule = { class = "Spotify" },
-      properties = { screen = num_screen, tag = "kreat" } },
+      properties = { screen = num_screen, tag = "kreat",
+                     maximized = true } },
 
     -- Set konsole to start unmaximized at the center
     { rule = { class = "konsole" },
