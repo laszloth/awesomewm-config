@@ -921,7 +921,12 @@ awful.rules.rules = {
     -- Set VirtualBox's manager to always be floating
     { rule = { class = "VirtualBox Manager" },
       properties = { floating = true,
-                     placement = awful.placement.centered} },
+                     placement = awful.placement.centered } },
+
+    -- Set KeePass to always be floating
+    { rule = { class = "KeePass2" },
+      properties = { floating = true,
+                     placement = awful.placement.centered } },
 }
 -- }}}
 
