@@ -885,9 +885,9 @@ awful.rules.rules = {
     { rule = { class = "Firefox" },
       properties = { screen = def_screen, tag = "www" } },
 
-    -- Set Chrome to always map on www tag on last screen
+    -- Set Chrome to always map on www tag on first screen
     { rule = { class = "Google-chrome" },
-      properties = { screen = num_screen, tag = "www" } },
+      properties = { screen = 1 , tag = "www" } },
 
     -- Set Evolution to always map to first tag on first screen
     { rule = { class = "Evolution" },
