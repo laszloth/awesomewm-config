@@ -69,10 +69,17 @@ end
 
 -- initialize external soundcard
 local function _init_ext_sc()
+    local false_pos_vol_ctrl = false
+    local info = helpmod.sound_info
     local default_volume
     local cmd
 
-    if helpmod.sound_info.has_vol_ctrl then
+    if info.bus_type == "BLUETOOTH" then
+        false_pos_vol_ctrl = true
+    end
+
+    -- volume can be controlled via SW
+    if info.has_vol_ctrl and not false_pos_vol_ctrl then
         default_volume = hcfg.ext_sc_init_val
 
     -- must be an external soundcard w/ an external volume setting, e.g. an amp

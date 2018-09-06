@@ -39,7 +39,7 @@ function log_err {
 
 function get_info {
   DEF_SINK=$(pactl info | sed -n 's#^Default Sink: \(.*\)#\1#p')
-  [ -z "$DEF_SINK" ] && log_err "PulseAudio error" && exit 2
+  [[ -z "$DEF_SINK" ]] && log_err "PulseAudio error" && exit 2
   DEF_SINK_INDEX=$(pactl list sinks short | grep "$DEF_SINK" | awk '{print $1}')
   SINK_DATA=$(pactl list sinks | awk "/Sink #$DEF_SINK_INDEX/,/Ports:/" | sed 's/^\s*//g')
   MUTED=$(echo "$SINK_DATA" | grep -c "^Mute: no")
@@ -58,15 +58,15 @@ function print_info {
   echo "DEF_SINK_INDEX = $DEF_SINK_INDEX"
   echo "DEF_SINK = $DEF_SINK"
   echo -n "MUTED = "
-  [ $MUTED -eq 0 ] && echo "true" || echo "false"
+  [[ $MUTED -eq 0 ]] && echo "true" || echo "false"
   echo "VOLUME = $VOLUME%"
   echo "BUS = $BUS"
   echo -n "JACK = "
-  [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
+  [[ $JACK -eq 0 ]] && echo "plugged" || echo "unplugged"
   echo "SAMPLE_SPEC = $SAMPLE_SPEC"
   echo -n "HAS_VOL_CTRL = "
-  [ $HAS_VOL_CTRL -eq 1 ] && echo "true" || echo "false"
-  echo "SYSFS = $SYSFS"
+  [[ $HAS_VOL_CTRL -eq 1 ]] && echo "true" || echo "false"
+  [[ -n "$SYSFS" ]] && echo "SYSFS = $SYSFS"
 }
 
 function print_raw_info {
@@ -77,8 +77,8 @@ function print_raw_info {
 # $2: new volume or new relative volume w/ operand
 # $SHOW_RESULT: call print_raw_info w/ updated volume
 function set_volume {
-  [ -z "$1" ] && log_err "please provide absolute/relative volume setting" && exit 1
-  if [ -z "$2" ]; then
+  [[ -z "$1" ]] && log_err "please provide absolute/relative volume setting" && exit 1
+  if [[ -z "$2" ]]; then
     volume=$1
     get_info
     sink=$DEF_SINK
@@ -89,16 +89,16 @@ function set_volume {
   volume=${volume//%}
   pactl set-sink-volume $sink $volume%
 
-  if [ -n "$SHOW_RESULT" ]; then
+  if [[ -n "$SHOW_RESULT" ]]; then
     op=$(expr "$volume" : '\([+-]*\)')
-    [ -z "$op" ] && VOLUME=$volume || VOLUME=$((VOLUME${volume}))
-    [ $VOLUME -lt 0 ] && VOLUME=0
+    [[ -z "$op" ]] && VOLUME=$volume || VOLUME=$((VOLUME${volume}))
+    [[ $VOLUME -lt 0 ]] && VOLUME=0
     print_raw_info
   fi
 }
 
 function toggle_mute {
-  if [ -z "$1" ]; then
+  if [[ -z "$1" ]]; then
     get_info
     sink=$DEF_SINK
   else
@@ -139,7 +139,7 @@ case $1 in
   ;;
   -m|--muted)
     get_info
-    [ $MUTED -eq 0 ] && echo "true" || echo "false"
+    [[ $MUTED -eq 0 ]] && echo "true" || echo "false"
   ;;
   -v|--volume)
     get_info
@@ -151,7 +151,7 @@ case $1 in
   ;;
   -j|--jack)
     get_info
-    [ $JACK -eq 0 ] && echo "plugged" || echo "unplugged"
+    [[ $JACK -eq 0 ]] && echo "plugged" || echo "unplugged"
   ;;
   -d|--sample-spec)
     get_info
@@ -159,7 +159,7 @@ case $1 in
   ;;
   -V|--volume-control)
     get_info
-    [ $HAS_VOL_CTRL -eq 1 ] && echo "true" || echo "false"
+    [[ $HAS_VOL_CTRL -eq 1 ]] && echo "true" || echo "false"
   ;;
   -h|--help)
     echo "$USAGE"
