@@ -7,11 +7,19 @@ helpmod.fnc = require("helpmod.helpmod-fnc")
 helpmod.sound_info = {}
 helpmod.widgets = {}
 
+helpmod.t_bus = {
+    pci = "PCI",
+    usb = "USB",
+    bluetooth = "BLUETOOTH",
+}
+
 -- {{{ Private
 local awful = require("awful")
 local hcmd = helpmod.cmd
 local hcfg = helpmod.cfg
 local hfnc = helpmod.fnc
+
+local t_bus = helpmod.t_bus
 
 local _sound_info_skel = {
   { "sink_index",    "number"  },
@@ -74,7 +82,7 @@ local function _init_ext_sc()
     local default_volume
     local cmd
 
-    if info.bus_type == "BLUETOOTH" then
+    if info.bus_type == t_bus.bluetooth then
         false_pos_vol_ctrl = true
     end
 
@@ -123,7 +131,7 @@ local function _fresh_volume_box(cmd)
         helpmod.sound_info = sinfo
 
         bus = sinfo.bus_type
-        is_ext_sc = (bus ~= "PCI")
+        is_ext_sc = (bus ~= t_bus.pci)
         vol = sinfo.volume
 
         -- check for bus type change and do setup
@@ -455,7 +463,7 @@ function helpmod.init_sound()
     helpmod.sound_info = sinfo
 
     -- init external devices
-    if sinfo.bus_type ~= "PCI" then
+    if sinfo.bus_type ~= t_bus.pci then
         _init_ext_sc()
     end
 
