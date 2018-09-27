@@ -22,7 +22,6 @@ run laptop-detect
 run xcompmgr
 run light-locker
 run conky -q -c ~/.config/awesome/conky.cfg
-run $SCRIPTDIR/dbus_proxy.py
 
 exit $CMD_NOTF
 
