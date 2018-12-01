@@ -908,6 +908,11 @@ awful.rules.rules = {
       properties = { screen = num_screen, tag = "kreat",
                      maximized = true } },
 
+    -- Set Steam to always map to 'main' tag on first screen, maximized
+    { rule = { class = "Steam" },
+      properties = { screen = 1, tag = "main",
+                     maximized = true } },
+
     -- Set konsole to start unmaximized at the center
     { rule = { class = "konsole" },
       properties = { maximized = false,
