@@ -12,8 +12,8 @@ hcmd.g_corecnt  = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 hcmd.g_netdevs  = [[ls /sys/class/net/]]
 
 -- raw commands
-local _bash       = [[bash -c ']]
-local _sh         = [[sh -c ']]
+local _bash       = [[nice -n -20 bash -c ']]
+local _sh         = [[nice -n -20 sh -c ']]
 local _and        = [[; ret=$?; [ $ret -ne 0 ] && exit $ret;]]
 local _terminate  = [[']]
 
