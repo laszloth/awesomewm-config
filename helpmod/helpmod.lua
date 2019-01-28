@@ -97,7 +97,7 @@ local function _init_ext_sc()
 
     cmd = _fill_args(hcmd.s_volume, { default_volume })
     helpmod.sound_info.volume = default_volume
-    awful.util.spawn(cmd)
+    awful.spawn(cmd)
 end
 
 local function _fresh_volume_box(cmd)

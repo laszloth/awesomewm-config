@@ -261,10 +261,10 @@ mympstate.opacity = 0.8
 
 local myplacedmpstate = wibox.container.place(mympstate)
 myplacedmpstate:buttons(gears.table.join(
-                     awful.button({ }, left_mb, function () awful.util.spawn(hcmd.s_playtoggle) end),
---                     awful.button({ }, right_mb, function () awful.util.spawn(hcmd.s_playtoggle) end),
-                     awful.button({ }, scroll_up, function () awful.util.spawn(hcmd.s_next) end),
-                     awful.button({ }, scroll_down, function () awful.util.spawn(hcmd.s_prev) end)))
+                     awful.button({ }, left_mb, function () awful.spawn(hcmd.s_playtoggle) end),
+--                     awful.button({ }, right_mb, function () awful.spawn(hcmd.s_playtoggle) end),
+                     awful.button({ }, scroll_up, function () awful.spawn(hcmd.s_next) end),
+                     awful.button({ }, scroll_down, function () awful.spawn(hcmd.s_prev) end)))
 
 helpmod.widgets["mpstate"] = { boxes = { mympstate, mpspace }, images = { play = beautiful.play, pause = beautiful.pause } }
 helpmod.fresh_mpstate_box()
@@ -365,7 +365,7 @@ end)
 function ext_event_handler(event, data)
     --debug_print("Received event: "..event)
     if event == "acpi_jack" then
-        awful.util.spawn(hcmd.s_pause)
+        awful.spawn(hcmd.s_pause)
         helpmod.fresh_volume_box()
     elseif event == "acpi_ac" and on_laptop then
         helpmod.fresh_battery_box()
@@ -669,7 +669,7 @@ globalkeys = gears.table.join(
 
     -- Assign special keys
     awful.key({ "Control", "Mod1" }, "Delete", function()
-        awful.util.spawn(hcmd.locker) end),
+        awful.spawn(hcmd.locker) end),
     awful.key({ }, "XF86AudioLowerVolume", function()
         helpmod.lower_volume() end),
     awful.key({ }, "XF86AudioRaiseVolume", function()
@@ -677,24 +677,24 @@ globalkeys = gears.table.join(
     awful.key({ }, "XF86AudioMute", function()
         helpmod.toggle_mute() end),
     awful.key({ }, "XF86AudioNext", function()
-        awful.util.spawn(hcmd.s_next)
+        awful.spawn(hcmd.s_next)
         end),
     awful.key({ }, "XF86AudioPrev", function()
-        awful.util.spawn(hcmd.s_prev)
+        awful.spawn(hcmd.s_prev)
         end),
     awful.key({ }, "XF86AudioPlay", function()
-        awful.util.spawn(hcmd.s_playtoggle)
+        awful.spawn(hcmd.s_playtoggle)
         end),
     awful.key({ }, "XF86Calculator", function()
-        awful.util.spawn(hcmd.calculator) end),
+        awful.spawn(hcmd.calculator) end),
     awful.key({ }, "XF86TouchpadToggle", function()
         if on_laptop then
-            awful.util.spawn(hcmd.s_toggletp)
+            awful.spawn(hcmd.s_toggletp)
         end end),
     -- in case of no dedicated button present
     awful.key({ modkey }, "F5",  function()
         if on_laptop then
-            awful.util.spawn(hcmd.s_toggletp)
+            awful.spawn(hcmd.s_toggletp)
         end end),
     awful.key({ }, "XF86MonBrightnessDown", function()
         if on_laptop then
