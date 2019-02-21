@@ -45,7 +45,7 @@ hcfg.titlebars_enabled       = false
 
 hcfg.nw_decimal_places       = 2
 
-hcfg.bl_step                 = 7 --percent
+hcfg.bl_step                 = 5 --percent
 hcfg.vol_step                = 2 --percent
 hcfg.ext_step                = 25 --percent
 
