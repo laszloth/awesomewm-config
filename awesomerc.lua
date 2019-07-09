@@ -933,6 +933,12 @@ awful.rules.rules = {
     { rule = { class = "KeePass2" },
       properties = { floating = true,
                      placement = awful.placement.centered } },
+
+    -- Set gcr prompter to always map to 'head' tag on first screen, floating
+    { rule = { class = "Gcr-prompter" },
+      properties = { screen = 1, tag = "head",
+                     floating = true,
+                     placement = awful.placement.centered } },
 }
 -- }}}
 
