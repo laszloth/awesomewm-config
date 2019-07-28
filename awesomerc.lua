@@ -140,24 +140,24 @@ local tags_cfg = {
 -- }}}
 
 -- {{{ Helper functions
-function debug_print(msg)
+function debug_print(message, timeout)
     naughty.notify({ preset = naughty.config.presets.critical,
-        timeout = 5,
+        timeout = timeout or 5,
         title = "DEBUG MESSAGE",
-        text = tostring(msg) })
+        text = tostring(message) })
 end
 
-function debug_print_perm(msg)
+function debug_print_perm(message)
     naughty.notify({ preset = naughty.config.presets.critical,
         title = "DEBUG MESSAGE",
-        text = tostring(msg) })
+        text = tostring(message) })
 end
 
-function warn_print(msg)
+function warn_print(message, timeout)
     naughty.notify({ preset = naughty.config.presets.critical,
-        timeout = 10,
+        timeout = timeout or 10,
         title = "warning",
-        text = tostring(msg) })
+        text = tostring(message) })
 end
 
 local function notify_print(msg)
@@ -454,11 +454,11 @@ awful.screen.connect_for_each_screen(function(s)
     -- connect to signals
     if first_screen then
         s:connect_signal("removed", function()
-            debug_print_perm("a screen has been removed")
+            debug_print("a screen has been removed", 10)
             update_screen_count()
         end)
         s:connect_signal("added", function()
-            debug_print_perm("a screen has been added")
+            debug_print("a screen has been added", 10)
             update_screen_count()
         end)
     end
