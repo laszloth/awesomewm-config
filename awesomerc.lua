@@ -883,7 +883,7 @@ awful.rules.rules = {
                      tag = hiddentag[1] } },
 
     -- Set Firefox to always map on www tag on def_screen
-    { rule = { class = "Firefox" },
+    { rule = { class = "firefox" },
       properties = { screen = def_screen, tag = "www" } },
 
     -- Set Chrome to always map on www tag on first screen
