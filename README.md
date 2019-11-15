@@ -8,6 +8,8 @@ based on awesomewm's awesomerc.lua and zenburn theme
 - [ ] remove workaround for konsole always being maximized
 - [ ] add separate volume thresholds for different targets
 - [ ] add borders, but hide 'em with one tiling client
+- [ ] better dynamic network device support
+- [ ] add disk IO widget
 
 ## done
 - [x] define multiple mouse button actions [volume & playstate]
