@@ -4,14 +4,23 @@ function hfnc.add_pango_fg(color, text)
     return [[<span foreground="]]..color..[[">]]..text..[[</span>]]
 end
 
-function hfnc.str_to_table(str, delimiter, exclude)
+function hfnc.str_to_table(str, delimiter, exclude_patterns)
     if not str then return nil end
+    exclude_patterns = exclude_patterns or {}
     delimiter = delimiter or ' '
 
     local rt = {}
 
-    for m in string.gmatch(str, "[^"..delimiter.."]+") do
-        if m ~= exclude then table.insert(rt, m) end
+    for dev in string.gmatch(str, "[^"..delimiter.."]+") do
+        for exc_key, exc_val in pairs(exclude_patterns) do
+            for exc in string.gmatch(dev, exc_val) do
+                goto continue
+            end
+        end
+
+        table.insert(rt, dev)
+
+        ::continue::
     end
 
     return rt
@@ -39,7 +48,7 @@ end
 
 function hfnc.print_table(t, name)
     name = name or "table"
-    debug_print(name..' '..hfnc.table_to_str(t))
+    debug_print_perm(name..' '..hfnc.table_to_str(t))
 end
 
 function hfnc.print_table_perm(t, name)

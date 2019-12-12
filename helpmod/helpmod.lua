@@ -439,12 +439,13 @@ function helpmod.get_cpu_core_count()
     return num
 end
 
--- called once at startup, popen is fine for now
+-- called once at startup and on events, popen is fine for now
 function helpmod.get_net_devices()
+    local excludes = { "lo[0-9]*", "docker[0-9]*" }
     local h = assert(io.popen(hcmd.g_netdevs))
     local ret = h:read("*a")
     h:close()
-    return hfnc.str_to_table(ret, "%s", "lo")
+    return hfnc.str_to_table(ret, "%s", excludes)
 end
 
 -- called once at startup/in callback, popen is fine for now

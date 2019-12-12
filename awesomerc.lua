@@ -35,6 +35,21 @@ local right_mb    = 3
 local scroll_up   = 4
 local scroll_down = 5
 
+-- {{{ Debug functions
+function debug_print(message, timeout)
+    naughty.notify({ preset = naughty.config.presets.critical,
+        timeout = timeout or 5,
+        title = "DEBUG MESSAGE",
+        text = tostring(message) })
+end
+
+function debug_print_perm(message)
+    naughty.notify({ preset = naughty.config.presets.critical,
+        title = "DEBUG MESSAGE",
+        text = tostring(message) })
+end
+-- }}} Debug functions
+
 -- Override awesome.quit when we're using GNOME
 _awesome_quit = awesome.quit
 awesome.quit = function()
@@ -140,20 +155,7 @@ local tags_cfg = {
 -- }}}
 
 -- {{{ Helper functions
-function debug_print(message, timeout)
-    naughty.notify({ preset = naughty.config.presets.critical,
-        timeout = timeout or 5,
-        title = "DEBUG MESSAGE",
-        text = tostring(message) })
-end
-
-function debug_print_perm(message)
-    naughty.notify({ preset = naughty.config.presets.critical,
-        title = "DEBUG MESSAGE",
-        text = tostring(message) })
-end
-
-function warn_print(message, timeout)
+local function warn_print(message, timeout)
     naughty.notify({ preset = naughty.config.presets.critical,
         timeout = timeout or 10,
         title = "warning",
