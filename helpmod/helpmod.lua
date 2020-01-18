@@ -37,7 +37,7 @@ local _sound_info_skel = {
 local _req_sound_info_count = #_sound_info_skel
 local _prev_states = { mp = nil, bat = 100, vol = 0 }
 
-local function _remove_newlines(s)
+local function _remove_newline(s)
     return string.gsub(s, "\n", "")
 end
 
@@ -122,7 +122,7 @@ local function _fresh_volume_box(cmd)
             return
         end
 
-        sinfo = _parse_sound_info(_remove_newlines(stdout))
+        sinfo = _parse_sound_info(_remove_newline(stdout))
         if not sinfo then box.markup = "no sound" return end
         -- force uppercase bus type
         sinfo.bus_type = string.upper(sinfo.bus_type)
@@ -223,7 +223,7 @@ local function _fresh_mpstate_box()
             return
         end
 
-        state = _remove_newlines(stdout)
+        state = _remove_newline(stdout)
         __fresh_mpstate_box(state, boxes, images)
     end)
 end
@@ -448,6 +448,14 @@ function helpmod.get_net_devices()
     return hfnc.str_to_table(ret, "%s", excludes)
 end
 
+-- called once at startup, popen is fine for now
+function helpmod.get_product()
+    local h = assert(io.popen(hcmd.g_product))
+    local ret = h:read("*a")
+    h:close()
+    return _remove_newline(ret)
+end
+
 -- called once at startup/in callback, popen is fine for now
 function helpmod.init_sound()
     local h = assert(io.popen(hcmd.g_soundinfo))
@@ -456,7 +464,7 @@ function helpmod.init_sound()
 
     h:close()
 
-    sinfo = _parse_sound_info(_remove_newlines(ret))
+    sinfo = _parse_sound_info(_remove_newline(ret))
     if not sinfo then return end
     -- force uppercase bus type
     sinfo.bus_type = string.upper(sinfo.bus_type)

@@ -106,6 +106,7 @@ editor_cmd  = terminal .. " -e " .. editor
 local cpu_cores = helpmod.get_cpu_core_count()
 local net_devs = helpmod.get_net_devices()
 local on_laptop = helpmod.is_on_laptop()
+local product = helpmod.get_product()
 local cput_widgets = {}
 local num_screen = 1
 local def_screen = 1
@@ -349,7 +350,7 @@ for i = 2, 1 + cpu_cores do
     end)
     vicious.register(c, vicious.widgets.thermal,
         function(widget, args) return helpmod.get_coretemp_text(args[1], i - 2) end,
-        1, { 'hwmon1', 'hwmon', 'temp'..i..'_input' })
+        1, { 'hwmon6', 'hwmon', 'temp'..i..'_input' })
 
     mycputempwidget:add(c)
 end

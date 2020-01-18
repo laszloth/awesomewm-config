@@ -10,6 +10,7 @@ hcmd.g_aconline = [[cat /sys/class/power_supply/AC/online]]
 hcmd.g_onlaptop = [[laptop-detect; echo $?]]
 hcmd.g_corecnt  = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 hcmd.g_netdevs  = [[ls /sys/class/net/]]
+hcmd.g_product  = [[cat /sys/devices/virtual/dmi/id/product_name]]
 
 -- raw commands
 local _bash       = [[nice -n -20 bash -c ']]
