@@ -20,7 +20,6 @@ run laptop-detect
 
 # run 'em
 run xcompmgr
-run conky -q -c ~/.config/awesome/conky.cfg
 
 exit $CMD_NOTF
 
