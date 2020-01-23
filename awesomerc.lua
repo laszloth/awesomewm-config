@@ -111,6 +111,19 @@ local cput_widgets = {}
 local num_screen = 1
 local def_screen = 1
 
+-- Product specific variables
+local hwmon_device_num
+
+-- Product specific setup
+if product == 'OptiPlex 7050' then
+    hwmon_device_num = 2
+elseif product == 'ThinkPad X280' then
+    hwmon_device_num = 6
+else
+    debug_print("Not implemented product name!")
+    hwmon_device_num = 0
+end
+
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
@@ -350,7 +363,7 @@ for i = 2, 1 + cpu_cores do
     end)
     vicious.register(c, vicious.widgets.thermal,
         function(widget, args) return helpmod.get_coretemp_text(args[1], i - 2) end,
-        1, { 'hwmon6', 'hwmon', 'temp'..i..'_input' })
+        1, { 'hwmon'..hwmon_device_num, 'hwmon', 'temp'..i..'_input' })
 
     mycputempwidget:add(c)
 end
