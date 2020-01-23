@@ -1,7 +1,7 @@
-awesome v4.3-382-gf1335be2 (Too long)
+awesome v4.3-685-gd9998dedd (Too long)
  • Compiled against Lua 5.3.5 (running with Lua 5.3)
- • D-Bus support: ✔
- • xcb-errors support: ✔
- • execinfo support: ✔
+ • D-Bus support: yes
+ • xcb-errors support: yes
+ • execinfo support: yes
  • xcb-randr version: 1.6
  • LGI version: 0.9.2
