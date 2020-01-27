@@ -4,16 +4,23 @@ function hfnc.add_pango_fg(color, text)
     return [[<span foreground="]]..color..[[">]]..text..[[</span>]]
 end
 
-function hfnc.str_to_table(str, delimiter, exclude_patterns)
-    if not str then return nil end
+function hfnc.string_contains(string, pattern)
+    for match in string.gmatch(string, pattern) do
+        return true
+    end
+    return false
+end
+
+function hfnc.str_to_table(string, delimiter, exclude_patterns)
+    if not string then return nil end
     exclude_patterns = exclude_patterns or {}
     delimiter = delimiter or ' '
 
     local rt = {}
 
-    for dev in string.gmatch(str, "[^"..delimiter.."]+") do
+    for dev in string.gmatch(string, "[^"..delimiter.."]+") do
         for exc_key, exc_val in pairs(exclude_patterns) do
-            for exc in string.gmatch(dev, exc_val) do
+            if hfnc.string_contains(dev, exc_val) then
                 goto continue
             end
         end

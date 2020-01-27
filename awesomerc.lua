@@ -102,9 +102,9 @@ local def_screen = 1
 local hwmon_device_num
 
 -- Product specific setup
-if product == 'OptiPlex 7050' then
+if hfnc.string_contains(product, 'OptiPlex 7050') then
     hwmon_device_num = 2
-elseif product == 'ThinkPad X280' then
+elseif hfnc.string_contains(product, 'ThinkPad X280') then
     hwmon_device_num = 6
 else
     debug_print("Not implemented product name!")

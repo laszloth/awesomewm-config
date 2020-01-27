@@ -453,7 +453,7 @@ function helpmod.get_product()
     local h = assert(io.popen(hcmd.g_product))
     local ret = h:read("*a")
     h:close()
-    return _remove_newline(ret)
+    return ret
 end
 
 -- called once at startup/in callback, popen is fine for now
