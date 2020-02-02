@@ -2,7 +2,7 @@ local hcfg = {}
 
 -- thresholds
 hcfg.cpu_temp_high           = 85
-hcfg.cpu_temp_mid            = 55
+hcfg.cpu_temp_mid            = 65
 
 hcfg.volume_high             = 75
 hcfg.volume_mid              = 50
