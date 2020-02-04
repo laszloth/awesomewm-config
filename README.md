@@ -5,9 +5,13 @@ based on awesomewm's awesomerc.lua and zenburn theme
 
 ## package dependencies
 - bc
-- xcompmgr
+- gnome-calculator
+- konsole
 - laptop-detect
+- physlock
 - pulseaudio
+- vim
+- xcompmgr
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround

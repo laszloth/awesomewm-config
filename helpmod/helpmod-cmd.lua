@@ -1,9 +1,16 @@
 local hcmd = {}
 
-hcmd.terminal   = "konsole"
-hcmd.editor     = "vim"
-hcmd.locker     = "light-locker-command -l"
-hcmd.calculator = "gnome-calculator"
+-- helper variables
+local _bash      = [[nice -n -20 bash -c ']]
+local _sh        = [[nice -n -20 sh -c ']]
+local _and       = [[; ret=$?; [ $ret -ne 0 ] && exit $ret;]]
+local _terminate = [[']]
+
+-- tool config commands
+hcmd.terminal   = [[konsole]]
+hcmd.editor     = [[vim]]
+hcmd.locker     = _sh .. [[~/bin/physlock -d -p $(cat /etc/hostname)]] .. _terminate
+hcmd.calculator = [[gnome-calculator]]
 
 -- get commands
 hcmd.g_aconline = [[cat /sys/class/power_supply/AC/online]]
@@ -13,11 +20,6 @@ hcmd.g_netdevs  = [[ls /sys/class/net/]]
 hcmd.g_product  = [[cat /sys/devices/virtual/dmi/id/product_{family,name,version}]]
 
 -- raw commands
-local _bash       = [[nice -n -20 bash -c ']]
-local _sh         = [[nice -n -20 sh -c ']]
-local _and        = [[; ret=$?; [ $ret -ne 0 ] && exit $ret;]]
-local _terminate  = [[']]
-
 local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh --raw]]
 local _setvolume  = [[~/.config/awesome/scripts/sound_handler.sh --set-volume ARG1]]
 local _setgetvol  = [[~/.config/awesome/scripts/sound_handler.sh --set-get-volume ARG1]]
