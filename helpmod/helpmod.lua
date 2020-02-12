@@ -100,6 +100,25 @@ local function _init_ext_sc()
     awful.spawn(cmd)
 end
 
+local function _update_sound_info(command_output)
+    local sinfo
+
+    sinfo = _parse_sound_info(command_output)
+    if not sinfo then return false end
+
+    -- force uppercase bus type
+    sinfo.bus_type = string.upper(sinfo.bus_type)
+    -- some PCI sound devices report no volume setting cap. falsely
+    if sinfo.bus_type == t_bus.pci then
+        sinfo.has_vol_ctrl = true
+    end
+
+    helpmod.sound_info = sinfo
+
+    return true
+end
+
+
 local function _update_volume_box(cmd)
     local box = helpmod.widgets.volume.box
     cmd = cmd or hcmd.g_soundinfo
@@ -110,10 +129,10 @@ local function _update_volume_box(cmd)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local is_ext_sc
         local prev_bus
-        local sinfo
         local text
         local bus
         local vol
+        local ret
 
         if exit_code ~= 0 then
             -- flock couldn't acquire lock, just drop
@@ -122,17 +141,14 @@ local function _update_volume_box(cmd)
             return
         end
 
-        sinfo = _parse_sound_info(_remove_newline(stdout))
-        if not sinfo then box.markup = "no sound" return end
-        -- force uppercase bus type
-        sinfo.bus_type = string.upper(sinfo.bus_type)
-
         prev_bus = helpmod.sound_info.bus_type
-        helpmod.sound_info = sinfo
 
-        bus = sinfo.bus_type
+        ret = _update_sound_info(_remove_newline(stdout))
+        if not ret then box.markup = "no sound" return end
+
+        bus = helpmod.sound_info.bus_type
         is_ext_sc = (bus ~= t_bus.pci)
-        vol = sinfo.volume
+        vol = helpmod.sound_info.volume
 
         -- check for bus type change and do setup
         if is_ext_sc and bus ~= prev_bus then
@@ -140,7 +156,7 @@ local function _update_volume_box(cmd)
         end
 
         -- muted state is common and special
-        if sinfo.is_muted then
+        if helpmod.sound_info.is_muted then
             box.markup = hfnc.add_pango_fg(hcfg.volume_mute_color, hcfg.label_muted..'['..vol..']')
             return
         end
@@ -148,7 +164,7 @@ local function _update_volume_box(cmd)
         -- set base label
         if is_ext_sc then
             text = hcfg.label_ext.."-"..string.sub(bus,1,3)
-        elseif sinfo.jack_plugged then
+        elseif helpmod.sound_info.jack_plugged then
             text = hcfg.label_jack
         else
             text = hcfg.label_speaker
@@ -460,19 +476,14 @@ end
 function helpmod.init_sound()
     local h = assert(io.popen(hcmd.g_soundinfo))
     local ret = h:read("*a")
-    local sinfo
 
     h:close()
 
-    sinfo = _parse_sound_info(_remove_newline(ret))
-    if not sinfo then return end
-    -- force uppercase bus type
-    sinfo.bus_type = string.upper(sinfo.bus_type)
-
-    helpmod.sound_info = sinfo
+    ret = _update_sound_info(_remove_newline(ret))
+    if not ret then return end
 
     -- init external devices
-    if sinfo.bus_type ~= t_bus.pci then
+    if helpmod.sound_info.bus_type ~= t_bus.pci then
         _init_ext_sc()
     end
 
