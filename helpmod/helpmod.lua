@@ -100,7 +100,7 @@ local function _init_ext_sc()
     awful.spawn(cmd)
 end
 
-local function _fresh_volume_box(cmd)
+local function _update_volume_box(cmd)
     local box = helpmod.widgets.volume.box
     cmd = cmd or hcmd.g_soundinfo
 
@@ -174,7 +174,7 @@ end
 
 local function _modify_volume(new_volume)
     local cmd = _fill_args(hcmd.sg_volume, { new_volume })
-    _fresh_volume_box(cmd)
+    _update_volume_box(cmd)
 end
 
 local function _modify_volume_rel(increase)
@@ -191,7 +191,7 @@ local function _modify_volume_rel(increase)
     _modify_volume(vol)
 end
 
-local function __fresh_mpstate_box(state, boxes, images)
+local function __update_mpstate_box(state, boxes, images)
     if state ~= _prev_states.mp then
         if state == "Playing" then
             boxes[1].image = images["pause"]
@@ -206,7 +206,7 @@ local function __fresh_mpstate_box(state, boxes, images)
     end
 end
 
-local function _fresh_mpstate_box()
+local function _update_mpstate_box()
     local images = helpmod.widgets.mpstate.images
     local boxes = helpmod.widgets.mpstate.boxes
     local cmd = hcmd.g_mpstatus
@@ -224,11 +224,11 @@ local function _fresh_mpstate_box()
         end
 
         state = _remove_newline(stdout)
-        __fresh_mpstate_box(state, boxes, images)
+        __update_mpstate_box(state, boxes, images)
     end)
 end
 
-local function _fresh_backlight_box(cmd)
+local function _update_backlight_box(cmd)
     local box = helpmod.widgets.backlight.box
     cmd = cmd or hcmd.g_backlight
 
@@ -250,7 +250,7 @@ local function _fresh_backlight_box(cmd)
     end)
 end
 
-local function _fresh_battery_box()
+local function _update_battery_box()
     local timer = helpmod.widgets.battery.timer
     local box = helpmod.widgets.battery.box
     local cmd = hcmd.g_battery
@@ -305,7 +305,7 @@ function helpmod.raise_volume()
 end
 
 function helpmod.toggle_mute()
-    _fresh_volume_box(hcmd.sg_togglemute)
+    _update_volume_box(hcmd.sg_togglemute)
 end
 
 function helpmod.toggle_slight_volume()
@@ -321,38 +321,38 @@ function helpmod.toggle_slight_volume()
     end
 end
 
-function helpmod.fresh_volume_box()
-    _fresh_volume_box()
+function helpmod.update_volume_box()
+    _update_volume_box()
 end
 
-function helpmod.fresh_mpstate_box(data)
+function helpmod.update_mpstate_box(data)
     if data then
         local images = helpmod.widgets.mpstate.images
         local boxes = helpmod.widgets.mpstate.boxes
         if not (boxes and images) then return end
 
-        __fresh_mpstate_box(data, boxes, images)
+        __update_mpstate_box(data, boxes, images)
     else
-        _fresh_mpstate_box()
+        _update_mpstate_box()
     end
 end
 
 function helpmod.brightness_down()
     local cmd = _fill_args(hcmd.sg_brightdown, { hcfg.bl_step })
-    _fresh_backlight_box(cmd)
+    _update_backlight_box(cmd)
 end
 
 function helpmod.brightness_up()
     local cmd = _fill_args(hcmd.sg_brightup, { hcfg.bl_step })
-    _fresh_backlight_box(cmd)
+    _update_backlight_box(cmd)
 end
 
-function helpmod.fresh_backlight_box()
-    _fresh_backlight_box()
+function helpmod.update_backlight_box()
+    _update_backlight_box()
 end
 
-function helpmod.fresh_battery_box()
-    _fresh_battery_box()
+function helpmod.update_battery_box()
+    _update_battery_box()
 end
 
 function helpmod.get_network_stats(widget, args, netdevs)

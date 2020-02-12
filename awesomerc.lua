@@ -271,7 +271,7 @@ myplacedmpstate:buttons(gears.table.join(
                      awful.button({ }, scroll_down, function () awful.spawn(hcmd.s_prev) end)))
 
 helpmod.widgets["mpstate"] = { boxes = { mympstate, mpspace }, images = { play = beautiful.play, pause = beautiful.pause } }
-helpmod.fresh_mpstate_box()
+helpmod.update_mpstate_box()
 
 -- Create systray and its separator
 local mystseparator = wibox.widget.textbox()
@@ -295,7 +295,7 @@ local mybltimer = nil
 if on_laptop then
     myblwidget = wibox.widget.textbox()
     helpmod.widgets["backlight"] = { box = myblwidget }
-    helpmod.fresh_backlight_box()
+    helpmod.update_backlight_box()
 
     -- timer to hide backlight textbox
     mybltimer = gears.timer { timeout = hcfg.backlight_timeout, }
@@ -315,7 +315,7 @@ myvolwidget:buttons(gears.table.join(
                      awful.button({ }, scroll_down, function () helpmod.lower_volume() end)))
 
 helpmod.widgets["volume"] = { box = myvolwidget }
-helpmod.fresh_volume_box()
+helpmod.update_volume_box()
 
 -- Create battery widget
 local mybatwidget = nil
@@ -325,11 +325,11 @@ if on_laptop then
     mybattimer = gears.timer { timeout = hcfg.battery_timeout, }
     mybattimer:connect_signal("timeout", function()
         --debug_print_perm("mybattimer expired")
-        helpmod.fresh_battery_box()
+        helpmod.update_battery_box()
     end)
 
     helpmod.widgets["battery"] = { box = mybatwidget, timer = mybattimer}
-    helpmod.fresh_battery_box()
+    helpmod.update_battery_box()
     mybattimer:start()
 end
 
@@ -370,11 +370,11 @@ function ext_event_handler(event, data)
     --debug_print("Received event: "..event)
     if event == "acpi_jack" then
         awful.spawn(hcmd.s_pause)
-        helpmod.fresh_volume_box()
+        helpmod.update_volume_box()
     elseif event == "acpi_ac" and on_laptop then
-        helpmod.fresh_battery_box()
+        helpmod.update_battery_box()
     elseif event == "mp_stat" then
-        helpmod.fresh_mpstate_box(data)
+        helpmod.update_mpstate_box(data)
     elseif event == "mp_quit" then
         mympstate.visible = false
         mpspace.visible = false
