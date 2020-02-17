@@ -1,7 +1,10 @@
-awesome v4.3-696-gfd237b9cd (Too long)
+awesome v4.3-731-g81d652114 (Too long)
  • Compiled against Lua 5.3.5 (running with Lua 5.3)
+ • API level: 4
  • D-Bus support: yes
  • xcb-errors support: yes
  • execinfo support: yes
  • xcb-randr version: 1.6
  • LGI version: 0.9.2
+ • Transparency enabled: yes
+ • Custom search paths: no
