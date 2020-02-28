@@ -308,6 +308,8 @@ end
 
 -- Create volume widget
 local myvolwidget = wibox.widget.textbox()
+myvolwidget.markup = 'n/a'
+
 myvolwidget:buttons(gears.table.join(
                      awful.button({ }, left_mb, function () helpmod.toggle_mute() end),
                      awful.button({ }, right_mb, function () helpmod.toggle_slight_volume() end),
