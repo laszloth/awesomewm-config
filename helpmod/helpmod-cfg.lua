@@ -6,7 +6,7 @@ hcfg.cpu_temp_mid            = 65
 
 hcfg.volume_high             = 75
 hcfg.volume_mid              = 50
-hcfg.volume_slight           = 5
+hcfg.volume_slight           = 10
 
 hcfg.battery_low             = 20
 hcfg.battery_low_notif_gap   = 5
