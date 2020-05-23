@@ -24,8 +24,8 @@ hcfg.label_muted             = 'MUTED'
 hcfg.warn_color              = '#FECA00'
 hcfg.crit_color              = '#FF0000'
 
-hcfg.net_download_color      = '#41F468'
-hcfg.net_upload_color        = '#4179F4'
+hcfg.net_download_color      = '#E60012'
+hcfg.net_upload_color        = '#41F468'
 hcfg.net_tunnel_color        = '#D31010'
 
 hcfg.cpu_temp_low_color      = '#7FAE5A'
