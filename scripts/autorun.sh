@@ -1,26 +1,37 @@
 #!/bin/bash
 
-CMD_NOTF=0
-SCRIPTDIR=$(dirname $(realpath $0))
+err_count=0
 
-function run {
-  if ! command -v $1 ;then
-    CMD_NOTF=$((CMD_NOTF+1))
-    echo "debug_print_perm(\"command not found: '$1'\")" | awesome-client
-    return
-  fi
-
-  if ! pgrep -f $1 ;then
-    $@&
+test_cmd() {
+  local -r cmd=$1
+  if ! command -v $cmd; then
+    echo "debug_print_perm(\"command not found: '$cmd'\")" | awesome-client
+    err_count=$((err_count+1))
   fi
 }
 
-# test 'em
-run laptop-detect
+test_cmd_running() {
+  local -r cmd=$1
+  if ! pgrep -f $cmd; then
+    echo "debug_print_perm(\"tool not running: '$cmd'\")" | awesome-client
+    err_count=$((err_count+1))
+  fi
+}
 
-# run 'em
-run xcompmgr
+# test tools needed to function properly
+test_cmd bc
+test_cmd gnome-calculator
+test_cmd konsole
+test_cmd laptop-detect
+test_cmd laptop-detect
+test_cmd physlock
+test_cmd pulseaudio
+test_cmd vim
+test_cmd xbacklight
 
-exit $CMD_NOTF
+# test running tools needed to function properly
+test_cmd_running xcompmgr
+
+exit $err_count
 
 # vim: autoindent tabstop=2 shiftwidth=2 expandtab softtabstop=2 filetype=sh

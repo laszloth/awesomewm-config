@@ -1,9 +1,8 @@
 #!/bin/bash
 
-readonly SCRIPTS_DIR=$(dirname $(realpath ${0}))
-readonly AW_CFG_ROOT=$(readlink -e ${SCRIPTS_DIR}/..)
-
-readonly aw_ver_file=${AW_CFG_ROOT}/awesome.version
+readonly script_dir=$(dirname $(realpath ${0}))
+readonly aw_cfg_root=$(readlink -e ${script_dir}/..)
+readonly aw_ver_file=${aw_cfg_root}/awesome.version
 
 awesome --version > ${aw_ver_file}
 

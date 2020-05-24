@@ -12,6 +12,7 @@ based on awesomewm's awesomerc.lua and zenburn theme
 - pulseaudio
 - vim
 - xcompmgr
+- xbacklight
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
