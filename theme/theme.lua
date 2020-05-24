@@ -24,7 +24,7 @@ local colors = {
 
 -- {{{ Main
 local theme = {}
-theme.wallpaper = themes_path .. "awesome-wallpaper"
+theme.wallpaper = themes_path .. "wallpaper"
 -- }}}
 
 -- {{{ Styles
