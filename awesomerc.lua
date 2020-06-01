@@ -27,10 +27,12 @@ local helpmod = require("helpmod.helpmod")
 local hcfg = helpmod.cfg
 local hcmd = helpmod.cmd
 local hfnc = helpmod.fnc
+-- extra tag
+local hiddentag
 
 -- button helpers
 local left_mb     = 1
-local middle_mb   = 2
+--local middle_mb   = 2
 local right_mb    = 3
 local scroll_up   = 4
 local scroll_down = 5
@@ -49,17 +51,6 @@ function debug_print_perm(message)
         text = tostring(message) })
 end
 -- }}} Debug functions
-
--- Override awesome.quit when we're using GNOME
-_awesome_quit = awesome.quit
-awesome.quit = function()
-    if os.getenv("XDG_CURRENT_DESKTOP") == "Awesome GNOME" then
-       --os.execute("/usr/bin/gnome-session-quit")
-       os.execute("pkill -9 gnome-session")
-    else
-    _awesome_quit()
-    end
-end
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -166,12 +157,6 @@ local function warn_print(message, timeout)
         text = tostring(message) })
 end
 
-local function notify_print(msg)
-    naughty.notify({ preset = naughty.config.presets.normal,
-        title = "notification",
-        text = tostring(msg) })
-end
-
 local function update_screen_count()
     num_screen = screen.count()
     def_screen = math.floor(num_screen / 3) + 1
@@ -201,19 +186,6 @@ local function reset_all_tags()
             then
                 tag.name = orig_name
             end
-        end
-    end
-end
-
-local function client_menu_toggle_fn()
-    local instance = nil
-
-    return function ()
-        if instance and instance.wibox.visible then
-            instance:hide()
-            instance = nil
-        else
-            instance = awful.menu.clients({ theme = { width = 250 } })
         end
     end
 end
@@ -251,7 +223,7 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- {{{ Wibar
 
 -- Keyboard map indicator and switcher
-mykeyboardlayout = awful.widget.keyboardlayout()
+--mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock("%Y-%m-%d %a %H:%M:%S", 1)
@@ -270,7 +242,10 @@ myplacedmpstate:buttons(gears.table.join(
                      awful.button({ }, scroll_up, function () awful.spawn(hcmd.s_next) end),
                      awful.button({ }, scroll_down, function () awful.spawn(hcmd.s_prev) end)))
 
-helpmod.widgets["mpstate"] = { boxes = { mympstate, mpspace }, images = { play = beautiful.play, pause = beautiful.pause } }
+helpmod.widgets["mpstate"] = {
+    boxes = { mympstate, mpspace },
+    images = { play = beautiful.play, pause = beautiful.pause }
+}
 helpmod.update_mpstate_box()
 
 -- Create systray and its separator
@@ -320,8 +295,8 @@ helpmod.widgets["volume"] = { box = myvolwidget }
 helpmod.update_volume_box()
 
 -- Create battery widget
-local mybatwidget = nil
-local mybattimer = nil
+local mybatwidget
+local mybattimer
 if on_laptop then
     mybatwidget = wibox.widget.textbox()
     mybattimer = gears.timer { timeout = hcfg.battery_timeout, }
@@ -352,7 +327,7 @@ for i = 2, 1 + cpu_cores do
         cput_widgets[s].visible = not cput_widgets[s].visible
     end)
     vicious.register(c, vicious.widgets.thermal,
-        function(widget, args) return helpmod.get_coretemp_text(args[1], i - 2) end,
+        function(_, args) return helpmod.get_coretemp_text(args[1], i - 2) end,
         1, { 'hwmon'..hwmon_device_num, 'hwmon', 'temp'..i..'_input' })
 
     mycputempwidget:add(c)
@@ -360,7 +335,7 @@ end
 
 -- CPU: usage
 local myusagewidget = wibox.widget.textbox()
-vicious.register(myusagewidget, vicious.widgets.cpu, function(widget, args)
+vicious.register(myusagewidget, vicious.widgets.cpu, function(_, args)
     return string.format("%02d", args[1]).."%" end, 1)
 myusagewidget:connect_signal("button::release", function()
     local s = mouse.screen.index

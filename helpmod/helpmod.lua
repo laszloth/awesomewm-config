@@ -125,7 +125,7 @@ local function _update_volume_box(cmd)
 
     if not box then return end
 
-    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
+    awful.spawn.easy_async(cmd, function(stdout, _, _, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local is_ext_sc
         local prev_bus
@@ -229,7 +229,7 @@ local function _update_mpstate_box()
 
     if not (boxes and images) then return end
 
-    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
+    awful.spawn.easy_async(cmd, function(stdout, _, _, exit_code)
         local state
 
         if exit_code ~= 0 then
@@ -250,7 +250,7 @@ local function _update_backlight_box(cmd)
 
     if not box then return end
 
-    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
+    awful.spawn.easy_async(cmd, function(stdout, _, _, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local label = 'backlight: '
 
@@ -273,7 +273,7 @@ local function _update_battery_box()
 
     if not (box and timer) then return end
 
-    awful.spawn.easy_async(cmd, function(stdout, stderr, reason, exit_code)
+    awful.spawn.easy_async(cmd, function(stdout, _, _, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local cap = tonumber(stdout)
         local text = 'B:'..cap
@@ -371,7 +371,7 @@ function helpmod.update_battery_box()
     _update_battery_box()
 end
 
-function helpmod.get_network_stats(widget, args, netdevs)
+function helpmod.get_network_stats(_, args, netdevs)
     local dec_places = hcfg.nw_decimal_places
     local down_label = "Rx"
     local down_unit = "K"
@@ -386,9 +386,8 @@ function helpmod.get_network_stats(widget, args, netdevs)
             local down_val = tonumber(args['{'..nwdev..' down_b}']) / kilo
             local up_val = tonumber(args['{'..nwdev..' up_b}']) / kilo
             local dev_label = nwdev..': '
-            local down_str = ""
-            local up_str = ""
-
+            local down_str
+            local up_str
 
             if down_val >= kilo then
                 down_unit = "M"

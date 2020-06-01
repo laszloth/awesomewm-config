@@ -5,7 +5,7 @@ function hfnc.add_pango_fg(color, text)
 end
 
 function hfnc.string_contains(string, pattern)
-    for match in string.gmatch(string, pattern) do
+    for _ in string.gmatch(string, pattern) do
         return true
     end
     return false
@@ -19,7 +19,7 @@ function hfnc.str_to_table(string, delimiter, exclude_patterns)
     local rt = {}
 
     for dev in string.gmatch(string, "[^"..delimiter.."]+") do
-        for exc_key, exc_val in pairs(exclude_patterns) do
+        for _, exc_val in pairs(exclude_patterns) do
             if hfnc.string_contains(dev, exc_val) then
                 goto continue
             end
@@ -41,7 +41,7 @@ function hfnc.table_to_str(t, depth)
     end
 
     local dpref = " "
-    for i = 1, depth do
+    for _ = 1, depth do
         dpref = dpref.." "
     end
 
