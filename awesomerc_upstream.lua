@@ -1,3 +1,4 @@
+-- awesome_mode: api-level=4:screen=on
 -- If LuaRocks is installed, make sure that packages installed through it are
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
@@ -13,6 +14,8 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
+-- Declarative object management
+local ruled = require("ruled")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
 -- Enable hotkeys help widget for VIM and other apps
@@ -369,6 +372,18 @@ awful.keyboard.append_global_keybindings({
                 end
             end
         end,
+    },
+    awful.key {
+        modifiers   = { modkey },
+        keygroup    = "numpad",
+        description = "select layout directly",
+        group       = "layout",
+        on_press    = function (index)
+            local t = awful.screen.focused().selected_tag
+            if t then
+                t.layout = t.layouts[index] or t.layout
+            end
+        end,
     }
 })
 
@@ -439,60 +454,60 @@ end)
 -- {{{ Rules
 -- Rules to apply to new clients.
 -- @DOC_RULES@
-awful.rules.rules = {
+ruled.client.connect_signal("request::rules", function()
     -- @DOC_GLOBAL_RULE@
     -- All clients will match this rule.
-    { rule = { },
-      properties = { focus = awful.client.focus.filter,
-                     raise = true,
-                     screen = awful.screen.preferred,
-                     placement = awful.placement.no_overlap+awful.placement.no_offscreen
-     }
-    },
+    ruled.client.append_rule {
+        id         = "global",
+        rule       = { },
+        properties = {
+            focus     = awful.client.focus.filter,
+            raise     = true,
+            screen    = awful.screen.preferred,
+            placement = awful.placement.no_overlap+awful.placement.no_offscreen
+        }
+    }
 
     -- @DOC_FLOATING_RULE@
     -- Floating clients.
-    { rule_any = {
-        instance = {
-          "DTA",  -- Firefox addon DownThemAll.
-          "copyq",  -- Includes session name in class.
-          "pinentry",
+    ruled.client.append_rule {
+        id       = "floating",
+        rule_any = {
+            instance = { "copyq", "pinentry" },
+            class    = {
+                "Arandr", "Blueman-manager", "Gpick", "Kruler", "Sxiv",
+                "Tor Browser", "Wpa_gui", "veromix", "xtightvncviewer"
+            },
+            -- Note that the name property shown in xprop might be set slightly after creation of the client
+            -- and the name shown there might not match defined rules here.
+            name    = {
+                "Event Tester",  -- xev.
+            },
+            role    = {
+                "AlarmWindow",    -- Thunderbird's calendar.
+                "ConfigManager",  -- Thunderbird's about:config.
+                "pop-up",         -- e.g. Google Chrome's (detached) Developer Tools.
+            }
         },
-        class = {
-          "Arandr",
-          "Blueman-manager",
-          "Gpick",
-          "Kruler",
-          "MessageWin",  -- kalarm.
-          "Sxiv",
-          "Tor Browser", -- Needs a fixed window size to avoid fingerprinting by screen size.
-          "Wpa_gui",
-          "veromix",
-          "xtightvncviewer"},
-
-        -- Note that the name property shown in xprop might be set slightly after creation of the client
-        -- and the name shown there might not match defined rules here.
-        name = {
-          "Event Tester",  -- xev.
-        },
-        role = {
-          "AlarmWindow",  -- Thunderbird's calendar.
-          "ConfigManager",  -- Thunderbird's about:config.
-          "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
-        }
-      }, properties = { floating = true }},
+        properties = { floating = true }
+    }
 
     -- @DOC_DIALOG_RULE@
     -- Add titlebars to normal clients and dialogs
-    { rule_any = {type = { "normal", "dialog" }
-      -- @DOC_CSD_TITLEBARS@
-      }, properties = { titlebars_enabled = true }
-    },
+    ruled.client.append_rule {
+        -- @DOC_CSD_TITLEBARS@
+        id         = "titlebars",
+        rule_any   = { type = { "normal", "dialog" } },
+        properties = { titlebars_enabled = true      }
+    }
 
     -- Set Firefox to always map on the tag named "2" on screen 1.
-    -- { rule = { class = "Firefox" },
-    --   properties = { screen = 1, tag = "2" } },
-}
+    -- ruled.client.append_rule {
+    --     rule       = { class = "Firefox"     },
+    --     properties = { screen = 1, tag = "2" }
+    -- }
+end)
+
 -- }}}
 
 -- {{{ Titlebars
@@ -534,4 +549,27 @@ client.connect_signal("request::titlebars", function(c)
         layout = wibox.layout.align.horizontal
     }
 end)
+
+-- {{{ Notifications
+
+ruled.notification.connect_signal('request::rules', function()
+    -- All notifications will match this rule.
+    ruled.notification.append_rule {
+        rule       = { },
+        properties = {
+            screen           = awful.screen.preferred,
+            implicit_timeout = 5,
+        }
+    }
+end)
+
+naughty.connect_signal("request::display", function(n)
+    naughty.layout.box { notification = n }
+end)
+
 -- }}}
+
+-- Enable sloppy focus, so that focus follows mouse.
+client.connect_signal("mouse::enter", function(c)
+    c:activate { context = "mouse_enter", raise = false }
+end)
