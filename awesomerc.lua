@@ -111,9 +111,9 @@ local hwmon_device_num
 
 -- Product specific setup
 if hfnc.string_contains(product, 'OptiPlex 7050') then
-    hwmon_device_num = 2
+    hwmon_device_num = helpmod.get_hwmon_num('coretemp')
 elseif hfnc.string_contains(product, 'ThinkPad X280') then
-    hwmon_device_num = 6
+    hwmon_device_num = helpmod.get_hwmon_num('coretemp')
 else
     debug_print("Not implemented product name!")
     hwmon_device_num = 0

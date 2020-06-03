@@ -18,6 +18,7 @@ hcmd.g_onlaptop = [[laptop-detect; echo $?]]
 hcmd.g_corecnt  = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 hcmd.g_netdevs  = [[ls /sys/class/net/]]
 hcmd.g_product  = [[cat /sys/devices/virtual/dmi/id/product_{family,name,version}]]
+hcmd.g_hwmon    = [[basename $(dirname $(grep -l "ARG1" /sys/class/hwmon/hwmon*/name)) | sed -n 's#hwmon\([0-9]\+\)#\1#p']]
 
 -- raw commands
 local _soundinfo  = [[~/.config/awesome/scripts/sound_handler.sh --raw]]

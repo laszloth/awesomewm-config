@@ -471,6 +471,15 @@ function helpmod.get_product()
     return ret
 end
 
+-- called once at startup, popen is fine for now
+function helpmod.get_hwmon_num(hwmon_name)
+    local cmd = _fill_args(hcmd.g_hwmon, { hwmon_name })
+    local h = assert(io.popen(cmd))
+    local ret = h:read("*n")
+    h:close()
+    return ret
+end
+
 -- called once at startup/in callback, popen is fine for now
 function helpmod.init_sound()
     local h = assert(io.popen(hcmd.g_soundinfo))
