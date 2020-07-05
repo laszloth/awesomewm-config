@@ -4,6 +4,7 @@ local hcfg = {}
 hcfg.cpu_temp_high           = 85
 hcfg.cpu_temp_mid            = 65
 
+hcfg.volume_max              = 175
 hcfg.volume_high             = 75
 hcfg.volume_mid              = 50
 hcfg.volume_slight           = 10

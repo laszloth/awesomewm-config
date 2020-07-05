@@ -314,9 +314,7 @@ function helpmod.lower_volume()
 end
 
 function helpmod.raise_volume()
-    -- protect from accidental +25% volumes w/ external soundcards
-    -- no extra checks for now, 100% should be enough for others, too
-    if helpmod.sound_info.volume >= 100 then return end
+    if helpmod.sound_info.volume >= hcfg.volume_max then return end
     _modify_volume_rel(true)
 end
 
