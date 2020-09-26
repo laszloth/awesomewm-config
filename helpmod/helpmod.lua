@@ -161,15 +161,25 @@ local function _update_volume_box(cmd)
             return
         end
 
+        is_bt_sc = nil
+        is_usb_sc = nil
+
         -- set base label
         if is_ext_sc then
-            text = hcfg.label_ext.."-"..string.sub(bus,1,3)
+            if bus == t_bus.bluetooth then
+                is_bt_sc = true
+                text = hcfg.label_bt
+            elseif bus == t_bus.usb then
+                is_usb_sc = true
+                text = hcfg.label_usb
+            else
+                text = hcfg.label_ext.."-"..string.sub(bus,1,3)
+            end
         elseif helpmod.sound_info.jack_plugged then
             text = hcfg.label_jack
         else
             text = hcfg.label_speaker
         end
-        -- final text w/out colors
         text = text .. ":" .. vol
 
         -- soundcard has volume setting capability, so colorize
@@ -181,9 +191,15 @@ local function _update_volume_box(cmd)
             else
                 box.markup = text
             end
-        -- must be an external soundcard w/ an external volume setting, e.g. an amp
+        -- must be an external soundcard w/ an external volume setting, e.g. an amp or bt
         else
-            box.markup = hfnc.add_pango_fg(hcfg.volume_ext_color, text)
+            if is_bt_sc  then
+                box.markup = hfnc.add_pango_fg(hcfg.volume_bt_color, text)
+            elseif is_usb_sc then
+                box.markup = hfnc.add_pango_fg(hcfg.volume_usb_color, text)
+            else
+                box.markup = hfnc.add_pango_fg(hcfg.volume_ext_color, text)
+            end
         end
     end)
 end

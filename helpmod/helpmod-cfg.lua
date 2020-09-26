@@ -19,6 +19,8 @@ hcfg.ext_sc_init_val         = 20
 hcfg.label_speaker           = 'SPEAKER'
 hcfg.label_jack              = 'JACK'
 hcfg.label_ext               = 'EXT'
+hcfg.label_bt                = 'BT'
+hcfg.label_usb               = 'USB'
 hcfg.label_muted             = 'MUTED'
 
 -- colors
@@ -37,6 +39,8 @@ hcfg.volume_high_color       = hcfg.crit_color
 hcfg.volume_mid_color        = hcfg.warn_color
 hcfg.volume_mute_color       = '#5C5C5C'
 hcfg.volume_ext_color        = '#BA4100'
+hcfg.volume_bt_color         = '#0083FD'
+hcfg.volume_usb_color        = '#005094'
 
 hcfg.battery_low_color       = hcfg.crit_color
 hcfg.battery_charge_color    = '#7FAE5A'
