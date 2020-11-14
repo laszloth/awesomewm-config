@@ -470,7 +470,7 @@ end
 
 -- called once at startup and on events, popen is fine for now
 function helpmod.get_net_devices()
-    local excludes = { "lo[0-9]*", "docker[0-9]*" }
+    local excludes = { "lo[0-9]*", "docker[0-9]*", "bond[0-9]*" }
     local h = assert(io.popen(hcmd.g_netdevs))
     local ret = h:read("*a")
     h:close()
