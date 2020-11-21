@@ -4,6 +4,7 @@ configuration for awesome window manager
 based on awesomewm's awesomerc.lua and zenburn theme
 
 ## package dependencies
+- archlinux-wallpaper
 - bc
 - gnome-calculator
 - konsole
@@ -11,8 +12,8 @@ based on awesomewm's awesomerc.lua and zenburn theme
 - physlock
 - pulseaudio
 - vim
-- xcompmgr
 - xbacklight
+- xcompmgr
 
 ## todo
 - [ ] remove under_mouse/centered+no_offscreen workaround
