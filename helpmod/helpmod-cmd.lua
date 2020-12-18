@@ -14,6 +14,7 @@ hcmd.calculator = [[gnome-calculator]]
 
 -- get commands
 hcmd.g_aconline = [[cat /sys/class/power_supply/AC/online]]
+hcmd.g_bat_stat = [[cat /sys/class/power_supply/BAT0/status]]
 hcmd.g_onlaptop = [[laptop-detect; echo $?]]
 hcmd.g_corecnt  = [[awk '/cpu cores/ {print $4; exit;}' /proc/cpuinfo]]
 hcmd.g_netdevs  = [[ls /sys/class/net/]]

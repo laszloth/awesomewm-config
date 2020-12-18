@@ -43,7 +43,8 @@ hcfg.volume_bt_color         = '#0083FD'
 hcfg.volume_usb_color        = '#005094'
 
 hcfg.battery_low_color       = hcfg.crit_color
-hcfg.battery_charge_color    = '#7FAE5A'
+hcfg.battery_charge_color    = '#00FF00'
+hcfg.ac_plugged_color        = '#7FAE5A'
 
 -- additional conf.
 hcfg.titlebars_enabled       = false

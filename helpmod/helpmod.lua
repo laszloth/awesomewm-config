@@ -293,8 +293,8 @@ local function _update_battery_box()
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local cap = tonumber(stdout)
         local text = 'B:'..cap
+        local battery_status
         local ac
-        local h
 
         if exit_code ~= 0 then
             --debug_print("BB_stderr="..stderr)
@@ -303,22 +303,21 @@ local function _update_battery_box()
             return
         end
 
-        h = assert(io.popen(hcmd.g_aconline))
-        ac = h:read("*n")
-        h:close()
+        ac = helpmod.get_ac_status()
+        battery_status = helpmod.get_battery_status()
 
-        if ac == 0 then
-            if cap <= hcfg.battery_low then
+        if battery_status == "Charging" then
+            box.markup = hfnc.add_pango_fg(hcfg.battery_charge_color, text)
+        elseif ac == 1 then
+            box.markup = hfnc.add_pango_fg(hcfg.ac_plugged_color, text)
+        elseif cap <= hcfg.battery_low then
                 box.markup = hfnc.add_pango_fg(hcfg.battery_low_color, text)
                 if cap < _prev_states.bat and math.fmod(cap, hcfg.battery_low_notif_gap) == 0 then
                     _prev_states.bat = cap
                     warn_print("low battery: "..cap.."%")
                 end
-            else
-                box.markup = text
-            end
         else
-            box.markup = hfnc.add_pango_fg(hcfg.battery_charge_color, text)
+            box.markup = text
         end
     end)
 end
@@ -452,7 +451,9 @@ function helpmod.get_coretemp_text(temp, n)
     return label..hcfg.separ_txt
 end
 
--- called once at startup, popen is fine for now
+-- The following functions are either called once at startup,
+-- and/or on events, and/or in callbacks, so popen is ok
+
 function helpmod.is_on_laptop()
     local h = assert(io.popen(hcmd.g_onlaptop))
     local ret = h:read("*n")
@@ -460,7 +461,6 @@ function helpmod.is_on_laptop()
     return ret == 0
 end
 
--- called once at startup, popen is fine for now
 function helpmod.get_cpu_core_count()
     local h = assert(io.popen(hcmd.g_corecnt))
     local num = h:read("*n")
@@ -468,7 +468,6 @@ function helpmod.get_cpu_core_count()
     return num
 end
 
--- called once at startup and on events, popen is fine for now
 function helpmod.get_net_devices()
     local excludes = { "lo[0-9]*", "docker[0-9]*", "bond[0-9]*" }
     local h = assert(io.popen(hcmd.g_netdevs))
@@ -477,7 +476,6 @@ function helpmod.get_net_devices()
     return hfnc.str_to_table(ret, "%s", excludes)
 end
 
--- called once at startup, popen is fine for now
 function helpmod.get_product()
     local h = assert(io.popen(hcmd.g_product))
     local ret = h:read("*a")
@@ -485,7 +483,6 @@ function helpmod.get_product()
     return ret
 end
 
--- called once at startup, popen is fine for now
 function helpmod.get_hwmon_num(hwmon_name)
     local cmd = _fill_args(hcmd.g_hwmon, { hwmon_name })
     local h = assert(io.popen(cmd))
@@ -494,7 +491,20 @@ function helpmod.get_hwmon_num(hwmon_name)
     return ret
 end
 
--- called once at startup/in callback, popen is fine for now
+function helpmod.get_battery_status()
+    local h = assert(io.popen(hcmd.g_bat_stat))
+    local ret = h:read("*a")
+    h:close()
+    return ret
+end
+
+function helpmod.get_ac_status()
+    local h = assert(io.popen(hcmd.g_aconline))
+    local ret = h:read("*n")
+    h:close()
+    return ret
+end
+
 function helpmod.init_sound()
     local h = assert(io.popen(hcmd.g_soundinfo))
     local ret = h:read("*a")
