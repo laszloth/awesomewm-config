@@ -4,7 +4,7 @@ local hcfg = {}
 hcfg.cpu_temp_high           = 85
 hcfg.cpu_temp_mid            = 65
 
-hcfg.volume_max              = 175
+hcfg.volume_max              = 200
 hcfg.volume_high             = 75
 hcfg.volume_mid              = 50
 hcfg.volume_slight           = 10
@@ -52,7 +52,7 @@ hcfg.titlebars_enabled       = false
 hcfg.nw_decimal_places       = 2
 
 hcfg.bl_step                 = 5 --percent
-hcfg.vol_step                = 2 --percent
+hcfg.vol_step                = 5 --percent
 hcfg.ext_step                = 25 --percent
 
 -- timeouts
