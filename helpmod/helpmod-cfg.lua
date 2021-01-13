@@ -59,6 +59,7 @@ hcfg.ext_step                = 25 --percent
 hcfg.backlight_timeout       = 2.5
 hcfg.volume_timeout          = 120
 hcfg.battery_timeout         = 30
+hcfg.cpu_freq_refresh_time   = 3
 
 -- spacing
 hcfg.space_txt  = ' '

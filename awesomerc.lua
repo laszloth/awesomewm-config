@@ -333,6 +333,10 @@ for i = 2, 1 + cpu_cores do
     mycputempwidget:add(c)
 end
 
+-- CPU: frequency
+local mycpufreqwidget = wibox.widget.textbox()
+vicious.register(mycpufreqwidget, vicious.widgets.cpufreq, "$1 MHz", hcfg.cpu_freq_refresh_time, "cpu0")
+
 -- CPU: usage
 local myusagewidget = wibox.widget.textbox()
 vicious.register(myusagewidget, vicious.widgets.cpu, function(_, args)
@@ -479,6 +483,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
     local rightl = wibox.layout.fixed.horizontal(
             space1,
             myusagewidget,
+            separator,
+            mycpufreqwidget,
             separator)
 
     local ctc = wibox.container.background(mycputempwidget)
