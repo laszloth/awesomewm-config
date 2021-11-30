@@ -435,8 +435,9 @@ function helpmod.get_network_stats(_, args, netdevs)
     return 'no network'
 end
 
-function helpmod.get_coretemp_text(temp, n)
-    local label = 'core ' .. n .. ': '
+function helpmod.get_coretemp_text(temp, data)
+    -- data can be either core index or full label string
+    local label = tonumber(data) and 'core ' .. data .. ': ' or data
     local text = temp..'°C'
 
     if temp <= hcfg.cpu_temp_mid then

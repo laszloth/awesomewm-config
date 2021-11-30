@@ -114,8 +114,10 @@ if hfnc.string_contains(product, 'OptiPlex 7050') then
     hwmon_device_num = helpmod.get_hwmon_num('coretemp')
 elseif hfnc.string_contains(product, 'ThinkPad X280') then
     hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+elseif hfnc.string_contains(product, 'Precision 5820') then
+    hwmon_device_num = helpmod.get_hwmon_num('coretemp')
 else
-    debug_print("Not implemented product name!")
+    debug_print("Not implemented product name: '" .. product .. "'." )
     hwmon_device_num = 0
 end
 
@@ -319,7 +321,13 @@ end, 1)
 -- Create CPU widgets
 
 -- CPU: thermal
+local mycpupkgtempwidget = wibox.widget.textbox()
+vicious.register(mycpupkgtempwidget, vicious.widgets.thermal,
+    function(_, args) return helpmod.get_coretemp_text(args[1], 'pkg: ') end,
+    1, { 'hwmon'..hwmon_device_num, 'hwmon', 'temp1_input' })
+
 local mycputempwidget = wibox.layout.fixed.horizontal()
+
 for i = 2, 1 + cpu_cores do
     local c = wibox.widget.textbox()
     c:connect_signal("button::release", function()
@@ -329,7 +337,6 @@ for i = 2, 1 + cpu_cores do
     vicious.register(c, vicious.widgets.thermal,
         function(_, args) return helpmod.get_coretemp_text(args[1], i - 2) end,
         1, { 'hwmon'..hwmon_device_num, 'hwmon', 'temp'..i..'_input' })
-
     mycputempwidget:add(c)
 end
 
@@ -485,10 +492,13 @@ screen.connect_signal("request::desktop_decoration", function(s)
             myusagewidget,
             separator,
             mycpufreqwidget,
-            separator)
+            separator,
+            mycpupkgtempwidget)
 
     local ctc = wibox.container.background(mycputempwidget)
     cput_widgets[s.index] = ctc
+    -- do not fill screen w/ cpu temps by default if core count is high
+    if cpu_cores > 12 then ctc.visible = false end
     rightl:add(ctc)
 
     rightl:add(mynetwidget) rightl:add(separator)
