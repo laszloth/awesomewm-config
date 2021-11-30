@@ -39,33 +39,43 @@ log_err() {
 }
 
 get_info() {
-  def_sink=$(pactl info | sed -n 's#^Default Sink: \(.*\)#\1#p')
-  [[ -z "$def_sink" ]] && log_err "PulseAudio error" && exit 2
-  def_sink_index=$(pactl list sinks short | grep "$def_sink" | awk '{print $1}')
-  sink_data=$(pactl list sinks | awk "/Sink #$def_sink_index/,/Ports:/" | sed 's/^\s*//g')
-  muted=$(echo "$sink_data" | grep -c "^Mute: no")
-  volume=$(echo "$sink_data" | grep "^Volume:" | awk '{print $5}' | tr -d '%')
-  bus=$(echo "$sink_data" | sed -n 's#device.bus = "\(.*\)"#\1#p')
-  sample_spec=$(echo "$sink_data" | sed -n 's#^Sample Specification: \(.*\)$#\1#p')
-  bit_depth=$(echo "$sample_spec" | cut -d' ' -f1)
-  channels=$(echo "$sample_spec" | cut -d' ' -f2 | tr -d 'ch')
-  sample_rate=$(echo "$sample_spec" | cut -d' ' -f3 | tr -d 'Hz')
-  has_vol_ctrl=$(echo "$sink_data" | grep "^Flags:" | grep -c HW_VOLUME_CTRL)
-  jack=$(cat /proc/asound/card?/codec#0 | grep "Pin-ctls:" | head -3 | tail -1 | grep -c OUT)
+  readonly def_sink=$(pactl info | sed -n 's#^Default Sink: \(.*\)#\1#p')
+  if [[ -z "${def_sink}" ]] || [[ "${def_sink}" == "auto_null" ]]; then
+    log_err "PulseAudio error"
+    exit 2
+  fi
+
+  readonly def_sink_index=$(pactl list sinks short | grep "${def_sink}" | awk '{print $1}')
+  readonly sink_data=$(pactl list sinks | awk "/Sink #${def_sink_index}/,/Ports:/" | sed 's/^\s*//g')
+  readonly muted=$(echo "${sink_data}" | grep -c '^Mute: no')
+  # can be modified in set_volume
+  volume=$(echo "${sink_data}" | grep '^Volume:' | awk '{print $5}' | tr -d '%')
+  bus=$(echo "${sink_data}" | sed -n 's#device.bus = "\(.*\)"#\1#p')
+  readonly bus=${bus:-'n/a'}
+  readonly sample_spec=$(echo "${sink_data}" | sed -n 's#^Sample Specification: \(.*\)$#\1#p')
+  readonly bit_depth=$(echo "${sample_spec}" | cut -d' ' -f1)
+  readonly channels=$(echo "${sample_spec}" | cut -d' ' -f2 | tr -d 'ch')
+  readonly sample_rate=$(echo "${sample_spec}" | cut -d' ' -f3 | tr -d 'Hz')
+  readonly has_vol_ctrl=$(echo "${sink_data}" | grep '^Flags:' | grep -c 'HW_VOLUME_CTRL')
+  readonly proc_codec=$(cat '/proc/asound/card?/codec#0' 2>/dev/null)
+  if [[ -n "${proc_codec}" ]]; then
+    jack=$(echo "${proc_codec}" | grep 'Pin-ctls:' | head -3 | tail -1 | grep -c 'OUT')
+  fi
+  readonly jack=${jack:-1}
 }
 
 print_info() {
-  echo "def_sink_index = $def_sink_index"
-  echo "def_sink = $def_sink"
-  echo -n "muted = "
-  [[ $muted -eq 0 ]] && echo "true" || echo "false"
-  echo "volume = $volume%"
-  echo "bus = $bus"
-  echo -n "jack = "
-  [[ $jack -eq 0 ]] && echo "plugged" || echo "unplugged"
-  echo "sample_spec = $sample_spec"
-  echo -n "has_vol_ctrl = "
-  [[ $has_vol_ctrl -eq 1 ]] && echo "true" || echo "false"
+  echo "def_sink_index = ${def_sink_index}"
+  echo "def_sink = ${def_sink}"
+  printf "muted = "
+  (( ${muted} == 0 )) && echo 'true' || echo 'false'
+  echo "volume = ${volume}%"
+  echo "bus = ${bus}"
+  printf "jack = "
+  (( ${jack} == 0 )) && echo 'plugged' || echo 'unplugged'
+  echo "sample_spec = ${sample_spec}"
+  printf "has_vol_ctrl = "
+  (( ${has_vol_ctrl} == 1 )) && echo 'true' || echo 'false'
 }
 
 print_raw_info() {
@@ -83,31 +93,36 @@ set_volume() {
   if [[ -z "$2" ]]; then
     vol=$1
     get_info
-    sink=$def_sink
+    sink=${def_sink}
   else
     sink=$1
     vol=$2
   fi
   vol=${vol//%}
+  readonly vol
+  readonly sink
 
-  pactl set-sink-volume $sink $vol%
+  pactl set-sink-volume ${sink} ${vol}%
 
-  if [[ -n "$show_result" ]]; then
-    op=$(expr "$vol" : '\([+-]*\)')
-    [[ -z "$op" ]] && volume=$vol || volume=$((volume${vol}))
-    [[ $volume -lt 0 ]] && volume=0
+  if [[ -n "${show_result}" ]]; then
+    local -r op=$(expr "${vol}" : '\([+-]*\)')
+    [[ -z "${op}" ]] && volume=${vol} || volume=$((volume${vol}))
+    (( ${volume} < 0 )) && volume=0
     print_raw_info
   fi
 }
 
 toggle_mute() {
+  local sink
   if [[ -z "$1" ]]; then
     get_info
-    sink=$def_sink
+    sink=${def_sink}
   else
     sink=$1
   fi
-    pactl set-sink-mute $sink toggle
+  readonly sink
+
+  pactl set-sink-mute ${sink} toggle
 }
 
 case $1 in
@@ -124,7 +139,7 @@ case $1 in
     set_volume $@
     ;;
   -S|--set-get-volume)
-    show_result=1
+    readonly show_result=1
     shift
     set_volume $@
     ;;
@@ -134,15 +149,15 @@ case $1 in
     ;;
   -I|--index)
     get_info
-    echo "$def_sink_index"
+    echo "${def_sink_index}"
     ;;
   -n|--name)
     get_info
-    echo "$def_sink"
+    echo "${def_sink}"
     ;;
   -m|--muted)
     get_info
-    [[ $muted -eq 0 ]] && echo "true" || echo "false"
+    (( ${muted} == 0 )) && echo "true" || echo "false"
     ;;
   -v|--volume)
     get_info
@@ -150,19 +165,19 @@ case $1 in
     ;;
   -b|--bus)
     get_info
-    echo "$bus"
+    echo "${bus}"
     ;;
   -j|--jack)
     get_info
-    [[ $jack -eq 0 ]] && echo "plugged" || echo "unplugged"
+    (( ${jack} == 0 )) && echo "plugged" || echo "unplugged"
     ;;
   -d|--sample-spec)
     get_info
-    echo "$sample_spec"
+    echo "${sample_spec}"
     ;;
   -V|--volume-control)
     get_info
-    [[ $has_vol_ctrl -eq 1 ]] && echo "true" || echo "false"
+    (( ${has_vol_ctrl} == 1 )) && echo "true" || echo "false"
     ;;
   -h|--help)
     print_usage
