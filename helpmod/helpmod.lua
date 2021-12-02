@@ -470,7 +470,7 @@ function helpmod.get_cpu_core_count()
 end
 
 function helpmod.get_net_devices()
-    local excludes = { "lo[0-9]*", "docker[0-9]*", "bond[0-9]*" }
+    local excludes = { "lo[0-9]*", "docker[0-9]*", "bond[0-9]*", "veth*" }
     local h = assert(io.popen(hcmd.g_netdevs))
     local ret = h:read("*a")
     h:close()
