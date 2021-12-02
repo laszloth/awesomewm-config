@@ -32,6 +32,7 @@ local _decbackl   = [[xbacklight -dec ARG1 >/dev/null 2>&1]]
 local _incbackl   = [[xbacklight -inc ARG1 >/dev/null 2>&1]]
 local _battery    = [[cat /sys/class/power_supply/BAT0/capacity]]
 local _toggletp   = [[~/.config/awesome/scripts/dell_touch.sh >/dev/null 2>&1]]
+local _fanspeed   = [[cat /sys/class/hwmon/hwmonARG1/fan1_input]]
 
 local _play       = [[~/.config/awesome/scripts/XF86Play.sh >/dev/null 2>&1]]
 local _pause      = [[~/.config/awesome/scripts/spotify_dbus.sh c Pause >/dev/null 2>&1]]
@@ -44,6 +45,7 @@ hcmd.g_soundinfo = _bash .. _soundinfo .. _terminate
 hcmd.g_backlight = _sh .. _getbackl .. _terminate
 hcmd.g_battery   = _sh .. _battery .. _terminate
 hcmd.g_mpstatus  = _sh .. _mpstatus .. _terminate
+hcmd.g_fanspeed  = _sh .. _fanspeed .. _terminate
 
 -- set commands w/ shell
 hcmd.s_volume     = _bash .. _setvolume .. _terminate

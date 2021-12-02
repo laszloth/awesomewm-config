@@ -125,7 +125,7 @@ local function _update_volume_box(cmd)
 
     if not box then return end
 
-    awful.spawn.easy_async(cmd, function(stdout, _, _, exit_code)
+    awful.spawn.easy_async(cmd, function(stdout, stderr, _, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local is_ext_sc
         local prev_bus
@@ -245,7 +245,8 @@ local function _update_mpstate_box()
 
     if not (boxes and images) then return end
 
-    awful.spawn.easy_async(cmd, function(stdout, _, _, exit_code)
+    awful.spawn.easy_async(cmd, function(stdout, stderr, _, exit_code)
+        --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local state
 
         if exit_code ~= 0 then
@@ -266,7 +267,7 @@ local function _update_backlight_box(cmd)
 
     if not box then return end
 
-    awful.spawn.easy_async(cmd, function(stdout, _, _, exit_code)
+    awful.spawn.easy_async(cmd, function(stdout, stderr, _, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local label = 'backlight: '
 
@@ -289,7 +290,7 @@ local function _update_battery_box()
 
     if not (box and timer) then return end
 
-    awful.spawn.easy_async(cmd, function(stdout, _, _, exit_code)
+    awful.spawn.easy_async(cmd, function(stdout, stderr, _, exit_code)
         --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
         local cap = tonumber(stdout)
         local text = 'B:'..cap
@@ -319,6 +320,24 @@ local function _update_battery_box()
         else
             box.markup = text
         end
+    end)
+end
+
+local function _update_fanspeed_box(cmd)
+    local box = helpmod.widgets.fanspeed.box
+
+    if not box then return end
+    if not cmd then return end
+
+    awful.spawn.easy_async(cmd, function(stdout, stderr, _, exit_code)
+        --debug_print_perm("cmd='"..cmd.."'\nstdout='"..stdout.."'\nstderr='"..stderr.."'\nexit="..exit_code)
+
+        if exit_code ~= 0 then
+            box.markup = "<error>"
+            return
+        end
+
+        box.markup = _remove_newline(stdout).." RPM"
     end)
 end
 -- }}}
@@ -382,6 +401,11 @@ end
 
 function helpmod.update_battery_box()
     _update_battery_box()
+end
+
+function helpmod.update_fanspeed_box(hwmon_dev_num)
+    local cmd = _fill_args(hcmd.g_fanspeed, {hwmon_dev_num})
+    _update_fanspeed_box(cmd)
 end
 
 function helpmod.get_network_stats(_, args, netdevs)

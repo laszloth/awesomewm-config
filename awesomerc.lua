@@ -107,18 +107,23 @@ local num_screen = 1
 local def_screen = 1
 
 -- Product specific variables
-local hwmon_device_num
+local cputemp_hwmon_device_num
+local fanspeed_hwmon_device_num
 
 -- Product specific setup
 if hfnc.string_contains(product, 'OptiPlex 7050') then
-    hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
 elseif hfnc.string_contains(product, 'ThinkPad X280') then
-    hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    fanspeed_hwmon_device_num = 0
 elseif hfnc.string_contains(product, 'Precision 5820') then
-    hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
 else
     debug_print("Not implemented product name: '" .. product .. "'." )
-    hwmon_device_num = 0
+    cputemp_hwmon_device_num = 0
+    fanspeed_hwmon_device_num = 0
 end
 
 -- Default modkey.
@@ -320,11 +325,24 @@ end, 1)
 
 -- Create CPU widgets
 
+-- CPU: fanspeed
+local mycpufanwidget = nil
+local mycpufantimer = nil
+mycpufanwidget = wibox.widget.textbox()
+helpmod.widgets["fanspeed"] = { box = mycpufanwidget }
+helpmod.update_fanspeed_box(fanspeed_hwmon_device_num)
+
+mycpufantimer = gears.timer { timeout = 5 }
+mycpufantimer:connect_signal("timeout", function()
+    helpmod.update_fanspeed_box(fanspeed_hwmon_device_num)
+end)
+mycpufantimer:start()
+
 -- CPU: thermal
 local mycpupkgtempwidget = wibox.widget.textbox()
 vicious.register(mycpupkgtempwidget, vicious.widgets.thermal,
     function(_, args) return helpmod.get_coretemp_text(args[1], 'pkg: ') end,
-    1, { 'hwmon'..hwmon_device_num, 'hwmon', 'temp1_input' })
+    1, { 'hwmon'..cputemp_hwmon_device_num, 'hwmon', 'temp1_input' })
 
 local mycputempwidget = wibox.layout.fixed.horizontal()
 
@@ -336,13 +354,15 @@ for i = 2, 1 + cpu_cores do
     end)
     vicious.register(c, vicious.widgets.thermal,
         function(_, args) return helpmod.get_coretemp_text(args[1], i - 2) end,
-        1, { 'hwmon'..hwmon_device_num, 'hwmon', 'temp'..i..'_input' })
+        1, { 'hwmon'..cputemp_hwmon_device_num, 'hwmon', 'temp'..i..'_input' })
     mycputempwidget:add(c)
 end
 
 -- CPU: frequency
 local mycpufreqwidget = wibox.widget.textbox()
-vicious.register(mycpufreqwidget, vicious.widgets.cpufreq, "$1 MHz", hcfg.cpu_freq_refresh_time, "cpu0")
+vicious.register(mycpufreqwidget, vicious.widgets.cpufreq,
+    function(_, args) return math.floor(args[1]).." MHz" end,
+    hcfg.cpu_freq_refresh_time, "cpu0")
 
 -- CPU: usage
 local myusagewidget = wibox.widget.textbox()
@@ -492,6 +512,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
             myusagewidget,
             separator,
             mycpufreqwidget,
+            separator,
+            mycpufanwidget,
             separator,
             mycpupkgtempwidget)
 
