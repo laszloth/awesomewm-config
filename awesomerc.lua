@@ -62,8 +62,9 @@ function debug_print(message, timeout)
         text = tostring(message) })
 end
 
-function debug_print_perm(message)
+function debug_print_perm(message, screen)
     naughty.notify({ preset = naughty.config.presets.critical,
+        screen = screen or def_screen,
         title = "DEBUG MESSAGE",
         text = tostring(message) })
 end
@@ -104,7 +105,7 @@ local on_laptop = helpmod.is_on_laptop()
 local product = helpmod.get_product()
 local cput_widgets = {}
 local num_screen = 1
-local def_screen = 1
+local def_screen = num_screen
 
 -- Product specific variables
 local cputemp_hwmon_device_num
@@ -120,6 +121,7 @@ elseif hfnc.string_contains(product, 'ThinkPad X280') then
 elseif hfnc.string_contains(product, 'Precision 5820') then
     cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
     fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
+    screen[2]:swap(screen[3])
 else
     debug_print("Not implemented product name: '" .. product .. "'." )
     cputemp_hwmon_device_num = 0
@@ -144,6 +146,7 @@ end
 local function update_screen_count()
     num_screen = screen.count()
     def_screen = math.floor(num_screen / 3) + 1
+    --debug_print_perm("screen count="..num_screen .. ", default screen=" .. def_screen)
 end
 
 local function rename_current_tag()
@@ -410,6 +413,8 @@ end)
 -- @DOC_FOR_EACH_SCREEN@
 screen.connect_signal("request::desktop_decoration", function(s)
     local first_screen = (s.index == 1)
+
+    --debug_print_perm("Screen #"..s.index, s.index)
 
     -- connect to signals
     if first_screen then
@@ -881,16 +886,16 @@ ruled.client.connect_signal("request::rules", function()
                      tag = hiddentag[1] }
      }
 
-    -- Set Firefox to always map on www tag on def_screen
+    -- Set Firefox to always map on www tag on last screen
     ruled.client.append_rule {
         rule = { class = "firefox" },
-        properties = { screen = def_screen, tag = "www" }
+        properties = { screen = num_screen, tag = "www" }
      }
 
     -- Set Chrome to always map on www tag on first screen
     ruled.client.append_rule {
         rule = { class = "Google-chrome" },
-        properties = { screen = 1 , tag = "www" }
+        properties = { screen = 1, tag = "www" }
      }
 
     -- Set Evolution to always map to first tag on first screen
