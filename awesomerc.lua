@@ -117,7 +117,7 @@ if hfnc.string_contains(product, 'OptiPlex 7050') then
     fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
 elseif hfnc.string_contains(product, 'ThinkPad X280') then
     cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
-    fanspeed_hwmon_device_num = 0
+    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('thinkpad')
 elseif hfnc.string_contains(product, 'Precision 5820') then
     cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
     fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
