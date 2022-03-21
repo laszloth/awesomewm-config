@@ -111,23 +111,6 @@ local def_screen = num_screen
 local cputemp_hwmon_device_num
 local fanspeed_hwmon_device_num
 
--- Product specific setup
-if hfnc.string_contains(product, 'OptiPlex 7050') then
-    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
-    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
-elseif hfnc.string_contains(product, 'ThinkPad X280') then
-    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
-    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('thinkpad')
-elseif hfnc.string_contains(product, 'Precision 5820') then
-    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
-    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
-    screen[2]:swap(screen[3])
-else
-    debug_print("Not implemented product name: '" .. product .. "'." )
-    cputemp_hwmon_device_num = 0
-    fanspeed_hwmon_device_num = 0
-end
-
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
@@ -184,6 +167,24 @@ end
 
 -- Default screen settings for Firefox and others
 update_screen_count()
+
+-- Product specific setup
+if hfnc.string_contains(product, 'OptiPlex 7050') then
+    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
+elseif hfnc.string_contains(product, 'ThinkPad X280') then
+    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('thinkpad')
+elseif hfnc.string_contains(product, 'Precision 5820') then
+    cputemp_hwmon_device_num = helpmod.get_hwmon_num('coretemp')
+    fanspeed_hwmon_device_num = helpmod.get_hwmon_num('dell_smm')
+    if num_screen > 1 then screen[2]:swap(screen[3]) end
+else
+    debug_print("Not implemented product name: '" .. product .. "'." )
+    cputemp_hwmon_device_num = 0
+    fanspeed_hwmon_device_num = 0
+end
+
 -- Initialize sound
 helpmod.init_sound()
 
