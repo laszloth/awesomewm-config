@@ -915,7 +915,7 @@ ruled.client.connect_signal("request::rules", function()
 
     -- Set gnome-calculator to always be floating
     ruled.client.append_rule {
-        rule = { class = "Gnome-calculator" },
+        rule_any = { class = { "Gnome-calculator", "gnome-calculator" } },
         properties = { floating = true }
      }
 
