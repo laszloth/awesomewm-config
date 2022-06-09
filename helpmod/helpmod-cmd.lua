@@ -9,7 +9,7 @@ local _terminate = [[']]
 -- tool config commands
 hcmd.terminal   = [[konsole]]
 hcmd.editor     = [[vim]]
-hcmd.locker     = _sh .. [[physlock -d -p $(cat /etc/hostname)]] .. _terminate
+hcmd.locker     = _sh .. [[physlock -d -p "$(uname --all)"]] .. _terminate
 hcmd.calculator = [[gnome-calculator]]
 
 -- get commands
