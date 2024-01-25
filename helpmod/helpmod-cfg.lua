@@ -13,7 +13,7 @@ hcfg.battery_low             = 20
 hcfg.battery_low_notif_gap   = 5
 
 -- initial values
-hcfg.ext_sc_init_val         = 20
+hcfg.ext_sc_init_val         = hcfg.volume_slight
 
 -- labels
 hcfg.label_speaker           = 'SPEAKER'

@@ -148,12 +148,13 @@ local function _update_volume_box(cmd)
 
         bus = helpmod.sound_info.bus_type
         is_ext_sc = (bus ~= t_bus.pci)
-        vol = helpmod.sound_info.volume
 
         -- check for bus type change and do setup
         if is_ext_sc and bus ~= prev_bus then
             _init_ext_sc()
         end
+
+        vol = helpmod.sound_info.volume
 
         -- muted state is common and special
         if helpmod.sound_info.is_muted then
@@ -528,23 +529,6 @@ function helpmod.get_ac_status()
     local ret = h:read("*n")
     h:close()
     return ret
-end
-
-function helpmod.init_sound()
-    local h = assert(io.popen(hcmd.g_soundinfo))
-    local ret = h:read("*a")
-
-    h:close()
-
-    ret = _update_sound_info(_remove_newline(ret))
-    if not ret then return end
-
-    -- init external devices
-    if helpmod.sound_info.bus_type ~= t_bus.pci then
-        _init_ext_sc()
-    end
-
-    return
 end
 
 return helpmod

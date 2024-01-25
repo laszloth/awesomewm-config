@@ -185,9 +185,6 @@ else
     fanspeed_hwmon_device_num = 0
 end
 
--- Initialize sound
-helpmod.init_sound()
-
 -- {{{ Menu
 -- @DOC_MENU@
 -- Create a launcher widget and a main menu
